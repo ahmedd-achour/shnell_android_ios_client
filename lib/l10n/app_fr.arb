@@ -1,0 +1,449 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Shnell",
+  "welcomeMessage": "Bienvenue chez Shnell !",
+  "selectLanguage": "Sélectionner la langue",
+  "logout": "Déconnexion",
+  "deleteAccount": "Supprimer le compte",
+  "personalInfo": "Informations personnelles",
+  "privacyPolicyTitle": "Politique de confidentialité",
+  "privacyPolicyUpdated": "Cette politique a été mise à jour pour la dernière fois le {date}.",
+  "@privacyPolicyUpdated": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "introHeading": "1. Introduction",
+  "introBody": "Schnell Logistics (« nous ») s'engage à protéger votre vie privée et à garantir la transparence dans la manière dont nous traitons vos informations personnelles. Cette politique de confidentialité décrit les pratiques de Schnell Logistics, une plateforme de transport et de logistique spécialisée dans les services de messagerie, les déménagements résidentiels et commerciaux, le transport de charges lourdes, l'entreposage, l'expédition internationale, le transport sécurisé et la livraison express. En accédant ou en utilisant l'application mobile, le site Web ou les services associés de Schnell Logistics (collectivement, l'« Application »), vous acceptez les pratiques décrites dans cette politique.\n\nCette politique est conçue pour se conformer aux lois applicables sur la protection des données, y compris, mais sans s'y limiter, le Règlement général sur la protection des données (RGPD) pour les utilisateurs de l'Union européenne, le California Consumer Privacy Act (CCPA) pour les résidents de Californie et d'autres réglementations pertinentes dans le monde entier. Notre objectif est de fournir des informations claires, détaillées et accessibles sur la manière dont nous collectons, utilisons, partageons et protégeons vos données personnelles, ainsi que sur vos droits concernant ces données.\n\nL'Application connecte les utilisateurs (particuliers et entreprises) avec des chauffeurs et des prestataires de services logistiques pour faciliter des services de transport efficaces et fiables. Cette politique s'applique à tous les utilisateurs, y compris les clients qui demandent des services (« Clients »), les chauffeurs qui fournissent des services de transport (« Chauffeurs ») et les entreprises qui s'engagent dans des services logistiques B2B (« Partenaires commerciaux »). Si vous n'acceptez pas cette politique, veuillez ne pas utiliser l'Application.\n\nNous pouvons mettre à jour cette politique périodiquement pour refléter les changements dans nos pratiques, notre technologie ou nos exigences légales. Vous serez informé des changements significatifs par e-mail, par des notifications dans l'application ou par des mises à jour sur notre site Web à l'adresse www.schnell.com/privacy-policy. L'utilisation continue de l'Application après de tels changements constitue votre acceptation de la politique révisée.\n\nCette politique a été mise à jour pour la dernière fois le **22 août 2025**. Veuillez la revoir attentivement pour comprendre nos pratiques.",
+  "infoCollectionHeading": "2. Informations que nous collectons",
+  "infoCollectionBody": "Nous collectons différents types d'informations pour fournir, améliorer et personnaliser nos services. Les informations que nous collectons se répartissent dans les catégories suivantes :\n\n**2.1 Informations que vous fournissez directement**\n\nLorsque vous interagissez avec l'Application, vous pouvez fournir les types d'informations personnelles suivants :\n\n- **Création de compte** : Lors de l'inscription en tant que client ou chauffeur, vous fournissez des détails tels que votre nom complet, votre adresse e-mail, votre numéro de téléphone et, pour les chauffeurs, une pièce d'identité nationale valide (par exemple, la CIN pour les résidents tunisiens) ou un numéro de permis de conduire. Les partenaires commerciaux fournissent les détails de l'entreprise, y compris le nom commercial, le numéro d'enregistrement et les informations de contact.\n- **Informations de profil** : Les clients peuvent fournir des préférences de livraison et des adresses. Les chauffeurs fournissent les détails du véhicule (par exemple, le type, la capacité, la plaque d'immatriculation), les certifications professionnelles et les informations bancaires pour les paiements.\n- **Demandes de service** : Les clients soumettent des détails sur leurs besoins logistiques, tels que la taille du colis, le poids, les lieux de ramassage et de livraison et les instructions spéciales (par exemple, les articles fragiles ou les livraisons urgentes).\n- **Données de communication** : Informations fournies lorsque vous contactez notre équipe d'assistance par e-mail, chat intégré à l'application ou par téléphone, y compris vos messages, demandes de renseignements et commentaires.\n- **Données des partenaires commerciaux** : Pour les clients B2B, nous collectons des détails supplémentaires tels que les numéros d'identification fiscale, les détails du contrat et les exigences logistiques (par exemple, la taille de la flotte, les calendriers de livraison).\n\n**2.2 Informations collectées automatiquement**\n\nNous collectons automatiquement certaines informations lorsque vous utilisez l'Application pour améliorer les fonctionnalités et l'expérience utilisateur :\n\n- **Informations sur l'appareil** : Nous collectons des données sur votre appareil, y compris le type d'appareil (par exemple, iOS ou Android), la version du système d'exploitation, les identifiants uniques de l'appareil (par exemple, UDID ou IMEI), l'adresse IP et le type de navigateur.\n- **Données de localisation** : Avec votre consentement, nous collectons des données de géolocalisation en temps réel pour activer des fonctionnalités telles que le suivi des envois, la mise en relation des chauffeurs avec les clients et l'optimisation des itinéraires de livraison. Les lieux de ramassage et de livraison des clients sont stockés pour l'exécution du service.\n- **Données d'utilisation** : Nous suivons la façon dont vous interagissez avec l'Application, y compris les pages visitées, les fonctionnalités utilisées (par exemple, le suivi, les demandes de devis), le temps passé et les schémas de clics.\n- **Données de journal** : Les journaux du serveur capturent des détails techniques tels que les appels d'API, les rapports d'erreurs et les horodatages pour surveiller les performances de l'Application et résoudre les problèmes.\n- **Cookies et technologies de suivi** : Notre site Web utilise des cookies, des balises Web et des technologies similaires pour suivre le comportement des utilisateurs, personnaliser le contenu et analyser le trafic. Vous pouvez gérer les préférences en matière de cookies via les paramètres de votre navigateur.\n\n**2.3 Informations provenant de tiers**\n\nNous pouvons recevoir des informations de sources tierces pour améliorer nos services ou nous conformer aux obligations légales :\n\n- **Services de cartographie** : Mapbox fournit des données basées sur la localisation pour optimiser le routage et afficher les cartes dans l'Application.\n- **Fournisseurs d'analyse** : Des outils tels que Firebase Analytics fournissent des données agrégées sur le comportement des utilisateurs et les performances de l'Application.\n- **Services de vérification** : Pour les chauffeurs, nous utilisons des services tiers pour vérifier leur identité, leur dossier de conduite et la conformité du véhicule aux réglementations de sécurité.\n- **Partenaires commerciaux** : Les clients B2B peuvent partager des données d'employés ou de sous-traitants (par exemple, les coordonnées) pour faciliter la coordination logistique.\n\n**2.4 Informations sensibles**\n\nNous pouvons collecter des informations sensibles, telles que les numéros de carte d'identité nationale, uniquement avec votre consentement explicite ou si la loi l'exige. Nous prenons des mesures supplémentaires pour protéger ces données, comme indiqué dans la section 5 (Sécurité des données).",
+  "infoUsageHeading": "3. Comment nous utilisons vos informations",
+  "infoUsageBody": "Nous utilisons les informations que nous collectons pour exploiter, améliorer et personnaliser les services de l'Application. Les principaux objectifs sont :\n\n**3.1 Livraison de service**\n\n- **Mise en relation des clients et des chauffeurs** : Nous utilisons les données de localisation et de demande de service du client pour les mettre en relation avec des chauffeurs appropriés en fonction de la proximité, de la capacité du véhicule et de la disponibilité.\n- **Exécution de la commande** : Des informations telles que les détails du colis, les lieux de ramassage et de livraison et les instructions spéciales sont utilisées pour garantir des livraisons précises et ponctuelles.\n- **Suivi et mises à jour** : Les données de localisation en temps réel permettent le suivi des envois pour les clients et l'optimisation des itinéraires pour les chauffeurs.\n\n**3.2 Amélioration de l'expérience utilisateur**\n\n- **Personnalisation** : Nous analysons les données d'utilisation pour adapter l'expérience de l'Application, par exemple en suggérant des services préférés ou en affichant des promotions pertinentes.\n- **Surveillance des performances** : Les données de l'appareil et les données de journal nous aident à identifier et à résoudre les problèmes techniques, garantissant une expérience utilisateur fluide.\n- **Analyse** : Les données agrégées de Firebase Analytics et d'outils similaires permettent d'améliorer les fonctionnalités et les services.\n\n**3.3 Communication**\n\n- **Notifications** : Nous envoyons des notifications dans l'application, par e-mail ou par SMS concernant le statut des commandes, les mises à jour du compte, les promotions ou les changements de politique. Vous pouvez gérer les préférences de notification dans les paramètres de l'Application.\n- **Assistance clientèle** : Vos coordonnées et votre historique de communication sont utilisés pour répondre aux demandes de renseignements, résoudre les problèmes et fournir une assistance.\n\n**3.4 Gestion des chauffeurs**\n\n- **Affichage des performances** : Avant d'accepter une demande de livraison, les chauffeurs peuvent consulter les mesures de performance du client, telles que la note moyenne (basée sur la ponctualité, la communication et l'historique de paiement) et la fréquence des commandes. Cela aide les chauffeurs à prendre des décisions éclairées.\n- **Acceptation des offres** : Les chauffeurs ont l'autonomie d'accepter ou de rejeter les demandes de livraison en fonction des informations affichées, sans pénalité pour les refus, sauf s'ils enfreignent nos conditions d'utilisation.\n- **Gestion de compte** : Les informations du chauffeur, y compris les détails du véhicule et les certifications, sont utilisées pour vérifier l'éligibilité et gérer le statut du compte.\n- **Responsabilité du chauffeur** : Les chauffeurs sont responsables des marchandises à partir du moment où ils confirment le ramassage jusqu'à la confirmation de la livraison.\n\n**3.5 Conformité légale et réglementaire**\n\n- **Déclaration fiscale** : Les données de transaction peuvent être utilisées pour se conformer aux obligations fiscales, telles que la déclaration des revenus des chauffeurs aux autorités compétentes.\n- **Prévention de la fraude** : Nous analysons les schémas d'utilisation et les données de tiers pour détecter et prévenir les activités frauduleuses, telles que l'accès non autorisé au compte ou la fraude au paiement.\n- **Obligations légales** : Nous pouvons utiliser vos données pour répondre à des demandes légales, telles que des ordonnances de tribunal ou des enquêtes réglementaires.\n\n**3.6 Marketing et promotions**\n\n- Avec votre consentement, nous utilisons vos coordonnées pour envoyer des offres promotionnelles, des newsletters ou des mises à jour sur les nouveaux services. Vous pouvez vous désabonner à tout moment via l'Application ou en nous contactant.\n- Nous pouvons utiliser des données agrégées et anonymisées pour créer des informations marketing ou des études de cas sans identifier les utilisateurs individuels.\n\n**3.7 Recherche et développement**\n\n- Nous utilisons des données anonymisées pour mener des recherches, développer de nouvelles fonctionnalités et améliorer nos algorithmes de mise en relation, de routage et de tarification.\n- Les commentaires fournis par le biais d'enquêtes ou d'interactions d'assistance nous aident à améliorer les fonctionnalités de l'Application et la satisfaction des utilisateurs.",
+  "infoSharingHeading": "4. Comment nous partageons vos informations",
+  "infoSharingBody": "Nous pouvons partager vos informations avec des parties spécifiques pour fournir nos services, nous conformer aux obligations légales ou améliorer l'Application. Nous veillons à ce que tout partage soit effectué de manière responsable et conformément aux lois applicables.\n\n**4.1 Partage avec d'autres utilisateurs**\n\n- **Interactions client-chauffeur** : Lorsqu'un client soumet une demande de service, son nom, ses coordonnées (par exemple, son numéro de téléphone), ses lieux de ramassage/livraison et les détails du colis sont partagés avec le chauffeur attribué pour faciliter la livraison.\n- **Affichage des performances du chauffeur** : Les clients peuvent consulter les mesures de performance du chauffeur, telles que les notes (basées sur la fiabilité, la communication et le succès de la livraison) et les années d'expérience, avant de confirmer une réservation.\n- **Coordination B2B** : Pour les partenaires commerciaux, nous pouvons partager des données liées à la logistique (par exemple, les calendriers de livraison, les coordonnées des employés) avec des chauffeurs ou des prestataires tiers pour exécuter les contrats.\n\n**4.2 Partage avec des fournisseurs de services**\n\nNous faisons appel à des fournisseurs de services tiers de confiance pour soutenir nos opérations. Ces fournisseurs sont contractuellement tenus de protéger vos données et de les utiliser uniquement aux fins que nous spécifions :\n\n- **Cartographie et navigation** : Mapbox reçoit des données de localisation pour fournir des services de cartographie, de routage et de géolocalisation dans l'Application.\n- **Fournisseurs d'analyse** : Firebase Analytics et d'autres outils reçoivent des données d'utilisation anonymisées pour générer des informations sur les performances de l'Application et le comportement des utilisateurs.\n- **Stockage en nuage** : Nous utilisons des fournisseurs de services en nuage sécurisés (par exemple, AWS, Google Cloud) pour stocker les données des utilisateurs, avec un cryptage et des contrôles d'accès en place.\n- **Services de vérification** : Des services tiers vérifient l'identité des chauffeurs, leurs dossiers de conduite et la conformité des véhicules pour garantir la sécurité et la conformité réglementaire.\n- **Outils d'assistance client** : Des plateformes comme Zendesk gèrent les tickets d'assistance et stockent les données de communication pour aider efficacement les utilisateurs.\n\n**4.3 Partage légal et réglementaire**\n\n- Nous pouvons partager vos informations avec les autorités gouvernementales, les forces de l'ordre ou les organismes de réglementation lorsque la loi l'exige, par exemple en réponse à des citations à comparaître, des ordonnances de tribunal ou des audits fiscaux.\n- En cas de suspicion de fraude, d'abus ou d'activité illégale, nous pouvons partager les données pertinentes avec les autorités pour enquêter ou prévenir les dommages.\n\n**4.4 Transferts d'entreprise**\n\n- Si Schnell Logistics est impliquée dans une fusion, une acquisition ou une vente d'actifs, vos informations peuvent être transférées à l'entité acquéreuse. Vous serez informé de tout transfert de ce type et aurez la possibilité de vous désinscrire, le cas échéant.\n- Nous veillerons à ce que tout acquéreur accepte de protéger vos données conformément à cette politique ou à une norme comparable.\n\n**4.5 Partage de données anonymisées**\n\n- Nous pouvons partager des données agrégées ou anonymisées (par exemple, les tendances de livraison, les données démographiques des utilisateurs) avec des partenaires, des chercheurs ou des annonceurs. Ces données n'identifient pas les individus et sont utilisées à des fins statistiques ou de marketing.\n\n**4.6 Partage basé sur le consentement**\n\n- Nous ne partagerons pas vos informations personnelles avec des tiers à des fins de marketing sans votre consentement explicite. Vous pouvez retirer votre consentement à tout moment via l'Application ou en nous contactant.",
+  "dataSecurityHeading": "5. Sécurité des données",
+  "dataSecurityBody": "Nous donnons la priorité à la sécurité de vos informations personnelles et mettons en œuvre des mesures robustes pour les protéger contre l'accès non autorisé, la perte, l'utilisation abusive ou l'altération.\n\n**5.1 Mesures de protection techniques**\n\n- **Cryptage** : Toutes les données sensibles, y compris les identifiants personnels, sont cryptées en transit (en utilisant TLS 1.2 ou supérieur) et au repos (en utilisant le cryptage AES-256).\n- **Contrôles d'accès** : Seul le personnel autorisé ayant un besoin légitime peut accéder aux données des utilisateurs, et l'accès est restreint par des autorisations basées sur les rôles et une authentification multifacteur.\n- **Serveurs sécurisés** : Nos serveurs sont hébergés dans des centres de données sécurisés avec des protections physiques et numériques, y compris des pare-feu, des systèmes de détection d'intrusion et des correctifs de sécurité réguliers.\n\n**5.2 Mesures de protection organisationnelles**\n\n- **Formation des employés** : Tous les employés et sous-traitants suivent une formation régulière sur la protection des données et les meilleures pratiques en matière de confidentialité.\n- **Audits par des tiers** : Nous faisons appel à des cabinets de sécurité indépendants pour effectuer des audits réguliers de nos systèmes et processus afin d'identifier et de résoudre les vulnérabilités.\n- **Gestion des fournisseurs** : Tous les fournisseurs de services tiers sont examinés pour leur conformité aux normes de protection des données, et les contrats comprennent des clauses de confidentialité strictes.\n\n**5.3 Réponse aux incidents**\n\n- Dans le cas peu probable d'une violation de données, nous disposons d'un plan complet de réponse aux incidents pour enquêter, atténuer et informer rapidement les utilisateurs concernés, comme l'exige la loi.\n- Nous tenons des journaux détaillés des incidents de sécurité pour améliorer nos défenses et éviter qu'ils ne se reproduisent.\n\n**5.4 Responsabilités de l'utilisateur**\n\n- Vous êtes responsable du maintien de la confidentialité de vos identifiants de compte (par exemple, mot de passe, code PIN). Ne les partagez pas avec d'autres.\n- Utilisez des mots de passe forts et uniques et activez l'authentification à deux facteurs (si disponible) pour renforcer la sécurité de votre compte.\n- Signalez immédiatement tout accès non autorisé suspect à votre compte à support@schnell.com.",
+  "dataRetentionHeading": "6. Rétention des données",
+  "dataRetentionBody": "Nous ne conservons vos informations personnelles qu'aussi longtemps que nécessaire pour atteindre les objectifs décrits dans cette politique ou pour nous conformer aux exigences légales, réglementaires ou opérationnelles.\n\n**6.1 Périodes de rétention**\n\n- **Données client** : Les informations relatives aux demandes de service (par exemple, les détails de livraison, les registres de paiement) sont conservées pendant 5 ans après la dernière transaction pour se conformer aux réglementations fiscales et comptables.\n- **Données chauffeur** : Les profils de chauffeurs, y compris les certifications et l'historique des transactions, sont conservés pendant 7 ans après la fermeture du compte pour se conformer aux lois sur le transport et le travail.\n- **Données de communication** : Les tickets d'assistance et la correspondance sont conservés pendant 3 ans pour garantir le contrôle qualité et résoudre les litiges.\n- **Données de localisation** : Les données de localisation en temps réel sont conservées pendant 30 jours après la fin d'une livraison, sauf si elles sont requises à des fins légales ou de résolution de litiges.\n- **Données anonymisées** : Les données agrégées et non identifiables peuvent être conservées indéfiniment à des fins d'analyse et de recherche.\n\n**6.2 Suppression des données**\n\n- Lors de l'annulation d'un compte, vous pouvez demander la suppression de vos données personnelles via l'Application ou en contactant support@schnell.com. Nous supprimerons vos données dans les 30 jours, sauf si la rétention est requise par la loi (par exemple, les registres fiscaux).\n- Les données anonymisées qui ne peuvent pas être liées à vous peuvent être conservées à des fins statistiques.\n- Les sauvegardes sont supprimées en toute sécurité après 90 jours pour garantir qu'aucune donnée résiduelle ne subsiste.\n\n**6.3 Archivage des données**\n\n- Les comptes inactifs (aucune activité pendant 2 ans) peuvent être archivés pour réduire le stockage actif. Vous serez averti avant l'archivage, et vous pouvez réactiver votre compte en vous connectant ou en contactant l'assistance.\n- Les données archivées sont stockées en toute sécurité et soumises aux mêmes protections que les données actives.",
+  "dataRightsHeading": "7. Vos droits en matière de protection des données",
+  "dataRightsBody": "Selon votre emplacement, vous disposez de certains droits concernant vos données personnelles en vertu des lois applicables sur la protection des données, telles que le RGPD, le CCPA ou d'autres réglementations régionales.\n\n**7.1 Droit d'accès**\n\n- Vous pouvez demander une copie des données personnelles que nous détenons à votre sujet, y compris des détails sur la manière dont elles sont traitées et partagées.\n- Pour demander l'accès, contactez support@schnell.com ou utilisez la fonction « Demande de données » dans l'Application. Nous vous répondrons dans les 30 jours (ou 45 jours pour les demandes complexes).\n\n**7.2 Droit de correction**\n\n- Si vos données personnelles sont inexactes ou incomplètes, vous pouvez demander des corrections via les paramètres de profil de l'Application ou en contactant l'assistance.\n- Nous mettrons à jour vos informations rapidement et en informerons les tiers avec lesquels les données ont été partagées.\n\n**7.3 Droit de suppression**\n\n- Vous pouvez demander la suppression de vos données personnelles, sous réserve des exigences de conservation légales (par exemple, les registres fiscaux).\n- Les demandes de suppression peuvent être soumises via l'Application ou par e-mail à support@schnell.com. Nous confirmerons la suppression dans les 30 jours.\n\n**7.4 Droit de restreindre le traitement**\n\n- Vous pouvez nous demander de limiter le traitement de vos données (par exemple, au stockage uniquement) si vous contestez leur exactitude, leur légalité ou leur nécessité.\n- Les données restreintes ne seront pas utilisées pour le traitement actif mais peuvent être conservées à des fins juridiques.\n\n**7.5 Droit à la portabilité des données**\n\n- Vous pouvez demander une copie lisible par machine de vos données personnelles (par exemple, au format CSV ou JSON) pour les transférer vers un autre service.\n- Nous fournirons ces données dans les 30 jours, gratuitement, pour les demandes standard.\n\n**7.6 Droit d'opposition**\n\n- Vous pouvez vous opposer au traitement de vos données à des fins de marketing ou lorsque le traitement est basé sur nos intérêts légitimes.\n- Pour vous désabonner du marketing, utilisez les paramètres de l'Application ou cliquez sur « Se désabonner » dans les e-mails promotionnels.\n\n**7.7 Droit de retirer son consentement**\n\n- Lorsque le traitement est basé sur votre consentement (par exemple, données de localisation, marketing), vous pouvez retirer votre consentement à tout moment via l'Application ou en nous contactant. Le retrait n'affecte pas la légalité du traitement antérieur.\n\n**7.8 Droit à la non-discrimination**\n\n- Nous ne ferons pas de discrimination à votre encontre pour l'exercice de vos droits de protection des données, par exemple en facturant des prix plus élevés ou en refusant des services.\n\n**7.9 Dépôt d'une plainte**\n\n- Si vous pensez que nous avons violé vos droits de protection des données, vous pouvez déposer une plainte auprès de votre autorité locale de protection des données (par exemple, la CNIL en France, l'ICO au Royaume-Uni ou le bureau du procureur général de Californie).\n- Vous pouvez également nous contacter directement à support@schnell.com pour résoudre tout problème de manière informelle.\n\n**7.10 Comment exercer vos droits**\n\n- Soumettez les demandes via la fonction « Demande de données » de l'Application ou par e-mail à support@schnell.com avec votre nom, les détails de votre compte et le droit spécifique que vous souhaitez exercer.\n- Nous pouvons exiger une vérification d'identité (par exemple, une copie de votre carte d'identité) pour empêcher les demandes non autorisées.\n- Les réponses seront fournies par écrit (par e-mail ou par notification dans l'application) dans le délai légal requis.",
+  "thirdPartyHeading": "8. Services tiers",
+  "thirdPartyBody": "L'Application s'intègre à des services tiers pour fournir des fonctionnalités essentielles. Ces services ont leurs propres politiques de confidentialité, qui s'appliquent séparément à leur traitement de vos données.\n\n**8.1 Cartographie et navigation**\n\n- **Mapbox** : Fournit des services de cartographie, de géolocalisation et de routage. Mapbox reçoit des données de localisation pour générer des cartes et optimiser les itinéraires de livraison. Consultez la politique de confidentialité de Mapbox à l'adresse www.mapbox.com/privacy.\n\n**8.2 Analyse**\n\n- **Firebase Analytics** : Collecte des données d'utilisation anonymisées pour analyser les performances de l'Application et le comportement des utilisateurs. Firebase peut utiliser des identifiants d'appareil et des schémas d'utilisation. Consultez la politique de confidentialité de Google à l'adresse www.google.com/policies/privacy.\n- **Mixpanel** : Suit les interactions des utilisateurs pour améliorer les fonctionnalités de l'Application. Mixpanel collecte des données anonymisées, telles que les schémas de clics et la durée de la session. Consultez la politique de confidentialité de Mixpanel à l'adresse www.mixpanel.com/legal/privacy-policy.\n\n**8.3 Assistance clientèle**\n\n- **Zendesk** : Gère les tickets d'assistance et l'historique de communication. Zendesk stocke vos coordonnées et vos messages. Consultez la politique de confidentialité de Zendesk à l'adresse www.zendesk.com/company/privacy.\n\n**8.4 Services de vérification**\n\n- **Jumio** : Vérifie l'identité et les documents des chauffeurs (par exemple, permis de conduire, carte d'identité nationale). Jumio traite les informations sensibles en toute sécurité. Consultez la politique de confidentialité de Jumio à l'adresse www.jumio.com/legal-information/privacy-policy.\n- **Onfido** : Un service de vérification alternatif pour l'intégration des chauffeurs. Onfido gère les données de vérification d'identité. Consultez la politique de confidentialité d'Onfido à l'adresse www.onfido.com/privacy.\n\n**8.5 Stockage en nuage**\n\n- **Amazon Web Services (AWS)** : Stocke les données des utilisateurs en toute sécurité sous forme cryptée. AWS n'accède ni ne traite vos données au-delà des services de stockage. Consultez la politique de confidentialité d'AWS à l'adresse aws.amazon.com/privacy.\n- **Google Cloud** : Fournit des capacités supplémentaires de stockage et de traitement en nuage. Consultez la politique de confidentialité de Google à l'adresse www.google.com/policies/privacy.\n\n**8.6 Responsabilité de l'utilisateur**\n\n- Vous reconnaissez que les services tiers sont régis par leurs politiques de confidentialité respectives, et Schnell n'est pas responsable de leurs pratiques.\n- Nous sélectionnons des fournisseurs réputés avec des normes de protection des données solides et nous nous assurons qu'ils se conforment aux lois applicables.",
+  "childrenPrivacyHeading": "9. Confidentialité des enfants",
+  "childrenPrivacyBody": "L'Application n'est pas destinée aux utilisateurs de moins de 18 ans. Nous ne collectons pas sciemment d'informations personnelles auprès d'enfants de moins de 18 ans.\n\n**9.1 Restrictions d'âge**\n\n- Les utilisateurs doivent être âgés d'au moins 18 ans pour créer un compte ou utiliser nos services.\n- Les chauffeurs doivent satisfaire aux exigences d'âge et de permis supplémentaires spécifiées dans nos conditions d'utilisation (par exemple, un âge minimum de 21 ans pour certains types de véhicules).\n\n**9.2 Consentement parental**\n\n- Si nous prenons connaissance qu'un utilisateur de moins de 18 ans a fourni des informations personnelles sans le consentement parental vérifiable, nous supprimerons rapidement les informations.\n- Les parents ou tuteurs qui pensent que leur enfant a soumis des données à l'Application doivent contacter support@schnell.com immédiatement.\n\n**9.3 Conformité à la loi COPPA**\n\n- Pour les utilisateurs américains, nous nous conformons à la loi sur la protection de la vie privée des enfants en ligne (COPPA). Nous ne collectons, n'utilisons ni ne partageons de données d'enfants de moins de 13 ans sans le consentement parental.",
+  "commissionHeading": "10. Structure de commission",
+  "commissionBody": "Schnell Logistics fonctionne sur un modèle de commission transparent pour garantir une rémunération équitable aux chauffeurs et des opérations durables pour la plateforme.\n\n**10.1 Taux de commission**\n\n- **Commission standard** : Schnell déduit une **commission de 7 %** du montant total de la course de chaque livraison ou service effectué. Cette commission couvre l'entretien de la plateforme, le support client et les coûts opérationnels.\n- **Exemple** : Si le prix de la livraison est de 100 TND (dinars tunisiens), Schnell déduit 7 TND de commission et le chauffeur reçoit 93 TND.\n- **Transparence** : La commission est clairement affichée aux chauffeurs avant d'accepter une demande de livraison et dans l'historique des transactions de l'Application.\n\n**10.2 Frais supplémentaires**\n\n- **Frais de service** : Les clients peuvent engager des frais supplémentaires pour les services premium, tels que la livraison express ou le transport sécurisé. Ces frais sont divulgués pendant le processus de réservation et n'affectent pas la commission du chauffeur.\n- **Taxes** : Les taxes applicables (par exemple, la TVA, la taxe de vente) sont calculées et ajoutées au tarif en fonction des réglementations locales. Les taxes sont distinctes de la commission et sont clairement détaillées dans les reçus.\n- **Surge Pricing** : Pendant les périodes de forte demande, les tarifs peuvent augmenter en raison du surge pricing. La commission de 7 % s'applique au tarif majoré, ce qui augmente proportionnellement les revenus du chauffeur.\n\n**10.3 Traitement des paiements**\n\n- Les paiements des clients sont traités via des paiements en espèces au bureau ou des paiements par mandat pour les recharges de compte, car les paiements en ligne ne sont pas pris en charge actuellement.\n- Les paiements aux chauffeurs sont traités chaque semaine (tous les lundis) sur le compte bancaire enregistré du chauffeur ou sur un portefeuille numérique, après déduction de la commission de 7 % et de toute taxe applicable.\n- Les chauffeurs peuvent consulter leurs revenus, les déductions de commission et les calendriers de paiement dans la section « Gains » de l'Application.\n\n**10.4 Litiges**\n\n- Si un client conteste un paiement, Schnell enquêtera et pourra temporairement retenir le paiement du chauffeur jusqu'à ce que le litige soit résolu.\n- Les chauffeurs seront informés de tout litige par e-mail ou par des notifications dans l'application et peuvent fournir des preuves (par exemple, confirmation de livraison, photos) pour étayer leur dossier.\n- Les litiges résolus en faveur du chauffeur entraînent un paiement immédiat, moins la commission standard de 7 %.",
+  "cancellationHeading": "11. Politique d'annulation",
+  "cancellationBody": "Schnell Logistics a une politique d'annulation claire pour garantir l'équité pour les clients, les chauffeurs et la plateforme. Les annulations sont traitées différemment selon la partie qui initie l'annulation et le moment.\n\n**11.1 Annulations par le client**\n\n- **Avant l'acceptation par le chauffeur** : Les clients peuvent annuler une demande de service à tout moment avant qu'un chauffeur ne l'accepte, sans pénalité ni frais.\n- **Après l'acceptation par le chauffeur** : Si un client annule après qu'un chauffeur a accepté la demande mais avant le ramassage, des frais d'annulation de 20 % du prix estimé (minimum 5 TND) peuvent s'appliquer pour compenser le chauffeur pour le temps et le carburant.\n- **Après le ramassage** : Les annulations après que le chauffeur a ramassé le colis ne sont pas autorisées, sauf si le chauffeur est d'accord ou s'il y a une raison valable (par exemple, des conditions dangereuses). Le prix complet peut être facturé.\n- **Processus** : Les clients peuvent annuler via le bouton « Annuler la commande » de l'Application ou en contactant support@schnell.com. Les remboursements des frais d'annulation sont traités dans les 7 jours ouvrables.\n- **Annulations fréquentes** : Les clients qui annulent fréquemment leurs envois risquent des restrictions temporaires ou une suspension de compte.",
+  "suspensionHeading": "12. Suspension et résiliation du compte",
+  "suspensionBody": "Schnell Logistics se réserve le droit de suspendre ou de résilier des comptes pour garantir l'intégrité de la plateforme, la sécurité et la conformité avec nos conditions d'utilisation.\n\n**12.1 Suspension de compte**\n\n- **Motifs de suspension** : Violations de nos conditions d'utilisation, telles que la fourniture de fausses informations, le harcèlement ou le transport d'articles interdits. Détection de fraude, d'accès non autorisé ou de tentatives de manipulation des évaluations ou des revenus. Exigences des forces de l'ordre ou des organismes de réglementation de suspendre un compte en attendant une enquête. Les chauffeurs ayant des notes constamment faibles (inférieures à 3,0 sur 5,0 pour 10 livraisons consécutives) ou des annulations fréquentes peuvent être suspendus. Les clients qui annulent fréquemment leurs envois risquent des restrictions temporaires ou une suspension de compte.\n- **Processus** : Les utilisateurs suspendus reçoivent un e-mail et une notification dans l'application détaillant le motif, la durée (par exemple, 7 jours, 30 jours) et les instructions d'appel. Pendant la suspension, les utilisateurs ne peuvent pas réserver ou accepter de nouveaux services, mais peuvent accéder à leur compte pour consulter l'historique ou soumettre des appels. Les suspensions sont régulièrement examinées et les comptes peuvent être rétablis après la résolution du problème (par exemple, un paiement effectué, une conformité à la politique).\n\n**12.2 Résiliation de compte**\n\n- **Motifs de résiliation** : Participation à une fraude délibérée, telle que la falsification des confirmations de livraison ou des détails de paiement. Harcèlement, discrimination ou violence envers d'autres utilisateurs, le personnel de Schnell ou des tiers. Transport de marchandises illégales, violation des lois sur le transport ou conduite criminelle. Suspensions multiples sans action corrective.\n- **Processus** : Les utilisateurs dont le compte a été résilié reçoivent un avis détaillé par e-mail et par notification dans l'application, sauf interdiction légale (par exemple, enquêtes en cours). Lors de la résiliation, toutes les livraisons prévues sont annulées et les remboursements des clients sont traités dans les 7 jours ouvrables. Les soldes de crédit restants des chauffeurs (après déduction des commissions) sont payés dans les 30 jours, sous réserve de vérification. Les comptes résiliés ne peuvent pas être réactivés, mais les utilisateurs peuvent faire appel pour un réexamen.\n\n**12.3 Processus d'appel**\n\n- Les utilisateurs peuvent faire appel des suspensions ou des résiliations dans un délai de **14 jours** à compter de la notification en envoyant un e-mail à support@schnell.com ou en utilisant la fonction « Faire appel de la décision » dans l'Application. Les appels doivent inclure le nom de l'utilisateur, les détails du compte et toute preuve à l'appui (par exemple, les registres de livraison, les journaux de communication). Schnell examinera les appels dans les 10 jours ouvrables et fournira une réponse écrite. Les décisions sont définitives, mais peuvent être transmises à un médiateur indépendant pour les partenaires commerciaux.\n\n**12.4 Surveillance des performances**\n\n- Nous surveillons les performances des utilisateurs pour garantir la qualité et la sécurité. Les clients et les chauffeurs reçoivent des notes basées sur les commentaires des uns et des autres. Un faible niveau de performance (par exemple, des annulations fréquentes, une mauvaise communication) peut déclencher des avertissements avant la suspension ou la résiliation. Les utilisateurs sont informés des problèmes de performance par e-mail ou par des alertes dans l'application et disposent de 7 jours pour s'améliorer avant toute autre action.",
+  "driverPerformanceHeading": "13. Affichage des performances du chauffeur et acceptation des offres",
+  "driverPerformanceBody": "Schnell Logistics donne aux chauffeurs l'autonomie nécessaire pour prendre des décisions éclairées concernant l'acceptation des demandes de livraison, avec le soutien de données de performance transparentes.",
+  "pickupLocation": "Lieu de départ",
+"whereDoYouWantToGo": "Où souhaitez-vous aller ?",
+"retry": "Réessayer",
+"selectLocationTitle": "Sélectionner le lieu de {type}",
+"searchForALocation": "Rechercher un lieu",
+"useCurrentLocation": "Utiliser la position actuelle",
+"cancel": "Annuler",
+"pickup": "Départ",
+"destination": "Destination",
+"destinationWithNumber": "Destination {number}",
+"osrmError": "OSRM indisponible, tentative avec Google Maps : {e}",
+"googleDirectionsError": "Erreur Google Directions : {status}",
+"googleHttpError": "Erreur HTTP Google : {statusCode}",
+"googleNetworkError": "Erreur réseau Google : {e}",
+"locationServiceDisabled": "Les services de localisation sont désactivés.",
+"locationPermissionDenied": "Permission de localisation refusée.",
+"locationPermissionDeniedForever": "Permission de localisation refusée définitivement.",
+"locationRetrievalError": "Erreur lors de la récupération de la position : {e}",
+"geocodingNetworkError": "Erreur réseau lors du géocodage : {e}",
+"locationCoordinatesError": "Désolé, les coordonnées de ce lieu n'ont pas pu être trouvées.",
+"definePickupFirst": "Veuillez d'abord définir le lieu de départ.",
+"definePreviousDestinationFirst": "Veuillez d'abord définir la destination précédente.",
+"maxDestinationsReached": "Maximum de {count} destinations atteint.",
+"confirmReorderTitle": "Confirmer le réordonnancement",
+"reorderWarning": "Le réordonnancement manuel peut augmenter la distance de l'itinéraire. Continuer ?",
+"confirm": "Confirmer",
+"selectAtLeastOneDestination": "Veuillez sélectionner au moins une destination.",
+"routeGenerationError": "Impossible de générer l'itinéraire. Veuillez réessayer.",
+"searchLocationHint": "Rechercher un lieu de {type}",
+"customerInfo": "Informations du client",
+"customerName": "Nom du client",
+"optional": "Facultatif",
+"customerPhone": "Numéro de téléphone",
+"continueText": "Continuer",
+"addDestination": "Ajouter une destination",
+"currentLocation": "Emplacement actuel",
+"untitledSection": "Section sans titre",
+"noContentAvailable": "Aucun contenu disponible",
+
+
+
+   "signInPrompt": "Veuillez vous connecter pour voir l'historique.",
+    "allTab": "Toutes",
+    "ongoingTab": "En cours",
+    "completedTab": "Terminées",
+    "canceledTab": "Annulées",
+    "historyTitle": "Historique",
+    "errorText": "Une erreur s'est produite: {error}",
+    "@errorText": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "noHistoryItems": "Aucune course dans votre historique.",
+    "noCategoryItems": "Aucun élément dans cette catégorie.",
+    "statusOngoing": "En cours",
+    "statusCompleted": "Terminée",
+    "statusCanceled": "Annulée",
+    "statusUnknown": "Inconnu",
+    "priceLabel": "Prix:",
+    "currencyLabel": "{price} TND",
+    "@currencyLabel": {
+        "placeholders": {
+            "price": {}
+        }
+    },
+    "scheduledLabel": "Programmé",
+    "tripIdLabel": "ID de la course:",
+    "idCopiedText": "ID de la course copié !",
+
+
+
+    "userNotLoggedIn": "Utilisateur non connecté.",
+    "accountTitle": "Compte",
+    "generalSettings": "Paramètres généraux",
+    "personalInfo": "Informations personnelles",
+    "darkMode": "Mode sombre",
+    "changeLanguage": "Changer de langue",
+    "information": "Information",
+    "aboutUsAndPolicy": "À propos de nous et politique",
+    "accountActions": "Actions du compte",
+    "logout": "Déconnexion",
+    "deleteAccount": "Supprimer le compte",
+    "deleteAccountWarning": "Cette action est permanente et irréversible.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "failedToUpdate": "Échec de la mise à jour : {error}",
+    "@failedToUpdate": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "errorDeletingAccount": "Erreur lors de la suppression du compte : {error}",
+    "@errorDeletingAccount": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+
+
+    "drawerGuest": "Invité",
+    "drawerUser": "Utilisateur",
+    "drawerUpdateApp": "Mettre à jour l'application",
+    "drawerHelpAndSupport": "Aide et support",
+    "drawerErrorLoadingUser": "Erreur lors du chargement des données utilisateur",
+    "drawerUserDataNotFound": "Données utilisateur introuvables",
+    "drawerAccountSettings": "Paramètres du compte",
+    "drawerMyServices": "Mes services",
+    "drawerSearchingCouriers": "Recherche de coursiers",
+
+
+
+
+    "searchForALocation": "Rechercher un lieu",
+"@searchForALocation": {
+"description": "Hint text for the location search input field."
+},
+"googleDirectionsError": "Erreur de l'API Google Directions : {status}",
+"@googleDirectionsError": {
+"description": "Error message from Google Directions API.",
+"placeholders": {
+"status": {
+"type": "String",
+"example": "ZERO_RESULTS"
+}
+}
+},
+"googleHttpError": "Erreur HTTP : {statusCode}",
+"@googleHttpError": {
+"description": "Generic HTTP error message.",
+"placeholders": {
+"statusCode": {
+"type": "String",
+"example": "404"
+}
+}
+},
+"googleNetworkError": "Erreur réseau : {error}",
+"@googleNetworkError": {
+"description": "Network connectivity error message.",
+"placeholders": {
+"error": {
+"type": "String",
+"example": "SocketException"
+}
+}
+},
+"noContentAvailable": "Aucun contenu disponible",
+"@noContentAvailable": {
+"description": "Message shown when search results are empty."
+},
+"untitledSection": "Sans titre",
+"@untitledSection": {
+"description": "Placeholder for a section with no name."
+},
+"locationCoordinatesError": "Impossible d'obtenir les coordonnées de l'emplacement. Veuillez essayer un autre endroit.",
+"@locationCoordinatesError": {
+"description": "Error message when location coordinates cannot be found."
+},
+"chooseLoadingPosition": "Choisir la position de chargement",
+"@chooseLoadingPosition": {
+"description": "Text above the location display on the map view."
+},
+"loading": "Chargement...",
+"@loading": {
+"description": "Text displayed while waiting for the location address to load."
+},
+"back": "Retour",
+"@back": {
+"description": "Text for the back button on the map view."
+},
+"confirmPosition": "Confirmer la position",
+"@confirmPosition": {
+"description": "Text for the button to confirm the selected position on the map."
+
+},
+"home": "Accueil",
+"history": "Historique",
+"account": "Compte",
+
+
+"cancelOrder": "Annuler la commande ?",
+    "cancelOrderMessage": "Êtes-vous sûr de vouloir annuler définitivement cette commande ?",
+    "keepOrder": "Garder la commande",
+    "yesCancel": "Oui, annuler",
+    "orderCanceledSuccess": "Commande annulée avec succès.",
+    "orderCancelFailed": "Échec de l'annulation de la commande : {error}",
+    "@orderCancelFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "connecting": "Connexion en cours...",
+    "error": "Erreur : {error}",
+    "@error": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "orderNotFound": "Commande introuvable",
+    "searchingForDrivers": "Recherche de chauffeurs à proximité...",
+    "pickupLocation": "Lieu de prise en charge",
+    "finalDropOff": "Point de dépôt final",
+    "dropOffNumber": "Dépôt {number}",
+    "@dropOffNumber": {
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "cancelSearch": "Annuler la recherche",
+    "distanceKm": "{distance} km",
+    "@distanceKm": {
+        "placeholders": {
+            "distance": {
+                "type": "double"
+            }
+        }
+    },
+    "tndPrice": "{price} TND",
+    "@tndPrice": {
+        "placeholders": {
+            "price": {
+                "type": "double"
+            }
+        }
+    },
+
+
+    "vehicleType": "Type de Véhicule",
+    "lightVehicles": "Véhicules Légers",
+    "heavyVehicles": "Poids Lourds",
+    "moto": "Moto",
+    "smallUtility": "Petit Utilitaire",
+    "van": "Camionnette",
+    "van35T": "Camionnette 3.5T",
+    "largeVan": "Grand Fourgon",
+    "heavyTruck": "Poids Lourd",
+    "superHeavyTruck": "Poids Super Lourd",
+    "weightUpTo": "Jusqu'à {weight}",
+    "@weightUpTo": {
+        "placeholders": {
+            "weight": {
+                "type": "String"
+            }
+        }
+    },
+    "idealForSmallVolumes": "Idéal pour les petits volumes et la vitesse",
+    "idealForAppliances": "Idéal pour électroménager ou quelques meubles",
+    "perfectForMaterials": "Parfait pour des matériaux ou petits déménagements",
+    "forFullStudioMove": "Pour un déménagement de studio complet",
+    "forLargerMoves": "Pour les déménagements plus importants",
+    "forLargeVolumes": "Pour les gros volumes et marchandises",
+    "forExceptionalTransports": "Pour les transports exceptionnels",
+    "fastestTag": "Le plus rapide",
+    "mostEconomicalTag": "Le plus économique",
+    "mostPopularTag": "Le plus populaire",
+    "mostEfficientTag": "Le plus efficace",
+    "bestValueTag": "Meilleur rapport",
+    "heavyCapacityTag": "Capacité lourde",
+    "maximumCapacityTag": "Capacité maximale",
+    "notSureVehicle": "Pas sûr du véhicule ? Calculez votre volume ici",
+    "continueButton": "Continuer",
+
+
+    "create": "Créer",
+    "delivery": "Livraison",
+    "pending": "En attente",
+    "home": "Accueil",
+    "errorLoadingDeals": "Erreur lors du chargement des livraisons : {error}",
+    "@errorLoadingDeals": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorLoadingOrders": "Erreur lors du chargement des commandes : {error}",
+    "@errorLoadingOrders": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "invalidDealId": "Identifiant de transaction invalide",
+    "failedToLoadDetails": "Échec du chargement des détails de livraison : {error}",
+    "@failedToLoadDetails": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "dealNotFound": "Transaction non trouvée",
+    "orderNotFound": "Commande non trouvée",
+    "driverNotFound": "Données utilisateur du chauffeur non trouvées",
+    "missingDriverOrOrderId": "ID de chauffeur ou de commande manquant",
+    "driverLocationUnavailable": "Emplacement du chauffeur indisponible.",
+    "failedToLoadRoute": "Échec du chargement de l'itinéraire : {error}",
+    "@failedToLoadRoute": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "deliveryCanceled": "La livraison a été annulée.",
+    "phoneAppLaunchFailed": "Impossible de lancer l'application téléphone.",
+    "retry": "Réessayer",
+    "distance": "Distance",
+    "time": "Temps",
+    "driverOnTheWayToPickup": "Le chauffeur est en route pour la prise en charge",
+    "driverHasItemsOnTheWay": "Le chauffeur a les articles et est en route",
+    "deliveryCompleted": "Livraison terminée !",
+    "deliveryRoute": "Itinéraire de livraison",
+    "pickupLocation": "Lieu de prise en charge",
+   
+    "couldNotLaunchPhoneApp": "Impossible de lancer l'application téléphone.",
+
+
+    "enterValidPhoneNumber": "Veuillez entrer un numéro de téléphone valide pour rechercher.",
+    "noOrderFoundForPhone": "Aucune commande trouvée pour ce numéro de téléphone.",
+    "noActiveDealsFound": "Aucun accord actif trouvé pour cette commande.",
+    "errorSearchingOrder": "Erreur lors de la recherche de la commande : {error}",
+    "onTheWay": "En chemin",
+    "returned": "Retourné",
+    "deliveredSuccessfully": "Livré avec succès",
+    "trackYourCourier": "Suivez votre coursier",
+    "yourCourierAwaits": "Votre coursier vous attend !",
+    "enterCustomerPhoneNumber": "Entrez votre numéro de téléphone",
+    "search": "Rechercher",
+    "noResultsFound": "Aucun résultat à afficher. Essayez de rechercher avec un numéro de téléphone.",
+    "destination": "Destination",
+    "status": "Statut",
+    "viewCourierOnLiveMap": "Voir le coursier sur la carte en direct",
+    "trackingNotAvailable": "Le suivi n'est pas disponible pour le moment.",
+
+
+    "deliveryCanceled": "La livraison a été annulée.",
+    "failedToUpdateDealStatus": "Échec de la mise à jour du statut de l'accord : {error}",
+    "failedToUpdateOrder": "Échec de la mise à jour de la commande : {error}",
+    "failedToUpdateStops": "Échec de la mise à jour des arrêts : {error}",
+    "driverLocationUnavailable": "Position du chauffeur indisponible.",
+    "failedToCenterOnDriver": "Échec du centrage sur le chauffeur : {error}",
+    "confirmCancellation": "Confirmer l'annulation",
+    "areYouSureToCancel": "Êtes-vous sûr de vouloir annuler cette livraison ?",
+    "noButton": "Non",
+    "yesCancelButton": "Oui, annuler",
+    "deliveryStatusUpdatedSuccessfully": "Livraison {status} avec succès.",
+    "failedToUpdateStatus": "Échec de la mise à jour du statut : {error}",
+    "failedToLoadRoute": "Échec du chargement de l'itinéraire : {error}",
+    "osrmServerError": "Erreur de serveur OSRM avec le statut",
+    "osrmApiError": "Erreur d'API OSRM : {error}",
+    "googleApiKeyNotConfigured": "Clé API Google non configurée.",
+    "googleRequestFailed": "La demande Google a échoué avec le statut",
+    "googleApiError": "Erreur d'API Google : {error}",
+    "invalidDealId": "ID d'accord invalide",
+    "userNotAuthenticated": "Utilisateur non authentifié",
+    "dealNotFound": "Accord non trouvé",
+    "driverIdMissing": "ID du chauffeur manquant",
+    "orderIdMissing": "ID de la commande manquant",
+    "orderNotFound": "Commande non trouvée",
+    "failedToParseData": "Échec de l'analyse des données de commande ou d'arrêt : {error}",
+    "delivered": "Livré",
+    "notDelivered": "Non livré",
+
+
+
+    "currentLocation": "Position actuelle",
+    "chooseOnMap": "Choisir sur la carte",
+    "noContentAvailable": "Aucun contenu disponible",
+    "untitledSection": "Sans titre",
+    "googleDirectionsError": "Erreur de l'API Google Directions : {error}",
+    "@googleDirectionsError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "googleHttpError": "Erreur de requête HTTP : Code d'état {statusCode}",
+    "@googleHttpError": {
+        "placeholders": {
+            "statusCode": {}
+        }
+    },
+    "googleNetworkError": "Erreur réseau : {error}",
+    "@googleNetworkError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "locationCoordinatesError": "Impossible de déterminer les coordonnées du lieu.",
+    "locationAccessError": "Erreur d'accès à la position : {error}",
+    "@locationAccessError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "chooseLoadingPosition": "Choisir la position de chargement",
+    "back": "Retour",
+    "confirmPosition": "Confirmer la position"
+
+}

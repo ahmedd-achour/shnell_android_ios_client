@@ -1,0 +1,445 @@
+{
+  "@@locale": "it",
+  "appTitle": "Shnell",
+  "welcomeMessage": "Benvenuto in Shnell!",
+  "selectLanguage": "Seleziona lingua",
+  "logout": "Esci",
+  "deleteAccount": "Elimina account",
+  "personalInfo": "Informazioni personali",
+  "privacyPolicyTitle": "Informativa sulla privacy",
+  "privacyPolicyUpdated": "Questa politica è stata aggiornata l'ultima volta il {date}.",
+  "@privacyPolicyUpdated": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "introHeading": "1. Introduzione",
+  "introBody": "Schnell Logistics (\"noi,\" \"ci\" o \"nostro\") si impegna a proteggere la tua privacy e a garantire la trasparenza nel modo in cui gestiamo le tue informazioni personali. Questa Informativa sulla privacy delinea le pratiche di Schnell Logistics, una piattaforma di trasporto e logistica specializzata in servizi di corriere, traslochi residenziali e commerciali, trasporto di carichi pesanti, stoccaggio, spedizioni internazionali, trasporto sicuro e consegne espresse. Accedendo o utilizzando l'applicazione mobile, il sito web o i servizi correlati di Schnell Logistics (collettivamente, l'\"App\"), accetti le pratiche descritte in questa politica.\n\nQuesta politica è progettata per rispettare le leggi sulla protezione dei dati applicabili, tra cui, a titolo esemplificativo, il Regolamento generale sulla protezione dei dati (GDPR) per gli utenti nell'Unione Europea, il California Consumer Privacy Act (CCPA) per i residenti in California e altre normative pertinenti in tutto il mondo. Il nostro obiettivo è fornire informazioni chiare, dettagliate e accessibili su come raccogliamo, utilizziamo, condividiamo e proteggiamo i tuoi dati personali, nonché sui tuoi diritti in merito a tali dati.\n\nL'App collega gli utenti (sia privati che aziende) con autisti e fornitori di servizi logistici per facilitare servizi di trasporto efficienti e affidabili. Questa politica si applica a tutti gli utenti, inclusi i clienti che richiedono servizi (\"Clienti\"), gli autisti che forniscono servizi di trasporto (\"Autisti\") e le aziende che si occupano di servizi di logistica B2B (\"Partner commerciali\"). Se non sei d'accordo con questa politica, ti preghiamo di non utilizzare l'App.\n\nPotremmo aggiornare questa politica periodicamente per riflettere i cambiamenti nelle nostre pratiche, tecnologie o requisiti legali. Ti verranno notificate le modifiche significative tramite e-mail, notifiche in-app o aggiornamenti sul nostro sito web all'indirizzo www.schnell.com/privacy-policy. L'uso continuato dell'App dopo tali modifiche costituisce l'accettazione della politica rivista.\n\nQuesta politica è stata aggiornata l'ultima volta il **22 agosto 2025**. Ti preghiamo di esaminarla attentamente per comprendere le nostre pratiche.",
+  "infoCollectionHeading": "2. Informazioni che raccogliamo",
+  "infoCollectionBody": "Raccogliamo vari tipi di informazioni per fornire, migliorare e personalizzare i nostri servizi. Le informazioni che raccogliamo rientrano nelle seguenti categorie:\n\n**2.1 Informazioni che fornisci direttamente**\n\nQuando interagisci con l'App, potresti fornire i seguenti tipi di informazioni personali:\n\n- **Creazione dell'account**: Quando ti registri come Cliente o Autista, fornisci dettagli come il tuo nome completo, indirizzo e-mail, numero di telefono e, per gli Autisti, un documento d'identità nazionale valido (ad esempio, CIN per i residenti tunisini) o il numero di patente di guida. I Partner commerciali forniscono i dettagli dell'azienda, inclusi il nome dell'attività, il numero di registrazione e le informazioni di contatto.\n- **Informazioni del profilo**: I Clienti possono fornire preferenze e indirizzi di consegna. Gli Autisti forniscono i dettagli del veicolo (ad esempio, tipo, capacità, targa), certificazioni professionali e informazioni bancarie per i pagamenti.\n- **Richieste di servizio**: I Clienti inviano dettagli sulle loro esigenze logistiche, come le dimensioni del pacco, il peso, i luoghi di ritiro e consegna e le istruzioni speciali (ad esempio, articoli fragili o consegne urgenti).\n- **Dati di comunicazione**: Informazioni fornite quando contatti il nostro team di supporto tramite e-mail, chat in-app o telefono, inclusi i tuoi messaggi, richieste e feedback.\n- **Dati dei partner commerciali**: Per i clienti B2B, raccogliamo dettagli aggiuntivi come i numeri di identificazione fiscale, i dettagli del contratto e i requisiti logistici (ad esempio, le dimensioni della flotta, i programmi di consegna).\n\n**2.2 Informazioni raccolte automaticamente**\n\nRaccogliamo automaticamente determinate informazioni quando utilizzi l'App per migliorare la funzionalità e l'esperienza dell'utente:\n\n- **Informazioni sul dispositivo**: Raccogliamo dati sul tuo dispositivo, inclusi il tipo di dispositivo (ad esempio, iOS o Android), la versione del sistema operativo, gli identificatori univoci del dispositivo (ad esempio, UDID o IMEI), l'indirizzo IP e il tipo di browser.\n- **Dati sulla posizione**: Con il tuo consenso, raccogliamo dati di geolocalizzazione in tempo reale per abilitare funzionalità come il tracciamento delle spedizioni, l'abbinamento degli Autisti con i Clienti e l'ottimizzazione dei percorsi di consegna. I luoghi di ritiro e consegna dei Clienti vengono memorizzati per l'esecuzione del servizio.\n- **Dati di utilizzo**: Tracciamo il modo in cui interagisci con l'App, incluse le pagine visitate, le funzionalità utilizzate (ad esempio, tracciamento, richieste di preventivo), il tempo trascorso e i modelli di clic.\n- **Dati di log**: I log del server catturano dettagli tecnici come chiamate API, rapporti sugli errori e timestamp per monitorare le prestazioni dell'App e risolvere i problemi.\n- **Cookie e tecnologie di tracciamento**: Il nostro sito web utilizza cookie, web beacon e tecnologie simili per tracciare il comportamento degli utenti, personalizzare i contenuti e analizzare il traffico. Puoi gestire le preferenze dei cookie tramite le impostazioni del tuo browser.\n\n**2.3 Informazioni da terze parti**\n\nPotremmo ricevere informazioni da fonti di terze parti per migliorare i nostri servizi o rispettare gli obblighi legali:\n\n- **Servizi di mappatura**: Mapbox fornisce dati basati sulla posizione per ottimizzare il routing e visualizzare le mappe all'interno dell'App.\n- **Fornitori di analisi**: Strumenti come Firebase Analytics forniscono dati aggregati sul comportamento degli utenti e sulle prestazioni dell'App.\n- **Servizi di verifica**: Per gli Autisti, utilizziamo servizi di terze parti per verificare l'identità, la storia di guida e la conformità del veicolo alle normative di sicurezza.\n- **Partner commerciali**: I clienti B2B possono condividere dati di dipendenti o appaltatori (ad esempio, i dettagli di contatto) per facilitare il coordinamento logistico.\n\n**2.4 Informazioni sensibili**\n\nPotremmo raccogliere informazioni sensibili, come i numeri di identità nazionale, solo con il tuo esplicito consenso o se richiesto dalla legge. Adottiamo misure aggiuntive per proteggere questi dati, come delineato nella Sezione 5 (Sicurezza dei dati).",
+  "infoUsageHeading": "3. Come utilizziamo le tue informazioni",
+  "infoUsageBody": "Utilizziamo le informazioni che raccogliamo per gestire, migliorare e personalizzare i servizi dell'App. Gli scopi principali includono:\n\n**3.1 Erogazione del servizio**\n\n- **Abbinamento di clienti e autisti**: Utilizziamo la posizione del cliente e i dati delle richieste di servizio per abbinarli ad Autisti idonei in base a vicinanza, capacità del veicolo e disponibilità.\n- **Evasione degli ordini**: Informazioni come i dettagli del pacco, i luoghi di ritiro e consegna e le istruzioni speciali vengono utilizzate per garantire consegne accurate e puntuali.\n- **Tracciamento e aggiornamenti**: I dati sulla posizione in tempo reale consentono il tracciamento delle spedizioni per i Clienti e l'ottimizzazione del percorso per gli Autisti.\n\n**3.2 Miglioramento dell'esperienza utente**\n\n- **Personalizzazione**: Analizziamo i dati di utilizzo per personalizzare l'esperienza dell'App, ad esempio suggerendo servizi preferiti o mostrando promozioni pertinenti.\n- **Monitoraggio delle prestazioni**: I dati del dispositivo e del log ci aiutano a identificare e risolvere i problemi tecnici, garantendo un'esperienza utente fluida.\n- **Analisi**: I dati aggregati di Firebase Analytics e strumenti simili informano i miglioramenti delle funzionalità e dei servizi.\n\n**3.3 Comunicazione**\n\n- **Notifiche**: Inviamo notifiche in-app, e-mail o SMS sullo stato degli ordini, aggiornamenti dell'account, promozioni o modifiche delle politiche. Puoi gestire le preferenze di notifica nelle impostazioni dell'App.\n- **Supporto clienti**: I tuoi dati di contatto e la cronologia delle comunicazioni vengono utilizzati per rispondere alle richieste, risolvere i problemi e fornire assistenza.\n\n**3.4 Gestione degli autisti**\n\n- **Visualizzazione delle prestazioni**: Prima di accettare una richiesta di consegna, gli Autisti possono visualizzare le metriche di prestazione del Cliente, come la valutazione media (basata su puntualità, comunicazione e cronologia dei pagamenti) e la frequenza degli ordini. Questo aiuta gli Autisti a prendere decisioni informate.\n- **Accettazione dell'offerta**: Gli Autisti hanno l'autonomia di accettare o rifiutare le richieste di consegna in base alle informazioni visualizzate, senza penalità per i rifiuti a meno che non violino i nostri Termini di utilizzo.\n- **Gestione dell'account**: Le informazioni sull'Autista, inclusi i dettagli del veicolo e le certificazioni, vengono utilizzate per verificare l'idoneità e gestire lo stato dell'account.\n- **Responsabilità dell'autista**: Gli Autisti sono responsabili della merce dal momento in cui confermano il ritiro fino alla conferma della consegna.\n\n**3.5 Conformità legale e normativa**\n\n- **Rendicontazione fiscale**: I dati delle transazioni possono essere utilizzati per rispettare gli obblighi fiscali, come la rendicontazione dei guadagni degli Autisti alle autorità competenti.\n- **Prevenzione delle frodi**: Analizziamo i modelli di utilizzo e i dati di terze parti per rilevare e prevenire attività fraudolente, come l'accesso non autorizzato all'account o la frode nei pagamenti.\n- **Obblighi legali**: Potremmo utilizzare i tuoi dati per rispondere a richieste legali, come ordini del tribunale o indagini normative.\n\n**3.6 Marketing e promozioni**\n\n- Con il tuo consenso, utilizziamo le tue informazioni di contatto per inviare offerte promozionali, newsletter o aggiornamenti su nuovi servizi. Puoi annullare l'iscrizione in qualsiasi momento tramite l'App o contattandoci.\n- Potremmo utilizzare dati aggregati e anonimizzati per creare approfondimenti di marketing o casi di studio senza identificare i singoli utenti.\n\n**3.7 Ricerca e sviluppo**\n\n- Utilizziamo dati anonimizzati per condurre ricerche, sviluppare nuove funzionalità e migliorare i nostri algoritmi per l'abbinamento, il routing e i prezzi.\n- Il feedback fornito tramite sondaggi o interazioni di supporto ci aiuta a migliorare la funzionalità dell'App e la soddisfazione dell'utente.",
+  "infoSharingHeading": "4. Come condividiamo le tue informazioni",
+  "infoSharingBody": "Potremmo condividere le tue informazioni con parti specifiche per fornire i nostri servizi, rispettare gli obblighi legali o migliorare l'App. Ci assicuriamo che qualsiasi condivisione sia condotta in modo responsabile e in conformità con le leggi applicabili.\n\n**4.1 Condivisione con altri utenti**\n\n- **Interazioni tra cliente e autista**: Quando un Cliente invia una richiesta di servizio, il suo nome, i suoi dati di contatto (ad esempio, il numero di telefono), i luoghi di ritiro/consegna e i dettagli del pacco vengono condivisi con l'Autista assegnato per facilitare la consegna.\n- **Visualizzazione delle prestazioni dell'autista**: I Clienti possono visualizzare le metriche di prestazione dell'Autista, come le valutazioni (basate su affidabilità, comunicazione e successo della consegna) e gli anni di esperienza, prima di confermare una prenotazione.\n- **Coordinamento B2B**: Per i Partner commerciali, potremmo condividere dati relativi alla logistica (ad esempio, programmi di consegna, dettagli di contatto dei dipendenti) con Autisti o fornitori di terze parti per adempiere ai contratti.\n\n**4.2 Condivisione con i fornitori di servizi**\n\nCi avvaliamo di fornitori di servizi di terze parti fidati per supportare le nostre operazioni. Questi fornitori sono contrattualmente obbligati a proteggere i tuoi dati e a utilizzarli solo per gli scopi che specifichiamo:\n\n- **Mappatura e navigazione**: Mapbox riceve dati sulla posizione per fornire servizi di mappatura, routing e geolocalizzazione all'interno dell'App.\n- **Fornitori di analisi**: Firebase Analytics e altri strumenti ricevono dati di utilizzo anonimizzati per generare approfondimenti sulle prestazioni dell'App e sul comportamento degli utenti.\n- **Archiviazione su cloud**: Utilizziamo fornitori di cloud sicuri (ad esempio, AWS, Google Cloud) per archiviare i dati degli utenti, con crittografia e controlli di accesso in atto.\n- **Servizi di verifica**: I servizi di terze parti verificano l'identità degli autisti, la storia di guida e la conformità dei veicoli per garantire la sicurezza e la conformità normativa.\n- **Strumenti di supporto clienti**: Piattaforme come Zendesk gestiscono i ticket di supporto e archiviano i dati di comunicazione per assistere efficacemente gli utenti.\n\n**4.3 Condivisione legale e normativa**\n\n- Potremmo condividere le tue informazioni con autorità governative, forze dell'ordine o organismi di regolamentazione quando richiesto dalla legge, ad esempio in risposta a citazioni in giudizio, ordini del tribunale o audit fiscali.\n- In caso di sospetta frode, abuso o attività illegale, potremmo condividere i dati pertinenti con le autorità per indagare o prevenire danni.\n\n**4.4 Trasferimenti aziendali**\n\n- Se Schnell Logistics è coinvolta in una fusione, un'acquisizione o una vendita di beni, le tue informazioni potrebbero essere trasferite all'entità acquirente. Ti verrà notificata tale trasferimento e ti verrà data la possibilità di rinunciarvi, ove applicabile.\n- Ci assicureremo che qualsiasi cessionario accetti di proteggere i tuoi dati in conformità con questa politica o con uno standard comparabile.\n\n**4.5 Condivisione di dati anonimizzati**\n\n- Potremmo condividere dati aggregati o anonimizzati (ad esempio, tendenze di consegna, dati demografici degli utenti) con partner, ricercatori o inserzionisti. Questi dati non identificano gli individui e vengono utilizzati per scopi statistici o di marketing.\n\n**4.6 Condivisione basata sul consenso**\n\n- Non condivideremo le tue informazioni personali con terze parti per scopi di marketing senza il tuo esplicito consenso. Puoi revocare il consenso in qualsiasi momento tramite l'App o contattandoci.",
+  "dataSecurityHeading": "5. Sicurezza dei dati",
+  "dataSecurityBody": "Diamo la priorità alla sicurezza delle tue informazioni personali e implementiamo misure solide per proteggerle da accesso non autorizzato, perdita, uso improprio o alterazione.\n\n**5.1 Salvaguardie tecniche**\n\n- **Crittografia**: Tutti i dati sensibili, inclusi gli identificatori personali, sono crittografati durante il transito (utilizzando TLS 1.2 o superiore) e a riposo (utilizzando la crittografia AES-256).\n- **Controlli di accesso**: Solo il personale autorizzato con una necessità legittima può accedere ai dati degli utenti e l'accesso è limitato tramite autorizzazioni basate sui ruoli e autenticazione a più fattori.\n- **Server sicuri**: I nostri server sono ospitati in data center sicuri con protezioni fisiche e digitali, inclusi firewall, sistemi di rilevamento delle intrusioni e patch di sicurezza regolari.\n\n**5.2 Salvaguardie organizzative**\n\n- **Formazione dei dipendenti**: Tutti i dipendenti e gli appaltatori si sottopongono a una formazione regolare sulla protezione dei dati e sulle migliori pratiche in materia di privacy.\n- **Audit di terze parti**: Ci avvaliamo di società di sicurezza indipendenti per condurre audit regolari dei nostri sistemi e processi al fine di identificare e affrontare le vulnerabilità.\n- **Gestione dei fornitori**: Tutti i fornitori di servizi di terze parti vengono esaminati per la conformità agli standard di protezione dei dati e i contratti includono clausole di riservatezza rigorose.\n\n**5.3 Risposta agli incidenti**\n\n- Nel caso improbabile di una violazione dei dati, abbiamo un piano di risposta agli incidenti completo per indagare, mitigare e notificare tempestivamente gli utenti interessati, come richiesto dalla legge.\n- Manteniamo log dettagliati degli incidenti di sicurezza per migliorare le nostre difese e prevenire il ripetersi.",
+  "dataRetentionHeading": "6. Conservazione dei dati",
+  "dataRetentionBody": "Conserviamo le tue informazioni personali solo per il tempo necessario a soddisfare gli scopi delineati in questa politica o per rispettare i requisiti legali, normativi o operativi.\n\n**6.1 Periodi di conservazione**\n\n- **Dati dei clienti**: Le informazioni relative alle richieste di servizio (ad esempio, i dettagli di consegna, i registri di pagamento) vengono conservate per 5 anni dopo l'ultima transazione per rispettare le normative fiscali e contabili.\n- **Dati dell'autista**: I profili degli autisti, comprese le certificazioni e la cronologia delle transazioni, vengono conservati per 7 anni dopo la chiusura dell'account per rispettare le leggi sui trasporti e sul lavoro.\n- **Dati di comunicazione**: I ticket di supporto e la corrispondenza vengono conservati per 3 anni per garantire il controllo di qualità e risolvere le controversie.\n- **Dati sulla posizione**: I dati sulla posizione in tempo reale vengono conservati per 30 giorni dopo il completamento di una consegna, a meno che non siano richiesti per scopi legali o per la risoluzione di controversie.\n- **Dati anonimizzati**: I dati aggregati e non identificabili possono essere conservati a tempo indeterminato per scopi di analisi e ricerca.\n\n**6.2 Eliminazione dei dati**\n\n- Alla cancellazione dell'account, puoi richiedere l'eliminazione dei tuoi dati personali tramite l'App o contattando support@schnell.com. Elimineremo i tuoi dati entro 30 giorni, tranne nei casi in cui la conservazione sia richiesta dalla legge (ad esempio, registri fiscali).\n- I dati anonimizzati che non possono essere collegati a te possono essere conservati per scopi statistici.\n- I backup vengono eliminati in modo sicuro dopo 90 giorni per garantire che non rimangano dati residui.\n\n**6.3 Archiviazione dei dati**\n\n- Gli account inattivi (nessuna attività per 2 anni) possono essere archiviati per ridurre lo spazio di archiviazione attivo. Verrai avvisato prima dell'archiviazione e potrai riattivare il tuo account accedendo o contattando il supporto.\n- I dati archiviati vengono archiviati in modo sicuro e sono soggetti alle stesse protezioni dei dati attivi.",
+  "dataRightsHeading": "7. I tuoi diritti sulla protezione dei dati",
+  "dataRightsBody": "A seconda della tua posizione, hai determinati diritti in merito ai tuoi dati personali ai sensi delle leggi sulla protezione dei dati applicabili, come il GDPR, il CCPA o altre normative regionali.\n\n**7.1 Diritto di accesso**\n\n- Puoi richiedere una copia dei dati personali che deteniamo su di te, inclusi i dettagli su come vengono elaborati e condivisi.\n- Per richiedere l'accesso, contatta support@schnell.com o utilizza la funzione \"Richiesta dati\" nell'App. Risponderemo entro 30 giorni (o 45 giorni per richieste complesse).\n\n**7.2 Diritto di rettifica**\n\n- Se i tuoi dati personali sono inesatti o incompleti, puoi richiedere correzioni tramite le impostazioni del profilo dell'App o contattando il supporto.\n- Aggiorneremo tempestivamente le tue informazioni e informeremo le terze parti con cui i dati sono stati condivisi.\n\n**7.3 Diritto di eliminazione**\n\n- Puoi richiedere l'eliminazione dei tuoi dati personali, a seconda dei requisiti di conservazione legali (ad esempio, registri fiscali).\n- Le richieste di eliminazione possono essere inviate tramite l'App o tramite e-mail a support@schnell.com. Confermeremo l'eliminazione entro 30 giorni.\n\n**7.4 Diritto di limitare il trattamento**\n\n- Puoi richiedere che limitiamo il trattamento dei tuoi dati (ad esempio, solo per l'archiviazione) se ne contesti l'accuratezza, la liceità o la necessità.\n- I dati limitati non verranno utilizzati per il trattamento attivo ma potranno essere conservati per scopi legali.\n\n**7.5 Diritto alla portabilità dei dati**\n\n- Puoi richiedere una copia leggibile da una macchina dei tuoi dati personali (ad esempio, in formato CSV o JSON) da trasferire a un altro servizio.\n- Forniremo questi dati entro 30 giorni, gratuitamente, per le richieste standard.\n\n**7.6 Diritto di opposizione**\n\n- Puoi opporti al trattamento dei tuoi dati per scopi di marketing o laddove il trattamento si basi sui nostri interessi legittimi.\n- Per annullare l'iscrizione al marketing, utilizza le impostazioni dell'App o fai clic su \"Annulla iscrizione\" nelle e-mail promozionali.\n\n**7.7 Diritto di revocare il consenso**\n\n- Laddove il trattamento si basi sul tuo consenso (ad esempio, dati sulla posizione, marketing), puoi revocare il consenso in qualsiasi momento tramite l'App o contattandoci. La revoca non pregiudica la liceità del trattamento precedente.\n\n**7.8 Diritto alla non discriminazione**\n\n- Non ti discrimineremo per aver esercitato i tuoi diritti di protezione dei dati, ad esempio addebitando prezzi più elevati o negando servizi.\n\n**7.9 Presentazione di un reclamo**\n\n- Se ritieni che abbiamo violato i tuoi diritti di protezione dei dati, puoi presentare un reclamo all'autorità locale per la protezione dei dati (ad esempio, CNIL in Francia, ICO nel Regno Unito o l'ufficio del Procuratore generale della California).\n- Puoi anche contattarci direttamente all'indirizzo support@schnell.com per risolvere informalmente qualsiasi dubbio.\n\n**7.10 Come esercitare i tuoi diritti**\n\n- Invia le richieste tramite la funzione \"Richiesta dati\" dell'App o invia un'e-mail a support@schnell.com con il tuo nome, i dettagli dell'account e il diritto specifico che desideri esercitare.\n- Potremmo richiedere la verifica dell'identità (ad esempio, una copia del tuo documento d'identità) per prevenire richieste non autorizzate.\n- Le risposte verranno fornite per iscritto (tramite e-mail o notifica in-app) entro il termine legalmente richiesto.",
+  "thirdPartyHeading": "8. Servizi di terze parti",
+  "thirdPartyBody": "L'App si integra con servizi di terze parti per fornire funzionalità essenziali. Questi servizi hanno le proprie politiche sulla privacy, che si applicano separatamente al loro trattamento dei tuoi dati.\n\n**8.1 Mappatura e navigazione**\n\n- **Mapbox**: Fornisce servizi di mappatura, geolocalizzazione e routing. Mapbox riceve dati sulla posizione per generare mappe e ottimizzare i percorsi di consegna. Consulta l'Informativa sulla privacy di Mapbox all'indirizzo www.mapbox.com/privacy.\n\n**8.2 Analisi**\n\n- **Firebase Analytics**: Raccoglie dati di utilizzo anonimizzati per generare approfondimenti sulle prestazioni dell'App e sul comportamento degli utenti. Firebase può utilizzare identificatori di dispositivo e modelli di utilizzo. Consulta l'Informativa sulla privacy di Google all'indirizzo www.google.com/policies/privacy.\n- **Mixpanel**: Traccia le interazioni degli utenti per migliorare le funzionalità dell'App. Mixpanel raccoglie dati anonimizzati, come i modelli di clic e la durata della sessione. Consulta l'Informativa sulla privacy di Mixpanel all'indirizzo www.mixpanel.com/legal/privacy-policy.\n\n**8.3 Supporto clienti**\n\n- **Zendesk**: Gestisce i ticket di supporto e la cronologia delle comunicazioni. Zendesk archivia i tuoi dati di contatto e i tuoi messaggi. Consulta l'Informativa sulla privacy di Zendesk all'indirizzo www.zendesk.com/company/privacy.\n\n**8.4 Servizi di verifica**\n\n- **Jumio**: Verifica l'identità e i documenti degli autisti (ad esempio, patente di guida, documento d'identità nazionale). Jumio elabora le informazioni sensibili in modo sicuro. Consulta l'Informativa sulla privacy di Jumio all'indirizzo www.jumio.com/legal-information/privacy-policy.\n- **Onfido**: Un servizio di verifica alternativo per l'onboarding degli autisti. Onfido gestisce i dati di verifica dell'identità. Consulta l'Informativa sulla privacy di Onfido all'indirizzo www.onfido.com/privacy.\n\n**8.5 Archiviazione su cloud**\n\n- **Amazon Web Services (AWS)**: Archivia i dati degli utenti in modo sicuro in formato crittografato. AWS non accede o elabora i tuoi dati oltre i servizi di archiviazione. Consulta l'Informativa sulla privacy di AWS all'indirizzo aws.amazon.com/privacy.\n- **Google Cloud**: Fornisce funzionalità aggiuntive di archiviazione e elaborazione su cloud. Consulta l'Informativa sulla privacy di Google all'indirizzo www.google.com/policies/privacy.\n\n**8.6 Responsabilità dell'utente**\n\n- Riconosci che i servizi di terze parti sono regolati dalle rispettive informative sulla privacy e che Schnell non è responsabile delle loro pratiche.\n- Selezioniamo fornitori affidabili con standard di protezione dei dati elevati e ci assicuriamo che rispettino le leggi applicabili.",
+  "childrenPrivacyHeading": "9. Privacy dei bambini",
+  "childrenPrivacyBody": "L'App non è destinata agli utenti di età inferiore ai 18 anni. Non raccogliamo consapevolmente informazioni personali da bambini di età inferiore ai 18 anni.\n\n**9.1 Limiti di età**\n\n- Gli utenti devono avere almeno 18 anni per creare un account o utilizzare i nostri servizi.\n- Gli Autisti devono soddisfare i requisiti aggiuntivi di età e licenza specificati nei nostri Termini di utilizzo (ad esempio, età minima di 21 anni per determinati tipi di veicoli).\n\n**9.2 Consenso dei genitori**\n\n- Se veniamo a conoscenza che un utente di età inferiore ai 18 anni ha fornito informazioni personali senza un consenso verificabile dei genitori, elimineremo tempestivamente le informazioni.\n- I genitori o i tutori che ritengono che il proprio figlio abbia inviato dati all'App devono contattare immediatamente support@schnell.com.\n\n**9.3 Conformità al COPPA**\n\n- Per gli utenti statunitensi, rispettiamo il Children’s Online Privacy Protection Act (COPPA). Non raccogliamo, utilizziamo o condividiamo dati di bambini di età inferiore ai 13 anni senza il consenso dei genitori.",
+  "commissionHeading": "10. Struttura delle commissioni",
+  "commissionBody": "Schnell Logistics opera con un modello trasparente basato su commissioni per garantire una retribuzione equa per gli Autisti e operazioni sostenibili per la piattaforma.\n\n**10.1 Tasso di commissione**\n\n- **Commissione standard**: Schnell detrae una **commissione del 7%** dalla tariffa totale di ogni consegna o servizio completato. Questa commissione copre la manutenzione della piattaforma, il supporto clienti e i costi operativi.\n- **Esempio**: Se la tariffa di una consegna è di 100 TND (dinaro tunisino), Schnell detrae 7 TND come commissione e l'Autista riceve 93 TND.\n- **Trasparenza**: La commissione viene visualizzata chiaramente agli Autisti prima di accettare una richiesta di consegna e nella cronologia delle transazioni all'interno dell'App.\n\n**10.2 Commissioni aggiuntive**\n\n- **Costi di servizio**: I Clienti possono incorrere in costi aggiuntivi per servizi premium, come la consegna espressa o il trasporto sicuro. Questi costi vengono divulgati durante il processo di prenotazione e non influiscono sulla commissione dell'Autista.\n- **Tasse**: Le tasse applicabili (ad esempio, IVA, imposta sulle vendite) vengono calcolate e aggiunte alla tariffa in base alle normative locali. Le tasse sono separate dalla commissione e sono chiaramente dettagliate nelle ricevute.\n- **Prezzi dinamici**: Durante i periodi di forte domanda, le tariffe possono aumentare a causa dei prezzi dinamici. La commissione del 7% si applica alla tariffa maggiorata, aumentando proporzionalmente i guadagni dell'Autista.\n\n**10.3 Elaborazione dei pagamenti**\n\n- I pagamenti dei Clienti vengono elaborati tramite pagamenti in contanti in ufficio o pagamenti tramite mandato per le ricariche dell'account, poiché i pagamenti online non sono attualmente supportati.\n- I pagamenti agli Autisti vengono elaborati settimanalmente (ogni lunedì) sul conto bancario o sul portafoglio digitale registrato dell'Autista, dopo aver detratto la commissione del 7% e le tasse applicabili.\n- Gli Autisti possono visualizzare i loro guadagni, le detrazioni di commissioni e i programmi di pagamento nella sezione \"Guadagni\" dell'App.\n\n**10.4 Controversie**\n\n- Se un Cliente contesta un addebito, Schnell indagherà e potrà trattenere temporaneamente il pagamento dell'Autista fino alla risoluzione della controversia.\n- Gli Autisti verranno avvisati di eventuali controversie tramite e-mail o notifiche in-app e potranno fornire prove (ad esempio, conferma di consegna, foto) a sostegno del loro caso.\n- Le controversie risolte a favore dell'Autista comporteranno un pagamento immediato, meno la commissione standard del 7%.",
+  "cancellationHeading": "11. Politica di cancellazione",
+  "cancellationBody": "Schnell Logistics ha una chiara politica di cancellazione per garantire l'equità per i Clienti, gli Autisti e la piattaforma. Le cancellazioni vengono gestite in modo diverso a seconda della parte che le avvia e del momento.\n\n**11.1 Cancellazioni del cliente**\n\n- **Prima dell'accettazione dell'autista**: I Clienti possono annullare una richiesta di servizio in qualsiasi momento prima che un Autista l'accetti, senza penalità o costi.\n- **Dopo l'accettazione dell'autista**: Se un Cliente annulla dopo che un Autista ha accettato la richiesta ma prima del ritiro, potrebbe essere applicata una commissione di cancellazione del 20% della tariffa stimata (minimo 5 TND) per risarcire l'Autista per il tempo e il carburante.\n- **Dopo il ritiro**: Le cancellazioni dopo che l'Autista ha ritirato il pacco non sono consentite a meno che l'Autista non sia d'accordo o ci sia un motivo valido (ad esempio, condizioni non sicure). Potrebbe essere addebitata una tariffa completa.\n- **Processo**: I Clienti possono annullare tramite il pulsante \"Annulla ordine\" dell'App o contattando support@schnell.com. I rimborsi per le commissioni di cancellazione vengono elaborati entro 7 giorni lavorativi.\n- **Cancellazioni frequenti**: I Clienti che annullano frequentemente le loro spedizioni rischiano restrizioni temporanee o la sospensione dell'account.",
+  "suspensionHeading": "12. Sospensione e chiusura dell'account",
+  "suspensionBody": "Schnell Logistics si riserva il diritto di sospendere o chiudere gli account per garantire l'integrità della piattaforma, la sicurezza e la conformità ai nostri Termini di utilizzo.\n\n**12.1 Sospensione dell'account**\n\n- **Motivi di sospensione**: Violazioni dei nostri Termini di utilizzo, come la fornitura di informazioni false, il coinvolgimento in molestie o il trasporto di articoli proibiti. Rilevamento di frodi, accesso non autorizzato o tentativi di manipolare le valutazioni o i guadagni. Richieste da parte delle forze dell'ordine o degli organismi di regolamentazione di sospendere un account in attesa di indagini. Gli autisti con valutazioni costantemente basse (inferiori a 3,0 su 5,0 per 10 consegne consecutive) o cancellazioni frequenti possono essere sospesi. I Clienti che annullano frequentemente le loro spedizioni rischiano restrizioni temporanee o la sospensione dell'account.\n- **Processo**: Gli utenti sospesi ricevono un'e-mail e una notifica in-app che descrivono in dettaglio il motivo, la durata (ad esempio, 7 giorni, 30 giorni) e le istruzioni per il ricorso. Durante la sospensione, gli utenti non possono prenotare o accettare nuovi servizi, ma possono accedere al proprio account per visualizzare la cronologia o inviare ricorsi. Le sospensioni vengono esaminate regolarmente e gli account possono essere ripristinati alla risoluzione del problema (ad esempio, liquidazione del pagamento, conformità alla politica).\n\n**12.2 Chiusura dell'account**\n\n- **Motivi di chiusura**: Coinvolgimento in frodi deliberate, come la falsificazione delle conferme di consegna o dei dettagli di pagamento. Molestie, discriminazione o violenza nei confronti di altri utenti, del personale di Schnell o di terze parti. Trasporto di merci illegali, violazione delle leggi sui trasporti o coinvolgimento in condotte criminali. Molteplici sospensioni senza azioni correttive.\n- **Processo**: Gli utenti con account chiusi ricevono un avviso dettagliato via e-mail e notifica in-app, a meno che non sia vietato dalla legge (ad esempio, indagini in corso). Alla chiusura, tutte le consegne programmate vengono annullate e i rimborsi ai Clienti vengono elaborati entro 7 giorni lavorativi. I saldi di credito rimanenti degli Autisti (dopo le detrazioni delle commissioni) vengono pagati entro 30 giorni, previa verifica. Gli account chiusi non possono essere riattivati, ma gli utenti possono presentare ricorso per un riesame.\n\n**12.3 Processo di ricorso**\n\n- Gli utenti possono presentare ricorso contro sospensioni o chiusure entro **14 giorni** dalla notifica inviando un'e-mail a support@schnell.com o utilizzando la funzione \"Ricorso contro la decisione\" dell'App. I ricorsi devono includere il nome dell'utente, i dettagli dell'account e qualsiasi prova a sostegno (ad esempio, registri di consegna, log di comunicazione). Schnell esaminerà i ricorsi entro 10 giorni lavorativi e fornirà una risposta scritta. Le decisioni sono definitive ma possono essere escalate a un mediatore indipendente per i Partner commerciali.\n\n**12.4 Monitoraggio delle prestazioni**\n\n- Monitoriamo le prestazioni degli utenti per garantire qualità e sicurezza. I Clienti e gli Autisti ricevono valutazioni basate sul feedback reciproco. Le prestazioni scarse (ad esempio, cancellazioni frequenti, scarsa comunicazione) possono innescare avvisi prima della sospensione o della chiusura. Gli utenti vengono avvisati dei problemi di prestazioni tramite e-mail o avvisi in-app e hanno 7 giorni per migliorare prima che vengano intraprese ulteriori azioni.",
+  "driverPerformanceHeading": "13. Visualizzazione delle prestazioni dell'autista e accettazione delle offerte",
+  "driverPerformanceBody": "Schnell Logistics consente agli Autisti di prendere decisioni informate sull'accettazione delle richieste di consegna, supportate da dati di prestazione trasparenti.",
+  "pickupLocation": "Luogo di ritiro",
+"whereDoYouWantToGo": "Dove vorresti andare?",
+"retry": "Riprova",
+"selectLocationTitle": "Seleziona luogo di {type}",
+"searchForALocation": "Cerca una posizione",
+"useCurrentLocation": "Usa la posizione attuale",
+"cancel": "Annulla",
+"pickup": "Ritiro",
+"destination": "Destinazione",
+"destinationWithNumber": "Destinazione {number}",
+"osrmError": "OSRM non disponibile, riprova con Google Maps: {e}",
+"googleDirectionsError": "Errore Google Directions: {status}",
+"googleHttpError": "Errore HTTP di Google: {statusCode}",
+"googleNetworkError": "Errore di rete di Google: {e}",
+"locationServiceDisabled": "I servizi di localizzazione sono disabilitati.",
+"locationPermissionDenied": "Permesso di localizzazione negato.",
+"locationPermissionDeniedForever": "Permesso di localizzazione negato in modo permanente.",
+"locationRetrievalError": "Errore durante il recupero della posizione: {e}",
+"geocodingNetworkError": "Errore di rete durante la geocodifica: {e}",
+"locationCoordinatesError": "Spiacenti, le coordinate per questo luogo non sono state trovate.",
+"definePickupFirst": "Si prega di definire prima il luogo di ritiro.",
+"definePreviousDestinationFirst": "Si prega di definire prima la destinazione precedente.",
+"maxDestinationsReached": "Massimo di {count} destinazioni raggiunto.",
+"confirmReorderTitle": "Conferma riordino",
+"reorderWarning": "Il riordino manuale può aumentare la distanza del percorso. Continuare?",
+"confirm": "Conferma",
+"selectAtLeastOneDestination": "Si prega di selezionare almeno una destinazione.",
+"routeGenerationError": "Non è stato possibile generare il percorso. Riprova.",
+"searchLocationHint": "Cerca un luogo di {type}",
+"customerInfo": "Informazioni cliente",
+"customerName": "Nome cliente",
+"optional": "Opzionale",
+"customerPhone": "Numero di telefono",
+"continueText": "Continua",
+"addDestination": "Aggiungi destinazione",
+"currentLocation": "Posizione attuale",
+"untitledSection": "Sezione senza titolo",
+"noContentAvailable": "Nessun contenuto disponibile",
+
+
+
+
+  "signInPrompt": "Accedi per visualizzare la cronologia.",
+    "allTab": "Tutti",
+    "ongoingTab": "In corso",
+    "completedTab": "Completati",
+    "canceledTab": "Annullati",
+    "historyTitle": "Cronologia",
+    "errorText": "Si è verificato un errore: {error}",
+    "@errorText": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "noHistoryItems": "Nessun viaggio nella tua cronologia.",
+    "noCategoryItems": "Nessun elemento in questa categoria.",
+    "statusOngoing": "In corso",
+    "statusCompleted": "Completata",
+    "statusCanceled": "Annullata",
+    "statusUnknown": "Sconosciuto",
+    "priceLabel": "Prezzo:",
+    "currencyLabel": "{price} TND",
+    "@currencyLabel": {
+        "placeholders": {
+            "price": {}
+        }
+    },
+    "scheduledLabel": "Programmato",
+    "tripIdLabel": "ID del viaggio:",
+    "idCopiedText": "ID del viaggio copiato!",
+
+
+    "userNotLoggedIn": "Utente non loggato.",
+    "accountTitle": "Account",
+    "generalSettings": "Impostazioni generali",
+    "personalInfo": "Informazioni personali",
+    "darkMode": "Modalità scura",
+    "changeLanguage": "Cambia lingua",
+    "information": "Informazioni",
+    "aboutUsAndPolicy": "Chi siamo e politica",
+    "accountActions": "Azioni account",
+    "logout": "Esci",
+    "deleteAccount": "Elimina account",
+    "deleteAccountWarning": "Questa azione è permanente e non può essere annullata.",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "failedToUpdate": "Aggiornamento fallito: {error}",
+    "@failedToUpdate": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "errorDeletingAccount": "Errore durante l'eliminazione dell'account: {error}",
+    "@errorDeletingAccount": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+
+    "drawerGuest": "Ospite",
+    "drawerUser": "Utente",
+    "drawerUpdateApp": "Aggiorna app",
+    "drawerHelpAndSupport": "Aiuto e supporto",
+    "drawerErrorLoadingUser": "Errore nel caricamento dei dati utente",
+    "drawerUserDataNotFound": "Dati utente non trovati",
+    "drawerAccountSettings": "Impostazioni account",
+    "drawerMyServices": "I miei servizi",
+    "drawerSearchingCouriers": "Ricerca corrieri",
+
+
+    "searchForALocation": "Cerca una posizione",
+"@searchForALocation": {
+"description": "Hint text for the location search input field."
+},
+"googleDirectionsError": "Errore API Google Directions: {status}",
+"@googleDirectionsError": {
+"description": "Error message from Google Directions API.",
+"placeholders": {
+"status": {
+"type": "String",
+"example": "ZERO_RESULTS"
+}
+}
+},
+"googleHttpError": "Errore HTTP: {statusCode}",
+"@googleHttpError": {
+"description": "Generic HTTP error message.",
+"placeholders": {
+"statusCode": {
+"type": "String",
+"example": "404"
+}
+}
+},
+"googleNetworkError": "Errore di rete: {error}",
+"@googleNetworkError": {
+"description": "Network connectivity error message.",
+"placeholders": {
+"error": {
+"type": "String",
+"example": "SocketException"
+}
+}
+},
+"noContentAvailable": "Nessun contenuto disponibile",
+"@noContentAvailable": {
+"description": "Message shown when search results are empty."
+},
+"untitledSection": "Senza titolo",
+"@untitledSection": {
+"description": "Placeholder for a section with no name."
+},
+"locationCoordinatesError": "Impossibile ottenere le coordinate della posizione. Si prega di provare un altro luogo.",
+"@locationCoordinatesError": {
+"description": "Error message when location coordinates cannot be found."
+},
+"chooseLoadingPosition": "Scegli la posizione di carico",
+"@chooseLoadingPosition": {
+"description": "Text above the location display on the map view."
+},
+"loading": "Caricamento...",
+"@loading": {
+"description": "Text displayed while waiting for the location address to load."
+},
+"back": "Indietro",
+"@back": {
+"description": "Text for the back button on the map view."
+},
+"confirmPosition": "Conferma posizione",
+"@confirmPosition": {
+"description": "Text for the button to confirm the selected position on the map."
+},
+
+"home": "Home",
+    "history": "Cronologia",
+    "account": "Account",
+
+
+    "cancelOrder": "Annullare l'ordine?",
+    "cancelOrderMessage": "Sei sicuro di voler annullare definitivamente questo ordine?",
+    "keepOrder": "Mantieni ordine",
+    "yesCancel": "Sì, annulla",
+    "orderCanceledSuccess": "Ordine annullato con successo.",
+    "orderCancelFailed": "Impossibile annullare l'ordine: {error}",
+    "@orderCancelFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "connecting": "Connessione in corso...",
+    "error": "Errore: {error}",
+    "@error": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "orderNotFound": "Ordine non trovato",
+    "searchingForDrivers": "Ricerca di autisti nelle vicinanze...",
+    "pickupLocation": "Luogo di ritiro",
+    "finalDropOff": "Punto di consegna finale",
+    "dropOffNumber": "Consegna {number}",
+    "@dropOffNumber": {
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "cancelSearch": "Annulla ricerca",
+    "distanceKm": "{distance} km",
+    "@distanceKm": {
+        "placeholders": {
+            "distance": {
+                "type": "double"
+            }
+        }
+    },
+    "tndPrice": "{price} TND",
+    "@tndPrice": {
+        "placeholders": {
+            "price": {
+                "type": "double"
+            }
+        }
+    },
+
+    "vehicleType": "Tipo di Veicolo",
+    "lightVehicles": "Veicoli Leggeri",
+    "heavyVehicles": "Veicoli Pesanti",
+    "moto": "Moto",
+    "smallUtility": "Veicolo Utilitario Piccolo",
+    "van": "Furgone",
+    "van35T": "Furgone 3.5T",
+    "largeVan": "Furgone Grande",
+    "heavyTruck": "Autocarro Pesante",
+    "superHeavyTruck": "Autocarro Super Pesante",
+    "weightUpTo": "Fino a {weight}",
+    "@weightUpTo": {
+        "placeholders": {
+            "weight": {
+                "type": "String"
+            }
+        }
+    },
+    "idealForSmallVolumes": "Ideale per piccoli volumi e velocità",
+    "idealForAppliances": "Ideale per elettrodomestici o pochi mobili",
+    "perfectForMaterials": "Perfetto per materiali o piccoli traslochi",
+    "forFullStudioMove": "Per un trasloco completo di monolocale",
+    "forLargerMoves": "Per traslochi più grandi",
+    "forLargeVolumes": "Per grandi volumi e merci",
+    "forExceptionalTransports": "Per trasporti eccezionali",
+    "fastestTag": "Il più veloce",
+    "mostEconomicalTag": "Il più economico",
+    "mostPopularTag": "Il più popolare",
+    "mostEfficientTag": "Il più efficiente",
+    "bestValueTag": "Miglior rapporto qualità-prezzo",
+    "heavyCapacityTag": "Capacità pesante",
+    "maximumCapacityTag": "Capacità massima",
+    "notSureVehicle": "Non sei sicuro del veicolo? Calcola il tuo volume qui",
+    "continueButton": "Continua",
+
+
+     "create": "Crea",
+    "delivery": "Consegna",
+    "pending": "In sospeso",
+    "home": "Home",
+    "errorLoadingDeals": "Errore durante il caricamento delle consegne: {error}",
+    "@errorLoadingDeals": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorLoadingOrders": "Errore durante il caricamento degli ordini: {error}",
+    "@errorLoadingOrders": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+
+
+    "invalidDealId": "ID transazione non valido",
+    "failedToLoadDetails": "Impossibile caricare i dettagli di consegna: {error}",
+    "@failedToLoadDetails": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "dealNotFound": "Transazione non trovata",
+    "orderNotFound": "Ordine non trovato",
+    "driverNotFound": "Dati utente del conducente non trovati",
+    "missingDriverOrOrderId": "ID del conducente o dell'ordine mancante",
+    "driverLocationUnavailable": "Posizione del conducente non disponibile.",
+    "failedToLoadRoute": "Impossibile caricare il percorso: {error}",
+    "@failedToLoadRoute": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "deliveryCanceled": "La consegna è stata annullata.",
+    "phoneAppLaunchFailed": "Impossibile avviare l'app del telefono.",
+    "retry": "Riprova",
+    "distance": "Distanza",
+    "time": "Tempo",
+    "driverOnTheWayToPickup": "Il conducente è in viaggio per il ritiro",
+    "driverHasItemsOnTheWay": "Il conducente ha gli articoli ed è in viaggio",
+    "deliveryCompleted": "Consegna completata!",
+    "deliveryRoute": "Percorso di consegna",
+    "pickupLocation": "Luogo di ritiro",
+   
+    "couldNotLaunchPhoneApp": "Impossibile avviare l'app del telefono.",
+
+
+    "enterValidPhoneNumber": "Inserisci un numero di telefono valido per cercare.",
+    "noOrderFoundForPhone": "Nessun ordine trovato per questo numero di telefono.",
+    "noActiveDealsFound": "Nessun accordo attivo trovato per questo ordine.",
+    "errorSearchingOrder": "Errore durante la ricerca dell'ordine: {error}",
+    "onTheWay": "In transito",
+    "returned": "Restituito",
+    "deliveredSuccessfully": "Consegnato con successo",
+    "trackYourCourier": "Traccia il tuo corriere",
+    "yourCourierAwaits": "Il tuo corriere ti aspetta!",
+    "enterCustomerPhoneNumber": "Inserisci il tuo numero di telefono",
+    "search": "Cerca",
+    "noResultsFound": "Nessun risultato da visualizzare. Prova a cercare con un numero di telefono.",
+    "destination": "Destinazione",
+    "status": "Stato",
+    "viewCourierOnLiveMap": "Visualizza il corriere sulla mappa in tempo reale",
+    "trackingNotAvailable": "Il tracciamento non è disponibile in questo momento.",
+
+    "deliveryCanceled": "La consegna è stata annullata.",
+    "failedToUpdateDealStatus": "Impossibile aggiornare lo stato dell'affare: {error}",
+    "failedToUpdateOrder": "Impossibile aggiornare l'ordine: {error}",
+    "failedToUpdateStops": "Impossibile aggiornare le fermate: {error}",
+    "driverLocationUnavailable": "Posizione del conducente non disponibile.",
+    "failedToCenterOnDriver": "Impossibile centrare sul conducente: {error}",
+    "confirmCancellation": "Conferma annullamento",
+    "areYouSureToCancel": "Sei sicuro di voler annullare questa consegna?",
+    "noButton": "No",
+    "yesCancelButton": "Sì, annulla",
+    "deliveryStatusUpdatedSuccessfully": "Consegna {status} con successo.",
+    "failedToUpdateStatus": "Impossibile aggiornare lo stato: {error}",
+    "failedToLoadRoute": "Impossibile caricare il percorso: {error}",
+    "osrmServerError": "Errore del server OSRM con stato",
+    "osrmApiError": "Errore API OSRM: {error}",
+    "googleApiKeyNotConfigured": "Chiave API di Google non configurata.",
+    "googleRequestFailed": "Richiesta Google non riuscita con stato",
+    "googleApiError": "Errore API di Google: {error}",
+    "invalidDealId": "ID affare non valido",
+    "userNotAuthenticated": "Utente non autenticato",
+    "dealNotFound": "Affare non trovato",
+    "driverIdMissing": "ID conducente mancante",
+    "orderIdMissing": "ID ordine mancante",
+    "orderNotFound": "Ordine non trovato",
+    "failedToParseData": "Impossibile analizzare i dati dell'ordine o della fermata: {error}",
+    "delivered": "Consegnato",
+    "notDelivered": "Non consegnato",
+
+
+     "currentLocation": "Posizione attuale",
+    "chooseOnMap": "Scegli sulla mappa",
+    "noContentAvailable": "Nessun contenuto disponibile",
+    "untitledSection": "Senza titolo",
+    "googleDirectionsError": "Errore API Google Directions: {error}",
+    "@googleDirectionsError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "googleHttpError": "Errore di richiesta HTTP: Codice di stato {statusCode}",
+    "@googleHttpError": {
+        "placeholders": {
+            "statusCode": {}
+        }
+    },
+    "googleNetworkError": "Errore di rete: {error}",
+    "@googleNetworkError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "locationCoordinatesError": "Impossibile determinare le coordinate della posizione.",
+    "locationAccessError": "Errore di accesso alla posizione: {error}",
+    "@locationAccessError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "chooseLoadingPosition": "Scegli la posizione di carico",
+    "back": "Indietro",
+    "confirmPosition": "Conferma posizione"
+
+}

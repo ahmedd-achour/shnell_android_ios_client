@@ -1,0 +1,8 @@
+# The directory that contains the App's `.arb` files.
+arb-dir: lib/l10n
+
+# The file path to an App-specific localization file.
+template-arb-file: app_fr.arb
+
+# The file path to the output localization file.
+output-localization-file: app_localizations.dart

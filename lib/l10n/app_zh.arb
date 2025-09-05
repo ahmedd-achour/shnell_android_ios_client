@@ -1,0 +1,451 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Shnell",
+  "welcomeMessage": "欢迎使用 Shnell！",
+  "selectLanguage": "选择语言",
+  "logout": "注销",
+  "deleteAccount": "删除账户",
+  "personalInfo": "个人信息",
+  "privacyPolicyTitle": "隐私政策",
+  "privacyPolicyUpdated": "本政策最后更新于 {date}。",
+  "@privacyPolicyUpdated": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "introHeading": "1. 简介",
+  "introBody": "Schnell Logistics（以下简称“我们”）致力于保护您的隐私，并确保我们在处理您的个人信息时保持透明。本隐私政策阐述了 Schnell Logistics 的业务实践，Schnell Logistics 是一个专注于快递服务、住宅和商业搬迁、重型货物运输、仓储、国际货运、安全运输和快速投递的运输与物流平台。通过访问或使用 Schnell Logistics 的移动应用程序、网站或相关服务（统称为“应用程序”），您即同意本政策中描述的做法。\n\n本政策旨在遵守适用的数据保护法律，包括但不限于欧盟用户的《通用数据保护条例》（GDPR）、加利福尼亚州居民的《加利福尼亚消费者隐私法案》（CCPA）以及全球其他相关法规。我们的目标是就我们如何收集、使用、共享和保护您的个人数据，以及您对这些数据拥有的权利，提供清晰、详细和可访问的信息。\n\n本应用程序连接用户（个人和企业）与司机和物流提供商，以促进高效可靠的运输服务。本政策适用于所有用户，包括请求服务的客户（“客户”）、提供运输服务的司机（“司机”）以及使用 B2B 物流服务的企业（“商业合作伙伴”）。如果您不同意本政策，请不要使用本应用程序。\n\n我们可能会定期更新本政策，以反映我们业务、技术或法律要求的变化。如有重大变更，我们将通过电子邮件、应用内通知或在我们网站 www.schnell.com/privacy-policy 上进行更新来通知您。在此类变更后继续使用本应用程序即表示您接受修订后的政策。\n\n本政策最后更新于 **2025 年 8 月 22 日**。请仔细阅读本政策以了解我们的做法。",
+  "infoCollectionHeading": "2. 我们收集的信息",
+  "infoCollectionBody": "我们收集各种类型的信息，以提供、改进和个性化我们的服务。我们收集的信息分为以下几类：\n\n**2.1 您直接提供的信息**\n\n当您与应用程序互动时，您可能会提供以下类型的个人信息：\n\n- **账户创建**：当您注册为客户或司机时，您将提供您的全名、电子邮件地址、电话号码以及（对于司机）有效的国民身份证件（例如，突尼斯居民的 CIN）或驾驶执照号码等详细信息。商业合作伙伴将提供公司详细信息，包括公司名称、注册号和联系信息。\n- **个人资料信息**：客户可能会提供投递偏好和地址。司机将提供车辆详细信息（例如，类型、容量、车牌）、专业资格和用于付款的银行信息。\n- **服务请求**：客户提交其物流需求的详细信息，例如包裹尺寸、重量、取货和投递地点以及特殊说明（例如，易碎物品或限时投递）。\n- **通信数据**：当您通过电子邮件、应用内聊天或电话联系我们的支持团队时提供的信息。这包括您的消息、查询和反馈。\n- **商业合作伙伴数据**：对于 B2B 客户，我们收集其他详细信息，例如税务识别号、合同详细信息和物流要求（例如，车队规模、投递时间表）。\n\n**2.2 自动收集的信息**\n\n为了增强应用程序的功能和改善用户体验，当您使用应用程序时，我们会自动收集某些信息：\n\n- **设备信息**：我们收集有关您设备的数据，包括设备类型（例如，iOS 或 Android）、操作系统版本、唯一设备标识符（例如，UDID 或 IMEI）、IP 地址和浏览器类型。\n- **位置数据**：在您同意的情况下，我们收集实时地理位置数据，以启用包裹追踪、将司机与客户匹配以及优化投递路线等功能。客户的取货和投递地点将保存以用于服务履行。\n- **使用数据**：我们跟踪您如何与应用程序互动，包括访问的页面、使用的功能（例如，追踪、报价请求）、花费的时间和点击模式。\n- **日志数据**：服务器日志会捕获技术详细信息，例如 API 调用、错误报告和时间戳，以监控应用程序性能和故障排除。\n- **Cookie 和追踪技术**：我们的网站使用 Cookie、网络信标和类似技术来追踪用户行为、个性化内容和分析流量。您可以通过浏览器设置管理您的 Cookie 偏好。\n\n**2.3 来自第三方的信息**\n\n我们可能会从第三方来源接收信息，以改善我们的服务或遵守法律义务：\n\n- **地图服务**：Mapbox 提供基于位置的数据，以优化路线和在应用程序中显示地图。\n- **分析提供商**：Firebase Analytics 等工具提供有关用户行为和应用程序性能的汇总数据。\n- **验证服务**：对于司机，我们使用第三方服务来验证身份、驾驶记录和车辆是否符合安全法规。\n- **商业合作伙伴**：B2B 客户可能会分享员工或承包商数据（例如，联系方式）以促进物流协调。\n\n**2.4 敏感信息**\n\n我们可能仅在获得您的明确同意或法律要求的情况下收集敏感信息，例如国民身份证号码。我们采取额外措施来保护此类数据，如第 5 节（数据安全）所述。",
+  "infoUsageHeading": "3. 我们如何使用您的信息",
+  "infoUsageBody": "我们使用收集到的信息来运营、改进和个性化应用程序的服务。主要目的包括：\n\n**3.1 服务提供**\n\n- **匹配客户和司机**：我们使用客户位置和请求服务数据，根据距离、车辆容量和可用性将合适的司机与客户匹配。\n- **订单履行**：包裹详细信息、取货和投递地点以及特殊说明等信息用于确保准确及时的投递。\n- **追踪和更新**：实时位置数据可为客户提供包裹追踪，并为司机提供路线优化。\n\n**3.2 增强用户体验**\n\n- **个性化**：我们分析使用数据以定制应用程序体验，例如建议首选服务或显示相关促销活动。\n- **性能监控**：设备和日志数据有助于识别和修复技术问题，确保流畅的用户体验。\n- **分析**：来自 Firebase Analytics 和类似工具的汇总数据有助于改进功能和服务。\n\n**3.3 通信**\n\n- **通知**：我们发送应用内、电子邮件或短信通知，告知您订单状态、账户更新、促销活动或政策变更。您可以在应用程序设置中管理您的通知偏好。\n- **客户支持**：您的联系方式和通信历史记录用于回复查询、解决问题和提供帮助。\n\n**3.4 司机管理**\n\n- **司机表现展示**：在接受投递请求之前，司机可以查看客户的表现指标，例如平均评分（基于准时性、沟通和付款历史）和订单频率。这有助于司机做出明智的决定。\n- **接受报价**：司机可以根据显示的信息自主决定接受或拒绝投递请求，除非拒绝违反我们的使用条款，否则不会受到处罚。\n- **账户管理**：司机的车辆详细信息和资格信息用于验证资格和管理账户状态。\n- **司机责任**：司机从确认取货的那一刻起，到确认投递为止，对货物负有责任。\n\n**3.5 法律和法规合规**\n\n- **税务报告**：交易数据可能用于遵守税务义务，例如向相关当局报告司机的收入。\n- **欺诈预防**：我们分析使用模式和第三方数据，以检测和预防欺诈活动，例如未经授权的账户访问或支付欺诈。\n- **法律义务**：您的数据可能用于回应法律要求，例如法庭命令或监管调查。\n\n**3.6 营销和促销**\n\n- 在您同意的情况下，我们使用您的联系方式发送有关新服务的促销优惠、时事通讯或更新。您可以随时通过应用程序或联系我们来选择退出。\n- 我们可能会使用聚合的、匿名的数据来创建营销洞察或案例研究，而无需识别个人身份。\n\n**3.7 研究与开发**\n\n- 我们使用匿名数据进行研究、开发新功能并改进我们的匹配、路线规划和定价算法。\n- 通过调查和支持互动提供的反馈有助于提高应用程序的功能和用户满意度。",
+  "infoSharingHeading": "4. 我们如何共享您的信息",
+  "infoSharingBody": "我们可能会与某些方共享您的信息，以提供我们的服务、遵守法律义务或改进应用程序。我们确保任何共享都是以负责任的方式并遵守适用法律进行的。\n\n**4.1 与其他用户的共享**\n\n- **客户与司机的互动**：当客户提交服务请求时，他们的姓名、联系方式（例如，电话号码）、取货/投递地点和包裹详细信息将与指定的司机共享，以方便投递。\n- **司机表现展示**：客户在确认预订之前可以查看司机的表现指标，例如评分（基于可靠性、沟通和成功投递）和经验年限。\n- **B2B 协调**：对于商业合作伙伴，我们可能会与司机或第三方提供商共享与物流相关的数据（例如，投递时间表、员工联系方式）以履行合同。\n\n**4.2 与服务提供商的共享**\n\n我们与值得信赖的第三方服务提供商合作以支持我们的运营。这些提供商有合同义务保护您的数据并仅将其用于我们指定的目的：\n\n- **地图和导航**：Mapbox 接收位置数据以在应用程序内提供地图、路线规划和地理位置服务。\n- **分析提供商**：Firebase Analytics 和其他工具接收匿名的使用数据，以生成有关应用程序性能和用户行为的洞察。\n- **云存储**：我们使用安全的云提供商（例如，AWS、Google Cloud）以加密形式存储用户数据，并实施访问控制。\n- **验证服务**：第三方服务验证司机的身份、驾驶记录和车辆合规性，以确保安全和法规遵从。\n- **客户支持工具**：Zendesk 等平台管理支持工单和通信历史，以有效协助用户。\n\n**4.3 法律和法规共享**\n\n- 当法律要求时，我们可能会与政府当局、执法部门或监管机构共享您的信息，例如响应传票、法庭命令或税务审计。\n- 在怀疑存在欺诈、滥用或非法活动的情况下，我们可能会与当局共享相关数据以进行调查或防止损害。\n\n**4.4 业务转让**\n\n- 如果 Schnell Logistics 参与合并、收购或资产出售，您的信息可能会被转移给收购实体。您将收到此类转让的通知，并将在适用的情况下获得选择退出的机会。\n- 我们将确保任何受让人同意根据本政策或同等标准保护您的数据。\n\n**4.5 匿名数据的共享**\n\n- 我们可能会与合作伙伴、研究人员或广告商共享聚合或匿名数据（例如，投递趋势、用户人口统计数据）。这些数据不会识别个人身份，用于统计或营销目的。\n\n**4.6 基于同意的共享**\n\n- 未经您的明确同意，我们不会将您的个人信息共享给第三方用于营销目的。您可以随时通过应用程序或联系我们来撤回您的同意。",
+  "dataSecurityHeading": "5. 数据安全",
+  "dataSecurityBody": "我们优先保护您的个人信息安全，并实施了强大的措施来保护其免受未经授权的访问、丢失、滥用或更改。\n\n**5.1 技术保障措施**\n\n- **加密**：所有敏感数据，包括个人身份信息，在传输过程中（使用 TLS 1.2 或更高版本）和静态存储时（使用 AES-256 加密）都会进行加密。\n- **访问控制**：只有具有合法需要的授权人员才能访问用户数据，并且访问受到基于角色的权限和多因素身份验证的限制。\n- **安全服务器**：我们的服务器托管在安全的配备物理和数字保护的数据中心，包括防火墙、入侵检测系统和定期安全补丁。\n\n**5.2 组织保障措施**\n\n- **员工培训**：所有员工和承包商都会接受有关数据保护和隐私最佳实践的定期培训。\n- **第三方审计**：我们聘请独立的安保公司对我们的系统和流程进行定期审计，以识别和解决漏洞。\n- **供应商管理**：所有第三方服务提供商都经过审查以确保其符合数据保护标准，且合同包含严格的保密条款。",
+  "dataRetentionHeading": "6. 数据保留",
+  "dataRetentionBody": "我们仅在为实现本政策中概述的目的或遵守法律、法规或运营要求所需的时间内保留您的个人信息。\n\n**6.1 保留期限**\n\n- **客户数据**：与服务请求相关的信息（例如，投递详细信息、付款记录）将保留 5 年，以遵守税务和会计法规。\n- **司机数据**：司机的个人资料（包括资格证书和交易历史）将在账户关闭后保留 7 年，以遵守运输和劳动法。\n- **通信数据**：支持工单和通信将保留 3 年，以确保质量控制和解决纠纷。\n- **位置数据**：实时位置数据将在投递完成后保留 30 天，除非因法律目的或纠纷解决而需要更长时间。\n- **匿名数据**：聚合的、不可识别个人身份的数据可能会无限期保留用于分析和研究目的。\n\n**6.2 数据删除**\n\n- 如果您取消账户，可以通过应用程序或联系 support@schnell.com 请求删除您的个人信息。除法律要求保留的情况（例如，税务记录）外，我们将在 30 天内删除您的数据。\n- 无法与您关联的匿名数据可能会出于统计目的而保留。\n- 备份将在 90 天后安全删除，以确保没有残留数据。",
+  "dataRetentionBody": "我们仅在为实现本政策中概述的目的或遵守法律、法规或运营要求所需的时间内保留您的个人信息。\n\n**6.1 保留期限**\n\n- **客户数据**：与服务请求相关的信息（例如，投递详细信息、付款记录）将保留 5 年，以遵守税务和会计法规。\n- **司机数据**：司机的个人资料（包括资格证书和交易历史）将在账户关闭后保留 7 年，以遵守运输和劳动法。\n- **通信数据**：支持工单和通信将保留 3 年，以确保质量控制和解决纠纷。\n- **位置数据**：实时位置数据将在投递完成后保留 30 天，除非因法律目的或纠纷解决而需要更长时间。\n- **匿名数据**：聚合的、不可识别个人身份的数据可能会无限期保留用于分析和研究目的。\n\n**6.2 数据删除**\n\n- 如果您取消账户，可以通过应用程序或联系 support@schnell.com 请求删除您的个人信息。除法律要求保留的情况（例如，税务记录）外，我们将在 30 天内删除您的数据。\n- 无法与您关联的匿名数据可能会出于统计目的而保留。\n- 备份将在 90 天后安全删除，以确保没有残留数据。\n\n**6.3 数据归档**\n\n- 不活跃的账户（2 年内无活动）可能会被归档以减少活动存储。您将在归档前收到通知，并且可以通过登录或联系支持来重新激活您的账户。\n- 存档的数据将安全存储，并享有与活动数据相同的保护。",
+  "dataRightsHeading": "7. 您的数据保护权利",
+  "dataRightsBody": "根据您所在的位置，您根据适用的数据保护法律（例如 GDPR、CCPA 或其他地区法规）对您的个人数据拥有某些权利。\n\n**7.1 访问权**\n\n- 您可以要求提供我们持有的关于您的个人数据的副本，包括有关其如何处理和共享的详细信息。\n- 要请求访问，请联系 support@schnell.com 或使用应用程序中的“数据请求”功能。我们将在 30 天内（复杂请求为 45 天）回复您。\n\n**7.2 纠正权**\n\n- 如果您的个人数据不准确或不完整，您可以通过应用程序的个人资料设置或联系支持来请求纠正。\n- 我们将及时更新您的信息，并通知已共享数据的第三方。\n\n**7.3 删除权**\n\n- 您可以要求删除您的个人数据，但须遵守法律保留要求（例如，税务记录）。\n- 删除请求可以通过应用程序或发送电子邮件至 support@schnell.com 提交。我们将在 30 天内确认删除。\n\n**7.4 限制处理权**\n\n- 如果您对数据的准确性、合法性或必要性提出异议，您可以要求限制处理数据（例如，仅用于存储）。\n- 限制的数据将不用于主动处理，但可能出于法律目的而保留。\n\n**7.5 数据可移植性权**\n\n- 您可以要求提供您的个人数据的机器可读副本（例如，CSV 或 JSON 格式），以便将其传输到其他服务。\n- 对于标准请求，我们将在 30 天内免费提供此数据。\n\n**7.6 反对权**\n\n- 您可以反对出于营销目的处理您的数据，或反对基于我们合法利益进行的处理。\n- 要选择退出营销，请使用应用程序设置或点击促销电子邮件中的“取消订阅”。\n\n**7.7 撤回同意权**\n\n- 在处理基于您的同意的情况下（例如，位置数据、营销），您可以随时通过应用程序或联系我们撤回您的同意。撤回不会影响之前处理的合法性。\n\n**7.8 不受歧视权**\n\n- 我们不会因您行使数据保护权利而歧视您，例如收取更高的价格或拒绝服务。\n\n**7.9 提出投诉**\n\n- 如果您认为我们侵犯了您的数据保护权利，您可以向您当地的数据保护机构（例如，法国的 CNIL、英国的 ICO 或加利福尼亚州总检察长办公室）提出投诉。\n- 您也可以直接联系 support@schnell.com 以非正式方式解决疑虑。\n\n**7.10 如何行使您的权利**\n\n- 通过应用程序的“数据请求”功能或发送包含您的姓名、账户详细信息和您希望行使的特定权利的电子邮件至 support@schnell.com 来提交请求。\n- 我们可能会要求提供身份验证（例如，您的身份证件副本）以防止未经授权的请求。\n- 答复将以书面形式（通过电子邮件或应用内通知）在法律要求的时间内提供。",
+  "thirdPartyHeading": "8. 第三方服务",
+  "thirdPartyBody": "本应用程序与第三方服务集成以提供基本功能。这些服务有其自己的隐私政策，这些政策独立适用于它们对您数据的处理。\n\n**8.1 地图和导航**\n\n- **Mapbox**：提供地图、地理定位和路线规划服务。Mapbox 接收位置数据以生成地图和优化投递路线。请参阅 Mapbox 的隐私政策，网址为 www.mapbox.com/privacy。\n\n**8.2 分析**\n\n- **Firebase Analytics**：收集匿名使用数据以生成有关应用程序性能和用户行为的洞察。Firebase 可能会使用设备标识符和使用模式。请参阅 Google 的隐私政策，网址为 www.google.com/policies/privacy。\n- **Mixpanel**：跟踪用户交互以改进应用程序功能。Mixpanel 收集匿名数据，例如点击模式和会话持续时间。请参阅 Mixpanel 的隐私政策，网址为 www.mixpanel.com/legal/privacy-policy。\n\n**8.3 客户支持**\n\n- **Zendesk**：管理支持工单和通信历史。Zendesk 存储您的联系信息和消息。请参阅 Zendesk 的隐私政策，网址为 www.zendesk.com/company/privacy。\n\n**8.4 验证服务**\n\n- **Jumio**：验证司机的身份和文件（例如，驾驶执照、国民身份证件）。Jumio 安全地处理敏感信息。请参阅 Jumio 的隐私政策，网址为 www.jumio.com/legal-information/privacy-policy。\n- **Onfido**：用于司机入职的替代验证服务。Onfido 处理身份验证数据。请参阅 Onfido 的隐私政策，网址为 www.onfido.com/privacy。\n\n**8.5 云存储**\n\n- **Amazon Web Services (AWS)**：以加密形式安全地存储用户数据。AWS 不会超出其存储服务范围访问或处理您的数据。请参阅 AWS 的隐私政策，网址为 aws.amazon.com/privacy。\n- **Google Cloud**：提供额外的云存储和处理功能。请参阅 Google 的隐私政策，网址为 www.google.com/policies/privacy。\n\n**8.6 用户责任**\n\n- 您承认第三方服务受其各自隐私政策的管辖，Schnell 对其做法不承担任何责任。\n- 我们选择信誉良好且具有强大数据保护标准的提供商，并确保其遵守适用的法律。",
+  "childrenPrivacyHeading": "9. 儿童隐私",
+  "childrenPrivacyBody": "本应用程序不面向 18 岁以下的用户。我们不会故意从 18 岁以下的儿童那里收集个人信息。\n\n**9.1 年龄限制**\n\n- 用户必须年满 18 岁才能创建账户或使用我们的服务。\n- 司机必须满足我们使用条款中规定的额外年龄和许可证要求（例如，某些类型车辆的最低年龄为 21 岁）。\n\n**9.2 父母同意**\n\n- 如果我们得知未满 18 岁的用户在没有可验证的父母同意的情况下提供了个人信息，我们将立即删除这些信息。\n- 认为其子女已向应用程序提交数据的父母或监护人应立即联系 support@schnell.com。\n\n**9.3 符合 COPPA**\n\n- 对于美国用户，我们遵守《儿童在线隐私保护法》（COPPA）。我们不会在未经父母同意的情况下收集、使用或共享 13 岁以下儿童的数据。",
+  "commissionHeading": "10. 佣金结构",
+  "commissionBody": "Schnell Logistics 采用透明的佣金模式运营，以确保司机获得公平的报酬并确保平台的可持续运营。\n\n**10.1 佣金率**\n\n- **标准佣金**：Schnell 从每次已完成的投递或服务总运费中扣除 **7% 的佣金**。此佣金用于支付平台维护、客户支持和运营成本。\n- **示例**：如果投递运费为 100 突尼斯第纳尔 (TND)，Schnell 将扣除 7 TND 作为佣金，司机将收到 93 TND。\n- **透明度**：在接受投递请求之前以及在应用程序的交易历史中，佣金会清楚地显示给司机。\n\n**10.2 附加费**\n\n- **服务费**：客户可能需要为高级服务支付额外费用，例如快速投递或安全运输。这些费用在预订过程中会披露，并且不会影响司机的佣金。\n- **税费**：根据当地法规计算并添加到运费中的适用税费（例如，增值税、销售税）。税费与佣金是分开的，并在收据中明确列出。\n- **高峰期定价**：在需求旺盛期间，高峰期定价可能会增加运费。7% 的佣金将适用于高峰期价格，从而按比例增加司机的收入。\n\n**10.3 支付处理**\n\n- 客户付款通过办公室现金支付或用于账户充值的支票支付进行处理，因为目前不支持在线支付。\n- 司机的付款将每周（每周一）处理到司机注册的银行账户或数字钱包中，并扣除 7% 的佣金和适用的税费。\n- 司机可以在应用程序的“收入”部分查看他们的收入、佣金扣除和支付时间表。\n\n**10.4 纠纷**\n\n- 如果客户对收费提出异议，Schnell 将进行调查，并可能暂时保留司机的付款，直到纠纷解决。\n- 司机将通过电子邮件或应用内通知收到有关纠纷的通知，并可以提供证据（例如，投递确认、照片）来支持他们的案子。\n- 解决后对司机有利的纠纷将立即支付，并扣除标准的 7% 佣金。",
+  "cancellationHeading": "11. 取消政策",
+  "cancellationBody": "Schnell Logistics 制定了明确的取消政策，以确保客户、司机和平台的公平性。取消的处理方式因发起方和时间而异。\n\n**11.1 客户取消**\n\n- **在司机接受之前**：客户可以在司机接受之前随时取消服务请求。此操作没有罚款或费用。\n- **在司机接受之后**：如果客户在司机接受请求后但在取货之前取消，则可能会收取相当于预估费用的 20%（最低 5 TND）的取消费用，以补偿司机的时间和燃料。\n- **在取货之后**：司机取货后，除非司机同意或有正当理由（例如，不安全的环境），否则不允许取消。在这种情况下可能会收取全额费用。\n- **流程**：客户可以通过应用程序中的“取消订单”按钮或联系 support@schnell.com 进行取消。取消费的退款将在 7 个工作日内处理。\n- **频繁取消**：频繁取消发货的客户可能会面临临时限制或账户暂停的风险。",
+  "suspensionHeading": "12. 账户暂停和终止",
+  "suspensionBody": "Schnell Logistics 保留暂停或终止账户的权利，以确保平台完整性、安全性和遵守我们的使用条款。\n\n**12.1 账户暂停**\n\n- **暂停原因**：违反我们的使用条款，例如提供虚假信息、参与骚扰或运输违禁物品。检测到欺诈、未经授权的访问或试图操纵评分或收入。执法部门或监管机构要求在调查期间暂停账户。评分持续偏低（在 10 次连续投递中低于 5.0 分中的 3.0 分）或频繁取消的司机可能会面临暂停。频繁取消发货的客户可能会面临临时限制或账户暂停的风险。\n- **流程**：被暂停的用户将收到一封电子邮件和应用内通知，详细说明原因、期限（例如，7 天、30 天）和申诉说明。在暂停期间，用户无法预订或接受新服务，但可以访问其账户以查看历史记录或提交申诉。暂停会定期审查，如果问题得到解决（例如，结清款项、遵守政策），账户可能会恢复。 \n\n**12.2 账户终止**\n\n- **终止原因**：参与故意欺诈活动，例如伪造投递确认或付款详细信息。对其他用户、Schnell 员工或第三方进行骚扰、歧视或暴力。运输非法物品、违反运输法律或参与犯罪活动。多次暂停而未采取纠正措施。\n- **流程**：被终止的用户将通过电子邮件和应用内通知收到详细通知，除非法律禁止（例如，正在进行的调查）。终止后，所有预定的投递都将被取消，客户的退款将在 7 个工作日内处理。司机的剩余信用余额（扣除佣金后）将在验证后 30 天内支付。终止的账户无法重新激活，但用户可以提出申诉以进行重新审查。\n\n**12.3 申诉流程**\n\n- 用户可以在通知后 **14 天内**通过向 support@schnell.com 发送电子邮件或使用应用程序中的“对决定提出申诉”功能来申诉暂停或终止。申诉必须包括用户名、账户详细信息和任何支持证据（例如，投递记录、通信日志）。Schnell 将在 10 个工作日内审查申诉并提供书面答复。该决定是最终的，但对于商业合作伙伴，可以升级到独立调解员。\n\n**12.4 性能监控**\n\n- 我们监控用户性能以确保质量和安全。客户和司机都会根据彼此的反馈获得评分。表现不佳（例如，频繁取消、沟通不畅）可能会在暂停或终止之前触发警告。用户将通过电子邮件或应用内警报收到有关性能问题的通知，并有 7 天时间进行改进，之后才会采取进一步行动。",
+  "driverPerformanceHeading": "13. 司机表现展示和接受报价",
+  "driverPerformanceBody": "Schnell Logistics 使司机能够根据透明的表现数据做出关于接受投递请求的明智决定。",
+  "pickupLocation": "取货地点",
+"whereDoYouWantToGo": "你想去哪里？",
+"retry": "重试",
+"selectLocationTitle": "选择 {type} 地点",
+"searchForALocation": "搜索地点",
+"useCurrentLocation": "使用当前位置",
+"cancel": "取消",
+"pickup": "取货",
+"destination": "目的地",
+"destinationWithNumber": "目的地 {number}",
+"osrmError": "OSRM 不可用，正在尝试使用谷歌地图：{e}",
+"googleDirectionsError": "谷歌路线错误：{status}",
+"googleHttpError": "谷歌 HTTP 错误：{statusCode}",
+"googleNetworkError": "谷歌网络错误：{e}",
+"locationServiceDisabled": "位置服务已禁用。",
+"locationPermissionDenied": "位置权限被拒绝。",
+"locationPermissionDeniedForever": "位置权限被永久拒绝。",
+"locationRetrievalError": "检索位置时出错：{e}",
+"geocodingNetworkError": "地理编码时网络出错：{e}",
+"locationCoordinatesError": "抱歉，无法找到此位置的坐标。",
+"definePickupFirst": "请先定义取货地点。",
+"definePreviousDestinationFirst": "请先定义上一个目的地。",
+"maxDestinationsReached": "已达到最大目的地数 {count}。",
+"confirmReorderTitle": "确认重新排序",
+"reorderWarning": "手动重新排序可能会增加路线距离。是否继续？",
+"confirm": "确认",
+"selectAtLeastOneDestination": "请至少选择一个目的地。",
+"routeGenerationError": "无法生成路线。请重试。",
+"searchLocationHint": "搜索 {type} 地点",
+"customerInfo": "客户信息",
+"customerName": "客户姓名",
+"optional": "可选",
+"customerPhone": "电话号码",
+"continueText": "继续",
+"addDestination": "添加目的地",
+"currentLocation": "当前位置",
+"untitledSection": "无标题部分",
+"noContentAvailable": "无可用内容",
+
+ "signInPrompt": "请登录以查看您的历史记录。",
+    "allTab": "所有",
+    "ongoingTab": "进行中",
+    "completedTab": "已完成",
+    "canceledTab": "已取消",
+    "historyTitle": "历史记录",
+    "errorText": "发生错误: {error}",
+    "@errorText": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "noHistoryItems": "您的历史记录中没有行程。",
+    "noCategoryItems": "此类别中没有项目。",
+    "statusOngoing": "进行中",
+    "statusCompleted": "已完成",
+    "statusCanceled": "已取消",
+    "statusUnknown": "未知",
+    "priceLabel": "价格:",
+    "currencyLabel": "{price} TND",
+    "@currencyLabel": {
+        "placeholders": {
+            "price": {}
+        }
+    },
+    "scheduledLabel": "已安排",
+    "tripIdLabel": "行程ID:",
+    "idCopiedText": "行程ID已复制！",
+
+
+
+
+
+
+     "userNotLoggedIn": "用户未登录。",
+    "accountTitle": "帐户",
+    "generalSettings": "常规设置",
+    "personalInfo": "个人信息",
+    "darkMode": "深色模式",
+    "changeLanguage": "更改语言",
+    "information": "信息",
+    "aboutUsAndPolicy": "关于我们和政策",
+    "accountActions": "帐户操作",
+    "logout": "退出",
+    "deleteAccount": "删除帐户",
+    "deleteAccountWarning": "此操作是永久性的，无法撤消。",
+    "cancel": "取消",
+    "delete": "删除",
+    "failedToUpdate": "更新失败：{error}",
+    "@failedToUpdate": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "errorDeletingAccount": "删除帐户时出错：{error}",
+    "@errorDeletingAccount": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+
+
+    "drawerGuest": "访客",
+    "drawerUser": "用户",
+    "drawerUpdateApp": "更新应用",
+    "drawerHelpAndSupport": "帮助与支持",
+    "drawerErrorLoadingUser": "加载用户数据时出错",
+    "drawerUserDataNotFound": "找不到用户数据",
+    "drawerAccountSettings": "账户设置",
+    "drawerMyServices": "我的服务",
+    "drawerSearchingCouriers": "正在搜索快递员",
+
+
+
+"searchForALocation": "搜索位置",
+"@searchForALocation": {
+"description": "Hint text for the location search input field."
+},
+"googleDirectionsError": "谷歌地图API错误: {status}",
+"@googleDirectionsError": {
+"description": "Error message from Google Directions API.",
+"placeholders": {
+"status": {
+"type": "String",
+"example": "ZERO_RESULTS"
+}
+}
+},
+"googleHttpError": "HTTP错误: {statusCode}",
+"@googleHttpError": {
+"description": "Generic HTTP error message.",
+"placeholders": {
+"statusCode": {
+"type": "String",
+"example": "404"
+}
+}
+},
+"googleNetworkError": "网络错误: {error}",
+"@googleNetworkError": {
+"description": "Network connectivity error message.",
+"placeholders": {
+"error": {
+"type": "String",
+"example": "SocketException"
+}
+}
+},
+"noContentAvailable": "无可用内容",
+"@noContentAvailable": {
+"description": "Message shown when search results are empty."
+},
+"untitledSection": "无标题",
+"@untitledSection": {
+"description": "Placeholder for a section with no name."
+},
+"locationCoordinatesError": "无法获取位置坐标。请尝试其他地点。",
+"@locationCoordinatesError": {
+"description": "Error message when location coordinates cannot be found."
+},
+"chooseLoadingPosition": "选择装货位置",
+"@chooseLoadingPosition": {
+"description": "Text above the location display on the map view."
+},
+"loading": "加载中...",
+"@loading": {
+"description": "Text displayed while waiting for the location address to load."
+},
+"back": "返回",
+"@back": {
+"description": "Text for the back button on the map view."
+},
+"confirmPosition": "确认位置",
+"@confirmPosition": {
+"description": "Text for the button to confirm the selected position on the map."
+},
+
+   "home": "主页",
+    "history": "历史记录",
+    "account": "账户",
+
+
+     "cancelOrder": "取消订单？",
+    "cancelOrderMessage": "您确定要永久取消此订单吗？",
+    "keepOrder": "保留订单",
+    "yesCancel": "是的，取消",
+    "orderCanceledSuccess": "订单已成功取消。",
+    "orderCancelFailed": "取消订单失败：{error}",
+    "@orderCancelFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "connecting": "连接中...",
+    "error": "错误：{error}",
+    "@error": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "orderNotFound": "未找到订单",
+    "searchingForDrivers": "正在搜索附近的司机...",
+    "pickupLocation": "接送地点",
+    "finalDropOff": "最终下车地点",
+    "dropOffNumber": "下车点 {number}",
+    "@dropOffNumber": {
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "cancelSearch": "取消搜索",
+    "distanceKm": "{distance} 公里",
+    "@distanceKm": {
+        "placeholders": {
+            "distance": {
+                "type": "double"
+            }
+        }
+    },
+    "tndPrice": "{price} TND",
+    "@tndPrice": {
+        "placeholders": {
+            "price": {
+                "type": "double"
+            }
+        }
+    },
+
+
+    "vehicleType": "车辆类型",
+    "lightVehicles": "轻型车辆",
+    "heavyVehicles": "重型车辆",
+    "moto": "摩托车",
+    "smallUtility": "小型货车",
+    "van": "厢式货车",
+    "van35T": "3.5吨厢式货车",
+    "largeVan": "大型货车",
+    "heavyTruck": "重型卡车",
+    "superHeavyTruck": "超重型卡车",
+    "weightUpTo": "承重 {weight}",
+    "@weightUpTo": {
+        "placeholders": {
+            "weight": {
+                "type": "String"
+            }
+        }
+    },
+    "idealForSmallVolumes": "适用于小件物品和快速运输",
+    "idealForAppliances": "适用于家电或少量家具",
+    "perfectForMaterials": "适用于建材或小型搬家",
+    "forFullStudioMove": "适用于整套单间搬家",
+    "forLargerMoves": "适用于大型搬家",
+    "forLargeVolumes": "适用于大件物品和货物",
+    "forExceptionalTransports": "适用于特殊运输",
+    "fastestTag": "最快",
+    "mostEconomicalTag": "最经济",
+    "mostPopularTag": "最受欢迎",
+    "mostEfficientTag": "最有效",
+    "bestValueTag": "性价比最高",
+    "heavyCapacityTag": "重型容量",
+    "maximumCapacityTag": "最大容量",
+    "notSureVehicle": "不确定车辆类型？在此处计算您的体积",
+    "continueButton": "继续",
+
+
+    "create": "创建",
+    "delivery": "正在派送",
+    "pending": "待处理",
+    "home": "主页",
+    "errorLoadingDeals": "加载交易错误：{error}",
+    "@errorLoadingDeals": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorLoadingOrders": "加载订单错误：{error}",
+    "@errorLoadingOrders": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+
+    "invalidDealId": "无效的交易ID",
+    "failedToLoadDetails": "加载配送详情失败：{error}",
+    "@failedToLoadDetails": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "dealNotFound": "未找到交易",
+    "orderNotFound": "未找到订单",
+    "driverNotFound": "未找到司机的用户数据",
+    "missingDriverOrOrderId": "缺少司机或订单ID",
+    "driverLocationUnavailable": "司机位置不可用。",
+    "failedToLoadRoute": "加载路线失败：{error}",
+    "@failedToLoadRoute": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "deliveryCanceled": "配送已被取消。",
+    "phoneAppLaunchFailed": "无法启动电话应用程序。",
+    "retry": "重试",
+    "distance": "距离",
+    "time": "时间",
+    "driverOnTheWayToPickup": "司机正在前往取货",
+    "driverHasItemsOnTheWay": "司机已取件并正在路上",
+    "deliveryCompleted": "配送已完成！",
+    "deliveryRoute": "配送路线",
+    "pickupLocation": "取货地点",
+  
+    "couldNotLaunchPhoneApp": "无法启动电话应用程序。",
+
+
+    "enterValidPhoneNumber": "请输入有效的电话号码进行搜索。",
+    "noOrderFoundForPhone": "未找到该电话号码的订单。",
+    "noActiveDealsFound": "该订单没有找到活跃交易。",
+    "errorSearchingOrder": "搜索订单时出错：{error}",
+    "onTheWay": "在路上",
+    "returned": "已退回",
+    "deliveredSuccessfully": "成功送达",
+    "trackYourCourier": "追踪您的快递员",
+    "yourCourierAwaits": "您的快递员正在等待！",
+    "enterCustomerPhoneNumber": "输入您的电话号码",
+    "search": "搜索",
+    "noResultsFound": "没有结果可显示。请尝试使用电话号码进行搜索。",
+    "destination": "目的地",
+    "status": "状态",
+    "viewCourierOnLiveMap": "在实时地图上查看快递员",
+    "trackingNotAvailable": "目前无法进行追踪。",
+
+
+    "deliveryCanceled": "配送已取消。",
+    "failedToUpdateDealStatus": "更新交易状态失败：{error}",
+    "failedToUpdateOrder": "更新订单失败：{error}",
+    "failedToUpdateStops": "更新站点失败：{error}",
+    "driverLocationUnavailable": "司机位置不可用。",
+    "failedToCenterOnDriver": "无法居中显示司机位置：{error}",
+    "confirmCancellation": "确认取消",
+    "areYouSureToCancel": "您确定要取消此配送吗？",
+    "noButton": "否",
+    "yesCancelButton": "是，取消",
+    "deliveryStatusUpdatedSuccessfully": "配送状态已成功更新。",
+    "failedToUpdateStatus": "更新状态失败：{error}",
+    "failedToLoadRoute": "加载路线失败：{error}",
+    "osrmServerError": "OSRM服务器错误，状态",
+    "osrmApiError": "OSRM API错误：{error}",
+    "googleApiKeyNotConfigured": "Google API密钥未配置。",
+    "googleRequestFailed": "Google请求失败，状态",
+    "googleApiError": "Google API错误：{error}",
+    "invalidDealId": "无效的交易ID",
+    "userNotAuthenticated": "用户未认证",
+    "dealNotFound": "未找到交易",
+    "driverIdMissing": "缺少司机ID",
+    "orderIdMissing": "缺少订单ID",
+    "orderNotFound": "未找到订单",
+    "failedToParseData": "解析订单或站点数据失败：{error}",
+    "delivered": "已送达",
+    "notDelivered": "未送达",
+
+
+
+    "currentLocation": "当前位置",
+    "chooseOnMap": "在地图上选择",
+    "noContentAvailable": "暂无内容",
+    "untitledSection": "无标题",
+    "googleDirectionsError": "Google Directions API错误: {error}",
+    "@googleDirectionsError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "googleHttpError": "HTTP请求错误: 状态码 {statusCode}",
+    "@googleHttpError": {
+        "placeholders": {
+            "statusCode": {}
+        }
+    },
+    "googleNetworkError": "网络错误: {error}",
+    "@googleNetworkError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "locationCoordinatesError": "无法确定位置坐标。",
+    "locationAccessError": "位置访问错误: {error}",
+    "@locationAccessError": {
+        "placeholders": {
+            "error": {}
+        }
+    },
+    "chooseLoadingPosition": "选择装货位置",
+    "back": "返回",
+    "confirmPosition": "确认位置"
+
+}

@@ -58,25 +58,6 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.amber),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                      'https://firebasestorage.googleapis.com/v0/b/shnell-393a6.appspot.com/o/default.jpeg?alt=media&token=b4fed130-bb4b-4a7f-b5fe-3fba23b8f035',
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    l10n.drawerGuest,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
             _buildDrawerTile(
               icon: Icons.dashboard,
               title: l10n.drawerUpdateApp,
@@ -114,9 +95,7 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
 
           final userData = snapshot.data!.data() as Map<String, dynamic>;
           final userName = userData['name'] ?? l10n.drawerUser;
-          final profileImage = 
-              'https://firebasestorage.googleapis.com/v0/b/shnell-393a6.appspot.com/o/default.jpeg?alt=media&token=b4fed130-bb4b-4a7f-b5fe-3fba23b8f035';
-
+   
           return ListView(
             padding: EdgeInsets.zero,
             children: [
@@ -125,11 +104,12 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: NetworkImage(profileImage),
-                      backgroundColor: Colors.grey[200],
-                    ),
+               CircleAvatar(
+  radius: 30,
+  backgroundImage: AssetImage("assets/shnell.jpeg"),
+  backgroundColor: Colors.grey[200],
+),
+
                     const SizedBox(height: 10),
                     Text(
                       userName,

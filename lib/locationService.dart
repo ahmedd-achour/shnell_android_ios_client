@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:shnell/dots.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -107,7 +108,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   }
 
   bool _isRtl(String? localeName) {
-    const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+    const rtlLanguages = ['ar'];
     return localeName != null && rtlLanguages.contains(localeName);
   }
 
@@ -340,10 +341,6 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  icon: GestureDetector(
-                    onTap: _toggleMapView,
-                    child: const Icon(Icons.my_location, color: Colors.blue),
-                  ),
                   hintText: widget.hintText,
                   hintStyle: const TextStyle(fontSize: 16),
                   border: InputBorder.none,
@@ -351,7 +348,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
                 style: const TextStyle(fontSize: 18),
                 textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
               ),
-        backgroundColor: _isMapView ? Colors.transparent : Colors.amberAccent,
+        backgroundColor: _isMapView ? Colors.transparent : Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
       body: Directionality(
@@ -387,7 +384,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
         const Divider(),
         Expanded(
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator()) // Replace with your custom indicator
+              ? const Center(child: RotatingDotsIndicator()) // Replace with your custom indicator
               : _errorMessage != null
                   ? Center(child: Text(_errorMessage!, style: TextStyle(fontSize: 16, color: colorScheme.error)))
                   : _searchController.text.isNotEmpty && _searchResults.isEmpty
@@ -402,7 +399,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
                           itemBuilder: (context, index) {
                             final place = _searchResults[index];
                             return ListTile(
-                              leading: const Icon(Icons.push_pin_sharp, color: Colors.amber, size: 24),
+                              leading: const Icon(Icons.location_pin, color: Colors.amber, size: 24),
                               title: Text(
                                 place.description ?? l10n.untitledSection,
                                 style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
@@ -529,14 +526,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
                       ),
                     ),
                     if (_isLoading)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).primaryColor),
-                        ),
-                      ),
+                      Center(child: RotatingDotsIndicator()),
                   ],
                 ),
                 const SizedBox(height: 24),

@@ -40,7 +40,10 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result ?? 'Failed to sign in'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(result ?? 'Failed to sign in'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -71,7 +74,8 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.amber.withOpacity(0.5), width: 1.0),
+          borderSide:
+              BorderSide(color: Colors.amber.withOpacity(0.5), width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -85,7 +89,8 @@ class _SignInScreenState extends State<SignInScreen> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
       ),
       validator: validator,
       cursorColor: Colors.amber,
@@ -97,7 +102,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/shnellbg.png'),
+          image: AssetImage('assets/auth.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -106,24 +111,18 @@ class _SignInScreenState extends State<SignInScreen> {
         body: Stack(
           children: [
             SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 180),
-                      const Text(
-                        'Shnell',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 60),
+                   
+
+                      const Spacer(flex: 3),
+
+                      // Email
                       _buildTextField(
                         controller: _emailController,
                         labelText: 'Email Address',
@@ -140,6 +139,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         },
                       ),
                       const SizedBox(height: 20),
+
+                      // Password
                       _buildTextField(
                         controller: _passwordController,
                         labelText: 'Password',
@@ -152,7 +153,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 30),
+
+                      const Spacer(flex: 1),
+
+                      // Sign In Button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -175,7 +179,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+
+                      const Spacer(flex: 2),
+
+                      // Sign up link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -186,7 +193,8 @@ class _SignInScreenState extends State<SignInScreen> {
                           GestureDetector(
                             onTap: () => Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const SignupScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => const SignupScreen()),
                             ),
                             child: const Text(
                               'Sign up',
@@ -199,11 +207,15 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ],
                       ),
+
+                      const Spacer(flex: 1),
                     ],
                   ),
                 ),
               ),
             ),
+
+            // Loader
             if (_isLoading) const Center(child: RotatingDotsIndicator()),
           ],
         ),

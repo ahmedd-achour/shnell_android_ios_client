@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as latlong;
+import 'package:shnell/dots.dart';
 import 'package:shnell/functions.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
@@ -63,6 +64,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   BitmapDescriptor _driverIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor _pickupIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor _undeliveredStopIcon = BitmapDescriptor.defaultMarker;
+
   BitmapDescriptor _deliveredStopIcon = BitmapDescriptor.defaultMarker;
   DealStatus _dealStatus = DealStatus.accepted;
   bool _isInitialRouteDrawn = false;
@@ -455,8 +457,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
 
       if (!(_assuranceTimer?.isActive ?? false)) {
         _assuranceTimer = Timer(const Duration(minutes: 1440), () async {
-          debugPrint('24 h assurance timer fired. Forcing new API call.');
-          await _updateRouteBasedOnStatus();
+        //  await _updateRouteBasedOnStatus();
         });
       }
     }, onError: (e) {
@@ -468,6 +469,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
       }
     });
   }
+
 
   Future<void> _updateRouteBasedOnStatus() async {
     List<latlong.LatLng> allPoints = [];
@@ -507,18 +509,18 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
 Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
   try {
     // Step 1: Always try Firestore first
-    await _getRouteFromFirestore();
+   await _getRouteFromFirestore();
     debugPrint('Firestore route fetched successfully');
 
     // Step 2: Check if driver is off-route
     if (_driverPosition != null && _isOffRoute(_driverPosition!)) {
       debugPrint('Driver is off-route, forcing new route fetch...');
-      try {
+   //   try {
         // Step 3: Try OSRM if off-route
-        await _getRouteFromOSRM(allPoints).timeout(Duration(seconds: _networkTimeoutSeconds));
-        debugPrint('OSRM route fetched successfully');
-      } catch (osrmError) {
-        debugPrint('OSRM failed: $osrmError. Trying Google fallback...');
+        //await _getRouteFromOSRM(allPoints).timeout(Duration(seconds: _networkTimeoutSeconds));
+     //   debugPrint('OSRM route fetched successfully');
+  //    } catch (osrmError) {
+     //   debugPrint('OSRM failed: $osrmError. Trying Google fallback...');
         try {
           // Step 4: Fall back to Google if OSRM fails
           await _getRouteFromGoogle(allPoints).timeout(Duration(seconds: _networkTimeoutSeconds));
@@ -531,7 +533,7 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
             );
           }
         }
-      }
+    //  }
     } else {
       debugPrint('Driver is on-route, using Firestore route.');
     }
@@ -539,7 +541,7 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
     debugPrint('Firestore failed: $firestoreErr. Trying OSRM...');
     try {
       // Step 5: If Firestore fails, try OSRM
-      await _getRouteFromOSRM(allPoints).timeout(Duration(seconds: _networkTimeoutSeconds));
+    //  await _getRouteFromOSRM(allPoints).timeout(Duration(seconds: _networkTimeoutSeconds));
       debugPrint('OSRM route fetched successfully');
     } catch (osrmError) {
       debugPrint('OSRM failed: $osrmError. Trying Google fallback...');
@@ -562,7 +564,7 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
   double apiCalls = 0;
 
 
-
+/*
   Future<void> _getRouteFromOSRM(List<latlong.LatLng> allPoints) async {
     final waypointString = allPoints.map((loc) => '${loc.longitude},${loc.latitude}').join(';');
     final url = 'https://router.project-osrm.org/route/v1/driving/$waypointString?overview=full&geometries=polyline&steps=true';
@@ -583,6 +585,15 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
     _initialTotalDistance = (route['distance'] as num).toDouble();
     _initialTotalDuration = (route['duration'] as num).toDouble();
     _fullRouteCoordinates = coordinates;
+
+      final cacheRef = FirebaseFirestore.instance.collection('routes').doc(_driverID);
+         await cacheRef.set({
+      'dealId': widget.dealId,
+      'driverId': _driverID,
+      'timestamp': FieldValue.serverTimestamp(),
+      'routeData': data,
+    });
+
 
     _updateClientSideRoute(_driverPosition!);
     
@@ -632,11 +643,14 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
       points.add(LatLng(lat / 1E5, lon / 1E5));
     }
     return points;
-  }
-
+  }*/
+/*
   Future<void> _getRouteFromFirestore() async {
 
     final String _driverId = await Maptools().getFieldValue(collectionName: 'deals', documentId: widget.dealId, fieldName: 'idDriver');
+    if(_driverId==null){
+        throw Exception('Route data missing in Firestore document');
+    }
     try {
       final doc = await FirebaseFirestore.instance.collection('routes').doc(_driverId).get();
       if (!doc.exists || doc.data() == null) {
@@ -648,10 +662,6 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
       if (routeData == null) {
         throw Exception('Route data missing in Firestore document');
       }
-
-      setState(() {
-        apiCalls += 1; // Track as if it were an API call for consistency
-      });
 
       if (routeData['status'] != 'OK' && routeData['status'] != 'FALLBACK' && routeData['status'] != 'NO_WAYPOINTS') {
         throw Exception('Invalid route status: ${routeData['status']}');
@@ -722,7 +732,189 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
       rethrow; // Allow caller to handle the error
     }
   }
+*/
+Future<void> _getRouteFromFirestore() async {
+  const maxRetries = 3;
+  const retryDelay = Duration(seconds: 2);
+  int attempt = 0;
 
+  while (attempt < maxRetries) {
+    try {
+      // Fetch driverId safely
+      final String? driverId = await Maptools().getFieldValue(
+        collectionName: 'deals',
+        documentId: widget.dealId,
+        fieldName: 'idDriver',
+      ).timeout(const Duration(seconds: 5), onTimeout: () {
+        throw Exception('Timeout fetching driver ID');
+      });
+
+      if (driverId == null || driverId.isEmpty) {
+        debugPrint('Driver ID missing for dealId: ${widget.dealId}');
+        throw Exception('Driver ID is missing or empty');
+      }
+
+      // Fetch route document
+      final doc = await FirebaseFirestore.instance
+          .collection('routes')
+          .doc(driverId)
+          .get()
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        throw Exception('Timeout fetching route document');
+      });
+
+      if (!doc.exists || doc.data() == null) {
+        debugPrint('Route document not found for driver: $driverId');
+        throw Exception('Route document not found');
+      }
+
+      final data = doc.data()!;
+      final routeData = data['routeData'] as Map<String, dynamic>?;
+      if (routeData == null) {
+        debugPrint('Route data missing in Firestore document for driver: $driverId');
+        //_getRouteFromGoogle(allPoints);
+        throw Exception('Route data missing');
+      }
+
+      // Validate route status
+      final status = routeData['status'] as String?;
+      if (status == null || !['OK', 'FALLBACK', 'NO_WAYPOINTS'].contains(status)) {
+        debugPrint('Invalid route status: $status for driver: $driverId');
+        throw Exception('Invalid route status: ${status ?? 'null'}');
+      }
+
+      // Validate routes array
+      final routes = routeData['routes'] as List<dynamic>?;
+      if (routes == null || routes.isEmpty) {
+        debugPrint('No routes found in Firestore data for driver: $driverId');
+        throw Exception('No routes found');
+      }
+
+      final List<LatLng> coordinates = [];
+      _initialTotalDistance = 0.0;
+      _initialTotalDuration = 0.0;
+
+      // Process route data based on status
+      try {
+        final legs = routes[0]['legs'] as List<dynamic>? ?? [];
+        if (legs.isEmpty) {
+          debugPrint('No legs found in route data for driver: $driverId');
+          throw Exception('No legs found in route');
+        }
+
+        if (status == 'OK') {
+          // Process Google API response
+          for (var leg in legs) {
+            _initialTotalDistance += (leg['distance']?['value'] as num?)?.toDouble() ?? 0.0;
+            _initialTotalDuration += (leg['duration']?['value'] as num?)?.toDouble() ?? 0.0;
+            final steps = leg['steps'] as List<dynamic>? ?? [];
+            for (var step in steps) {
+              final points = step['polyline']?['points'] as String?;
+              if (points != null && points.isNotEmpty) {
+                try {
+                  final decodedPoints = _decodeGooglePolyline(points);
+                  coordinates.addAll(decodedPoints);
+                } catch (e) {
+                  debugPrint('Error decoding polyline for step in driver: $driverId, error: $e');
+                }
+              }
+            }
+          }
+        } else if (status == 'FALLBACK' || status == 'NO_WAYPOINTS') {
+          // Process fallback or no-waypoints data
+          for (var leg in legs) {
+            final startLat = (leg['start_location']?['lat'] as num?)?.toDouble();
+            final startLng = (leg['start_location']?['lng'] as num?)?.toDouble();
+            if (startLat != null && startLng != null && startLat != 0.0 && startLng != 0.0) {
+              coordinates.add(LatLng(startLat, startLng));
+            }
+            _initialTotalDistance += (leg['distance']?['value'] as num?)?.toDouble() ?? 0.0;
+            _initialTotalDuration += (leg['duration']?['value'] as num?)?.toDouble() ?? 0.0;
+          }
+          final lastLeg = legs.lastOrNull;
+          if (lastLeg != null) {
+            final endLat = (lastLeg['end_location']?['lat'] as num?)?.toDouble();
+            final endLng = (lastLeg['end_location']?['lng'] as num?)?.toDouble();
+            if (endLat != null && endLng != null && endLat != 0.0 && endLng != 0.0) {
+              coordinates.add(LatLng(endLat, endLng));
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error parsing route data for driver: $driverId, error: $e');
+        throw Exception('Invalid route data format: $e');
+      }
+
+      if (coordinates.isEmpty) {
+        debugPrint('No valid coordinates parsed for driver: $driverId');
+        throw Exception('No valid coordinates in route data');
+      }
+
+      setState(() {
+        _fullRouteCoordinates = coordinates;
+      });
+
+      // Update route if driver position is available
+      if (_driverPosition != null) {
+        _updateClientSideRoute(_driverPosition!);
+      } else {
+        debugPrint('Warning: _driverPosition is null, using full route coordinates');
+        setState(() {
+          _polylines.clear();
+          _polylines.add(Polyline(
+            polylineId: const PolylineId('tracking_route'),
+            color: const Color.fromARGB(255, 255, 191, 0),
+            points: _fullRouteCoordinates,
+            width: 5,
+            patterns: [PatternItem.dash(20), PatternItem.gap(10)],
+          ));
+        });
+      }
+
+      // Zoom to fit route if not yet drawn
+      if (!_isInitialRouteDrawn && _driverPosition != null) {
+        final destination = _dealStatus == DealStatus.accepted
+            ? _pickupLocation
+            : _remainingDropoffs.isNotEmpty
+                ? _remainingDropoffs.first.destination
+                : _allDropoffs.isNotEmpty
+                    ? _allDropoffs.first.destination
+                    : null;
+        if (destination != null && destination.latitude != 0.0 && destination.longitude != 0.0) {
+          await _zoomToFitRoute(
+            _driverPosition!.toLatLng(),
+            destination.toLatLng(),
+          );
+          setState(() {
+            _isInitialRouteDrawn = true;
+          });
+        } else {
+          debugPrint('Warning: Invalid or missing destination for zooming');
+         // await _zoomToFitAllMarkers(); // Fallback to show all markers
+        }
+      }
+
+      debugPrint('Successfully fetched and processed route from Firestore for driver: $driverId');
+      return; // Success, exit retry loop
+    } catch (e) {
+      attempt++;
+      debugPrint('Attempt $attempt failed to fetch route from Firestore: $e');
+      if (attempt >= maxRetries) {
+        debugPrint('Max retries reached for Firestore route fetch');
+        if (mounted) {
+         /*  ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(
+              content: Text('Unable to load route data. Please try again later.'),
+              backgroundColor: Colors.red,
+            ),
+          );*/
+        }
+        throw Exception('Failed to fetch route after $maxRetries attempts: $e');
+      }
+      await Future.delayed(retryDelay * (attempt + 1)); // Exponential backoff
+    }
+  }
+}
   Future<void> _getRouteFromGoogle(List<latlong.LatLng> allPoints) async {
     if (_googleApiKey.isEmpty) throw Exception('Google API Key not configured.');
 
@@ -748,6 +940,13 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
     if (data['status'] != 'OK' || data['routes'].isEmpty) {
       throw Exception('Google API error: ${data['error_message'] ?? data['status']}');
     }
+      final cacheRef = FirebaseFirestore.instance.collection('routes').doc(_driverID);
+        await cacheRef.set({
+      'dealId': widget.dealId,
+      'driverId': _driverID,
+      'timestamp': FieldValue.serverTimestamp(),
+      'routeData': data,
+    });
 
     final List<LatLng> coordinates = [];
     _initialTotalDistance = 0;
@@ -1028,6 +1227,8 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
             snippet: dropOff.isDelivered == true ? l10n.deliveredSuccessfully : dropOff.isDelivered == false? l10n.notDelivered : l10n.deliveryCanceled,
           ),
         ));
+
+   
       }
       _markersNotifier.value = Set.of(_markers);
       debugPrint('Added ${_markers.length} static markers (pickup + ${_allDropoffs.length} stops)');
@@ -1188,7 +1389,7 @@ Future<void> _getRouteAndSetData(List<latlong.LatLng> allPoints) async {
             ),
           ),
           if (_screenState == ScreenState.loading)
-            const Center(child: CircularProgressIndicator()),
+            const Center(child: RotatingDotsIndicator()),
           if (_screenState == ScreenState.error)
             Center(
               child: Column(

@@ -58,7 +58,10 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result ?? 'Failed to sign up'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(result ?? 'Failed to sign up'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -89,7 +92,8 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.amber.withOpacity(0.5), width: 1.0),
+          borderSide:
+              BorderSide(color: Colors.amber.withOpacity(0.5), width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -103,7 +107,8 @@ class _SignupScreenState extends State<SignupScreen> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.red, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
       ),
       validator: validator,
       cursorColor: Colors.amber,
@@ -113,180 +118,212 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true, // prevents keyboard overflow
       body: Stack(
         children: [
           SizedBox.expand(
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/shnellbg.png'),
+                  image: AssetImage('assets/auth.png'),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
+
           if (_isLoading) const Center(child: RotatingDotsIndicator()),
+
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 100),
-                    const Text(
-                      'Shnell Services',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    _buildTextField(
-                      controller: _emailController,
-                      labelText: 'Email Address',
-                      icon: Icons.email,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!EmailValidator.validate(value)) {
-                          return 'Please enter a valid email address';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _passwordController,
-                      labelText: 'Password',
-                      icon: Icons.lock,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _fullNameController,
-                      labelText: 'Full Name',
-                      icon: Icons.person,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your full name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextField(
-                      controller: _phoneController,
-                      labelText: 'Phone Number (Optional)',
-                      icon: Icons.phone,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (!RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value) && value.length != 8) {
-                            return 'Please enter a valid phone number';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 30),
-                    CheckboxListTile(
-                      title: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()),
-                          );
-                        },
-                        child:  RichText(
-                          text: TextSpan(
-                            text: 'I agree to the ',
-                            style: TextStyle(color: Colors.black, fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: TextStyle(
-                                  color: Colors.amber,
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      value: _privacyPolicyAccepted,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          _privacyPolicyAccepted = newValue ?? false;
-                        });
-                      },
-                      activeColor: Colors.amber,
-                      checkColor: Colors.black,
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                    const SizedBox(height: 30),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleSignup,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5,
-                        ),
-                        child: const Text(
-                          'Sign Up',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: IntrinsicHeight(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        const Text(
-                          'Already have an account? ',
-                          style: TextStyle(color: Colors.black87),
+                        const Spacer(flex: 3),
+
+
+                        const Spacer(flex: 4),
+
+                        // Email
+                        _buildTextField(
+                          controller: _emailController,
+                          labelText: 'Email Address',
+                          icon: Icons.email,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!EmailValidator.validate(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
                         ),
-                        GestureDetector(
-                          onTap: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SignInScreen()),
+                        Spacer(flex: 1,),
+
+                        // Password
+                        _buildTextField(
+                          controller: _passwordController,
+                          labelText: 'Password',
+                          icon: Icons.lock,
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                                               Spacer(flex: 1,),
+
+
+                        // Full name
+                        _buildTextField(
+                          controller: _fullNameController,
+                          labelText: 'Full Name',
+                          icon: Icons.person,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your full name';
+                            }
+                            return null;
+                          },
+                        ),
+                                                Spacer(flex: 1,),
+
+
+                        // Phone
+                        _buildTextField(
+                          controller: _phoneController,
+                          labelText: 'Phone Number (Optional)',
+                          icon: Icons.phone,
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              if (!RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value) &&
+                                  value.length != 8) {
+                                return 'Please enter a valid phone number';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const Spacer(flex: 2),
+
+                        // Privacy Policy
+                        CheckboxListTile(
+                          title: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PrivacyPolicyScreen(),
+                                ),
+                              );
+                            },
+                            child: RichText(
+                              text: const TextSpan(
+                                text: 'I agree to the ',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 14),
+                                children: [
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: TextStyle(
+                                      color: Colors.amber,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: const Text(
-                            'Sign in',
-                            style: TextStyle(
-                              color: Colors.amber,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
+                          value: _privacyPolicyAccepted,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              _privacyPolicyAccepted = newValue ?? false;
+                            });
+                          },
+                          activeColor: Colors.amber,
+                          checkColor: Colors.black,
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+
+                        const Spacer(flex: 2),
+
+                        // Sign Up button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleSignup,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amber,
+                              foregroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 5,
+                            ),
+                            child: const Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
+
+                        const Spacer(flex: 1),
+
+                        // Already have account
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Already have an account? ',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SignInScreen()),
+                              ),
+                              child: const Text(
+                                'Sign in',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const Spacer(flex: 2),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

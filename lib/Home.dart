@@ -66,8 +66,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
   }
 
   bool _isRtl(String? localeName) {
-    const rtlLanguages = ['ar'];
-    return localeName != null && rtlLanguages.contains(localeName);
+    return false;
   }
 
   Future<void> _updateMapElements({bool forceBoundsUpdate = false}) async {
@@ -102,6 +101,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                     ? dropOff.destinationName
                     : l10n.destinationWithNumber('${i + 1}'),
               ),
+              
             ),
           );
         }
@@ -118,6 +118,8 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
               points: result['points'],
               color: Colors.amber,
               width: 5,
+              patterns: [PatternItem.dash(20), PatternItem.gap(10)], // dashed line
+
             ),
           );
         }
@@ -195,7 +197,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
         }
       }
     } catch (e) {
-      _showError(l10n.osrmError(e.toString()));
+      //_showError(l10n.osrmError(e.toString())); we try without showing errors ,
     }
 
     try {
@@ -653,6 +655,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                           _updateMapElements();
                         }
                       },
+                      
                       markers: markers,
                       polylines: polylines,
                       myLocationEnabled: true,
@@ -675,6 +678,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
   Widget _buildDraggableSheet() {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
+    double _deviceWHeight = MediaQuery.of(context).size.height;
 
     return AnimatedBuilder(
       animation: _dropOffControllersNotifier,
@@ -687,12 +691,12 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
 
         return DraggableScrollableSheet(
           key: _bottomSheetKey,
-          initialChildSize: 0.6,
+          initialChildSize: 0.62,
           minChildSize: 0.11,
           maxChildSize: 0.85,
           expand: false,
           snap: true,
-          snapSizes: const [0.11 , 0.6 , 0.8],
+          snapSizes: const [0.11 , 0.62 , 0.85],
           builder: (BuildContext context, ScrollController scrollController) {
             return Container(
               decoration: BoxDecoration(
@@ -721,7 +725,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                           height: 5,
                           margin: const EdgeInsets.only(bottom: 24),
                           decoration: BoxDecoration(
-                            color: onSurfaceColor.withOpacity(0.2),
+                            color: Colors.amber,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -735,7 +739,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                         ),
                         textAlign: _isRtl(l10n.localeName) ? TextAlign.end : TextAlign.start,
                       ),
-                      const SizedBox(height: 6),
+                       SizedBox(height: _deviceWHeight * 0.01),
                       _buildLocationCard(
                         context: context,
                         title: l10n.pickup,
@@ -745,12 +749,15 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                         hintText: l10n.pickupLocation,
                         onTap: () =>  _openSearch('pickup'),
                       ),
-                      const SizedBox(height: 24),
+                       SizedBox(height: _deviceWHeight * 0.03),
                       _buildDropOffsList(context, primaryAmber),
-                      const SizedBox(height: 24),
+                       SizedBox(height: _deviceWHeight * 0.03),
+
+                       
                       if (_dropOffControllersNotifier.value.length < _maxDropOffs)
                         _buildAddDestinationButton(context, primaryAmber),
-                      const SizedBox(height: 8),
+                       SizedBox(height: _deviceWHeight * 0.01),
+
                       _pickupAddress==null || _dropOffData.isEmpty ?_buildContinueButton(context, const Color.fromARGB(120, 158, 158, 158)) :
                       _buildContinueButton(context, primaryAmber),
                     ],

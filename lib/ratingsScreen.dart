@@ -43,9 +43,7 @@ class _RatingPopupWidgetState extends State<RatingPopupWidget> {
     final rating = Rating(
       userId: widget.userIdToRate,
       rating: _currentRating,
-      additionalInfos: _infoController.text.trim().isNotEmpty
-          ? _infoController.text.trim()
-          : null,
+      additionalInfos: _infoController.text,
     );
 
     try {

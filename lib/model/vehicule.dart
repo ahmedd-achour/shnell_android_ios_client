@@ -12,6 +12,7 @@ class Vehicle {
  String vehicleImage;
 
 
+
   Vehicle({
     required this.carteGriseFront,
     required this.carteGriseBack,

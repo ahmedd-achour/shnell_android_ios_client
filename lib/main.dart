@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 // 1. Add localization imports
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/SignUpScreen.dart';
@@ -72,6 +73,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   ThemeData getLightTheme() => ThemeData(
+            fontFamily: GoogleFonts.inter().fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.amber, // 🌟 set amber as seed
       brightness: Brightness.light, // or Brightness.dark if you want dark mode
@@ -85,6 +87,7 @@ class _MyAppState extends State<MyApp> {
       );
 
   ThemeData getDarkTheme() => ThemeData(
+            fontFamily: GoogleFonts.inter().fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.amber, // 🌟 set amber as seed
       brightness: Brightness.dark, // or Brightness.dark if you want dark mode
@@ -155,6 +158,7 @@ class _MyAppState extends State<MyApp> {
 
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
+                
                 // Use default locale and delegates while data is being set
                 locale: const Locale('fr'),
                 supportedLocales: AppLocalizations.supportedLocales,

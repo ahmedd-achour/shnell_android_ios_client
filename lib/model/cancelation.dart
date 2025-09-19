@@ -4,13 +4,14 @@ class Cancelation {
  String idDeal;
  String cancelledBy;
   Timestamp? time;
- String? reason;
+ int? points;
 
 
   Cancelation({
    required this.cancelledBy,
    required this.idDeal,
-    this.reason,
+    this.points
+,
 
    
    });
@@ -20,7 +21,7 @@ class Cancelation {
     return {
       'cancelledBy': cancelledBy,
       'idDeal': idDeal,
-      'reason': reason,
+      'reason': points,
       'time': Timestamp.now(),
 
     };

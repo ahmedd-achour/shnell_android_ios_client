@@ -1,11 +1,13 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shnell/model/users.dart';
 
 class AuthMethods {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+   static FirebaseAuth _auth = FirebaseAuth.instance;
+  static FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Get Current User
   User? getCurrentUser() {
@@ -136,4 +138,97 @@ class AuthMethods {
         return 'Authentication error: $code';
     }
   }
+
+
+
+
+
+
+  /// Update name (direct Firestore update)
+  static Future<void> updateName(String name) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception("User not logged in");
+
+    await _firestore.collection("users").doc(uid).update({"name": name});
+  }
+
+  /// Send password reset email
+  static Future<void> sendPasswordResetEmail() async {
+    final email = _auth.currentUser?.email;
+    if (email == null) throw Exception("No email found for user");
+
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  // -------------------------------
+  // 🔐 OTP HANDLING FOR EMAIL/PHONE
+  // -------------------------------
+  static final Map<String, _OtpData> _pendingOtps = {};
+
+  /// Request OTP for updating email
+static Future<void> updateEmailWithOtp(String newEmail) async {
+  final uid = _auth.currentUser?.uid;
+  if (uid == null) throw Exception("User not logged in");
+  final otp = _generateOtp();
+  _pendingOtps[uid] = _OtpData(
+    otp: otp,
+    expiry: DateTime.now().add(const Duration(seconds: 90)),
+    field: "email",
+    newValue: newEmail,
+  );
+  print("DEBUG OTP for email update: $otp");
+}
+
+static Future<void> verifyOtpAndApply(String otp) async {
+  final uid = _auth.currentUser?.uid;
+  if (uid == null) throw Exception("User not logged in");
+  final data = _pendingOtps[uid];
+  if (data == null) throw Exception("No pending OTP request");
+  if (DateTime.now().isAfter(data.expiry)) {
+    _pendingOtps.remove(uid);
+    throw Exception("OTP expired");
+  }
+  if (otp != data.otp) throw Exception("Invalid OTP");
+  if (data.field == "email") {
+    await _auth.currentUser?.verifyBeforeUpdateEmail(data.newValue);
+    await _firestore.collection("users").doc(uid).update({"email": data.newValue});
+  }
+  _pendingOtps.remove(uid);
+}
+  /// Request OTP for updating phone
+static Future<void> updatePhoneWithOtp(String newPhone) async {
+  final uid = _auth.currentUser?.uid;
+  if (uid == null) throw Exception("User not logged in");
+  final otp = _generateOtp();
+  _pendingOtps[uid] = _OtpData(
+    otp: otp,
+    expiry: DateTime.now().add(const Duration(seconds: 90)),
+    field: "phone",
+    newValue: newPhone,
+  );
+  print("DEBUG OTP for phone update: $otp");
+}
+
+  // 🔧 Helpers
+  // -------------------------------
+  static String _generateOtp() {
+    final random = Random();
+    return (100000 + random.nextInt(900000)).toString();
+  }
+}
+
+class _OtpData {
+  final String otp;
+  final DateTime expiry;
+  final String field; // "email" or "phone"
+  final String newValue;
+
+  _OtpData({
+    required this.otp,
+    required this.expiry,
+    required this.field,
+    required this.newValue,
+  });
+
+  
 }

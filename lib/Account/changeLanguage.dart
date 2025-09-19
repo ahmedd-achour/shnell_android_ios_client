@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shnell/AuthHandler.dart';
-import 'package:shnell/dots.dart'; // Your AuthMethods
+import 'package:shnell/dots.dart';
 
 class LanguageSelectionWidget extends StatefulWidget {
   const LanguageSelectionWidget({super.key});
@@ -18,7 +18,6 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
 
   String? _selectedLanguage;
 
-  // List of 10 languages
   final List<Map<String, String>> _languages = [
     {'code': 'en', 'name': 'English', 'flag': '🇬🇧'},
     {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
@@ -83,13 +82,15 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool darkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Language', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-        centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: darkMode ? Colors.grey[900] : Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(
+          color: darkMode ? Colors.amber[300] : Colors.amber[800],
+        ),
       ),
       body: currentUser == null
           ? const Center(child: RotatingDotsIndicator())
@@ -98,15 +99,6 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Choose your preferred language:',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
                   Expanded(
                     child: ListView.builder(
                       physics: const BouncingScrollPhysics(),
@@ -120,6 +112,7 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
                           languageName: language['name']!,
                           flagEmoji: language['flag']!,
                           isSelected: isSelected,
+                          darkMode: darkMode,
                           onTap: () => _updateLanguage(language['code']!),
                         );
                       },
@@ -137,29 +130,35 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
     required String languageName,
     required String flagEmoji,
     required bool isSelected,
+    required bool darkMode,
     required VoidCallback onTap,
   }) {
+    final Color selectedColor = darkMode ? Colors.amber[300]! : Colors.amber;
+    final Color textColor = darkMode ? Colors.grey[200]! : Colors.grey[800]!;
+    final Color backgroundColor = darkMode ? Colors.grey[800]! : Colors.grey[100]!;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
         margin: const EdgeInsets.only(bottom: 15),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.amber.withOpacity(0.15) : Colors.grey[100],
+          color: isSelected ? selectedColor.withOpacity(0.15) : backgroundColor,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isSelected ? Colors.amber : Colors.transparent,
+            color: isSelected ? selectedColor : Colors.transparent,
             width: 2,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.2),
+                    color: selectedColor.withOpacity(0.25),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ]
-              : null,
+              : [],
         ),
         child: Row(
           children: [
@@ -169,14 +168,14 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
               child: Text(
                 languageName,
                 style: TextStyle(
-                  color: isSelected ? Colors.amber : Colors.grey[700],
+                  color: isSelected ? selectedColor : textColor,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   fontSize: 18,
                 ),
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle_rounded, color: Colors.amber, size: 28),
+              Icon(Icons.check_circle_rounded, color: selectedColor, size: 28),
           ],
         ),
       ),

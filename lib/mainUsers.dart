@@ -44,15 +44,15 @@ Widget build(BuildContext context) {
       onTap: (index) => setState(() => _currentIndex = index),
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home_outlined),
           label: l10n.home, // Use the 'home' key
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.history_edu),
+          icon: Icon(Icons.history_edu_outlined , size: 26,),
           label: l10n.history, // Use the 'history' key
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.person_outlined),
           label: l10n.account, // Use the 'account' key
         ),
       ],

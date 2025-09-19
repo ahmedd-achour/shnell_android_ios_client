@@ -10,7 +10,6 @@ class shnellUsers {
   String? vehicleId;
   String? matVehicle;
   bool? isActive;
-  String? profileImage;
   bool darkMode;
 
   shnellUsers({
@@ -24,7 +23,6 @@ class shnellUsers {
     this.vehicleType,
     this.vehicleId,
     this.matVehicle,
-    this.profileImage,
     this.isActive = false,
     this.darkMode = true,
   });
@@ -40,7 +38,6 @@ class shnellUsers {
       vehicleType: json['vehicleType'],
       vehicleId: json['vehicleId'],
       matVehicle: json['matVehicle'],
-      profileImage: json['profileImage'],
       isActive: json['isActive'] ?? false,
       darkMode: json['darkMode'] ?? true,
 
@@ -62,10 +59,6 @@ class shnellUsers {
       'isActive': false,
       'language': 'fr', // Default language
       'darkMode': darkMode,
-
-      
-      'profileImage': profileImage ??
-          'https://firebasestorage.googleapis.com/v0/b/shnell-393a6.appspot.com/o/default.jpeg?alt=media&token=b4fed130-bb4b-4a7f-b5fe-3fba23b8f035',
     };
   }
 }

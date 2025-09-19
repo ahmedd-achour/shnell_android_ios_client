@@ -54,7 +54,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
   }
 
   bool _isRtl(String? localeName) {
-    const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+    const rtlLanguages = ['ar'];
     return localeName != null && rtlLanguages.contains(localeName);
   }
 
@@ -391,7 +391,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> {
                         child: SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).primaryColor),
+                          child: Center(child: RotatingDotsIndicator()),
                         ),
                       ),
                   ],

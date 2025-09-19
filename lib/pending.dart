@@ -57,7 +57,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.warning, color: Colors.amber, size: 28),
+            const Icon(Icons.warning, color: Colors.redAccent, size: 28),
             const SizedBox(width: 8),
             Text(
               l10n.cancelOrder,
@@ -74,7 +74,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.keepOrder,
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
+              style: const TextStyle( fontSize: 16),
             ),
           ),
           ElevatedButton(
@@ -86,7 +86,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.yesCancel,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              style: const TextStyle( fontSize: 16),
             ),
           ),
         ],
@@ -96,9 +96,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     if (confirm != true || !mounted) return;
 
     try {
-      // Delete order
-      await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).delete();
-      // Delete associated stops
+      // Delete order and associated stops
       final orderDoc = await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).get();
       if (orderDoc.exists && orderDoc.data() != null) {
         final order = Orders.fromFirestore(orderDoc);
@@ -106,6 +104,8 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
           await FirebaseFirestore.instance.collection('stops').doc(stopId).delete();
         }
       }
+      await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).delete();
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -131,15 +131,29 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          _buildRadarBackground(),
-          SafeArea(
-            child: _buildContentStream(l10n),
-          ),
-        ],
+    // Get screen dimensions for responsive design
+    final mediaQuery = MediaQuery.of(context);
+    final isTablet = mediaQuery.size.width > 600;
+    final horizontalPadding = isTablet ? mediaQuery.size.width * 0.1 : 24.0;
+    final titleFontSize = isTablet ? 24.0 : 20.0;
+    final priceFontSize = isTablet ? 50.0 : 40.0;
+    final locationNameFontSize = isTablet ? 20.0 : 18.0;
+
+    return Theme(
+      data: theme.copyWith(
+        textTheme: theme.textTheme.apply(),
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            _buildRadarBackground(),
+            SafeArea(
+              child: _buildContentStream(l10n, horizontalPadding, titleFontSize, priceFontSize, locationNameFontSize),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -156,12 +170,20 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     );
   }
 
-  Widget _buildContentStream(AppLocalizations l10n) {
+Widget _buildContentStream(
+    AppLocalizations l10n,
+    double horizontalPadding,
+    double titleFontSize,
+    double priceFontSize,
+    double locationNameFontSize,
+  ) {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance.collection('orders').doc(widget.orderId).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildSearchingIndicator(l10n.connecting);
+          return Center(
+            child: _buildSearchingIndicator(l10n.connecting, titleFontSize),
+          );
         }
         if (snapshot.hasError) {
           return Center(
@@ -180,7 +202,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                 const SizedBox(height: 20),
                 Text(
                   l10n.orderNotFound,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -189,33 +211,34 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
 
         final order = Orders.fromFirestore(snapshot.data!);
 
-        return LayoutBuilder(builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSearchingIndicator(l10n.searchingForDrivers),
-                    const SizedBox(height: 16),
-                    _buildJourneyDetails(order, l10n),
-                    const SizedBox(height: 16),
-                    _buildCancelButton(l10n),
-                  ],
-                ),
-              ),
-            ),
-          );
-        });
+       // Corrected code
+return Padding(
+  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSearchingIndicator(l10n.searchingForDrivers, titleFontSize),
+      const SizedBox(height: 48),
+      
+      Expanded(
+        child: SingleChildScrollView(
+          child: _buildJourneyDetails(order, l10n, priceFontSize, locationNameFontSize),
+        ),
+      ),
+      
+      _buildCancelButton(l10n),
+    ],
+  ),
+);
       },
     );
   }
-
-  Widget _buildJourneyDetails(Orders order, AppLocalizations l10n) {
-    // Fetch stop data from Firestore
+  Widget _buildJourneyDetails(
+    Orders order,
+    AppLocalizations l10n,
+    double priceFontSize,
+    double locationNameFontSize,
+  ) {
     final stopIds = order.stops.where((id) => id.isNotEmpty).toList();
 
     return FutureBuilder<List<DropOffData>>(
@@ -227,7 +250,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
       }))),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: RotatingDotsIndicator());
         }
         if (snapshot.hasError) {
           return Center(
@@ -240,45 +263,29 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
             child: Text(
-              "l10n.noStopsFound",
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              "noStopsFound",
+              style: const TextStyle(fontSize: 18),
             ),
           );
         }
 
         final stopData = snapshot.data!;
+        final isTablet = MediaQuery.of(context).size.width > 600;
 
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.amber.withOpacity(0.3),
-              width: 1,
-            ),
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
-                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         l10n.tndPrice(truncateTo2Decimals(order.price)),
-                        style: const TextStyle(
-                          fontSize: 32,
+                        style: TextStyle(
+                          fontSize: priceFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -298,65 +305,73 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            _buildLocationRow(
+              Icons.my_location,
+              order.namePickUp,
+              l10n.pickupLocation,
+              locationNameFontSize,
+            ),
+            _buildJourneyLine(),
+            ...stopData.asMap().entries.map((entry) {
+              final index = entry.key;
+              final dropOff = entry.value;
+              final isLast = index == stopData.length - 1;
+              return Column(
+                children: [
+                  _buildLocationRow(
+                    isLast ? Icons.location_on : Icons.arrow_downward,
+                    dropOff.destinationName,
+                    isLast ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
+                    locationNameFontSize,
+                    customerName: dropOff.customerName,
+                    customerPhoneNumber: dropOff.customerPhoneNumber,
+                  ),
+                  if (!isLast) _buildJourneyLine(),
                 ],
-              ),
-              const SizedBox(height: 24),
-              _buildLocationRow(
-                Icons.my_location,
-                order.namePickUp,
-                l10n.pickupLocation,
-              ),
-              _buildJourneyLine(),
-              ...stopData.asMap().entries.map((entry) {
-                final index = entry.key;
-                final dropOff = entry.value;
-                final isLast = index == stopData.length - 1;
-                return Column(
-                  children: [
-                    _buildLocationRow(
-                      isLast ? Icons.location_on : Icons.arrow_downward,
-                      dropOff.destinationName,
-                      isLast ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
-                      customerName: dropOff.customerName,
-                      customerPhoneNumber: dropOff.customerPhoneNumber,
-                    ),
-                    if (!isLast) _buildJourneyLine(),
-                  ],
-                );
-              }).toList(),
-            ],
-          ),
+              );
+            }).toList(),
+            if (isTablet) const SizedBox(height: 48), // Add more space for larger screens
+          ],
         );
       },
     );
   }
 
   Widget _buildCancelButton(AppLocalizations l10n) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        label: Text(l10n.cancelSearch),
-        onPressed: _cancelOrder,
-        icon: const Icon(Icons.cancel, size: 20),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent.withOpacity(0.9),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 2,
+    final mediaQuery = MediaQuery.of(context);
+    final buttonHeight = mediaQuery.size.height > 800 ? 56.0 : 48.0;
+
+    return Center(
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          label: Text(
+            l10n.cancelSearch,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.redAccent),
+          ),
+          onPressed: _cancelOrder,
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: Colors.redAccent.withOpacity(0.5), width: 1.5),
+            padding: EdgeInsets.symmetric(vertical: buttonHeight / 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSearchingIndicator(String text) {
+  Widget _buildSearchingIndicator(String text, double titleFontSize) {
     return Column(
       children: [
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.amber,
-            fontSize: 18,
+            fontSize: titleFontSize,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -374,7 +389,16 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
         child: Container(
           height: 40,
           width: 2,
-          color: Colors.grey.withOpacity(0.5),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.amber.withOpacity(0.2),
+                Colors.amber.withOpacity(0.0),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -383,15 +407,20 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
   Widget _buildLocationRow(
     IconData icon,
     String location,
-    String label, {
+    String label,
+    double locationNameFontSize, {
     String? customerName,
     String? customerPhoneNumber,
   }) {
+    final mediaQuery = MediaQuery.of(context);
+    final textScaleFactor = mediaQuery.textScaleFactor;
+    final isTablet = mediaQuery.size.width > 600;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.amber, size: 28),
-        const SizedBox(width: 12),
+        Icon(icon, color: Colors.amber, size: isTablet ? 32 : 24),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,16 +428,15 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 14,
+                  fontSize: 14 * textScaleFactor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 location,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: locationNameFontSize * textScaleFactor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -419,7 +447,6 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.amber.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -429,16 +456,15 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                       if (customerName != null)
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.person,
-                              color: Colors.amber,
-                              size: 16,
+                              size: 16 * textScaleFactor,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               customerName,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: 14 * textScaleFactor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -449,16 +475,15 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                       if (customerPhoneNumber != null)
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.phone,
-                              color: Colors.amber,
-                              size: 16,
+                              size: 16 * textScaleFactor,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               customerPhoneNumber,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: 14 * textScaleFactor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -483,7 +508,7 @@ class _RadarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = (size.width < size.height ? size.width : size.height) * 0.8;
+    final maxRadius = (size.width < size.height ? size.width : size.height) * 0.5;
 
     final circlePaint = Paint()
       ..color = Colors.amber.withOpacity(0.08)

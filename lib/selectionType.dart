@@ -40,19 +40,22 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> with Si
   // --- VEHICLE DATA ---
   // Using localization keys for dynamic strings
   final List<Map<String, dynamic>> lightVehicles = [
-    {
+    // on va ajouter les motos lors que lapplication avoir au moin 100 utilisateur actifs / jour
+    // on va ajouter le type moto , et invester entre 10k$ - 30k$ pour cetter categorie seul
+    // tout les autre categorie vont coster 2k$ 15k$, entre la marketing frais de lapplication et les papiers juridique etc ..
+    /*{
       "typeKey": "moto",
       "typeCode": "super_light",
       "image": "assets/super_light.png",
       "weight": "100 kg",
       "exampleKey": "idealForSmallVolumes",
       "tagKey": "fastestTag"
-    },
+    },*/
     {
       "typeKey": "smallUtility",
       "typeCode": "light",
       "image": "assets/light.png",
-      "weight": "800 kg",
+      "weight": "500 kg",
       "exampleKey": "idealForAppliances",
       "tagKey": "mostEconomicalTag"
     },

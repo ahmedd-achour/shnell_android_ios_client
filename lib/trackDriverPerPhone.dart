@@ -104,7 +104,7 @@ class _SearchCourierByPhoneNumberState extends State<SearchCourierByPhoneNumber>
           final timestamp = dealData['timestamp'] as Timestamp?;
           final status = dealData['status'] as String? ?? 'unknown';
           final isWithin240Days = timestamp != null
-              ? DateTime.now().difference(timestamp.toDate()).inHours < 24
+              ? DateTime.now().difference(timestamp.toDate()).inHours < 72
               : false;
           final isDeliveryOngoing = matchingDropOff.isDelivered == null;
           final isTrackable = (status.toLowerCase() == 'accepted' || status.toLowerCase() == 'almost') && isWithin240Days && isDeliveryOngoing;

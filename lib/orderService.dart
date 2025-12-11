@@ -10,6 +10,7 @@ class OrderService {
   Future<String> addOrder(Orders order) async {
     try {
       DocumentReference docRef = await _ordersCollection.add(order.toJson());
+      _ordersCollection.doc(docRef.id).update({'id': docRef.id});// update the document with its own ID
       return docRef.id; // return generated document ID
     } catch (e) {
       throw Exception('Failed to add order: $e');
@@ -59,9 +60,9 @@ class OrderService {
           pickUpLocation: pickUpLoc,
           stops: data['stops'],
           vehicleType: data['vehicleType'],
-          isInstantDelivery: data['isInstantDelivery'] ?? false,
           isAcepted: data['isAcepted'] ?? false,
           additionalInfo: data['additionalInfo'],
+          id: data['id'],
         );
       }
       return null;

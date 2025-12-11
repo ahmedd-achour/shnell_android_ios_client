@@ -210,7 +210,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Confirmar posição",
+"confirmPosition": "Confirmar",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 },
@@ -443,7 +443,6 @@
     },
     "chooseLoadingPosition": "Escolha a posição de carregamento",
     "back": "Voltar",
-    "confirmPosition": "Confirmar posição",
 
     "selectAtLeastOneDestination": "Por favor, selecione pelo menos um destino.",
     "provideValidApiKey": "Por favor, forneça uma chave de API do Google Maps válida.",
@@ -503,6 +502,82 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+    "selectStarError": "Por favor, selecione pelo menos uma estrela.",
+  "ratingSuccess": "Obrigado pela sua avaliação!",
+  "rateRide": "Avalie sua corrida",
+  "ratingHelper": "Seu feedback nos ajuda a melhorar.",
+  "commentHint": "Deixe um comentário (opcional)...",
+  "submitRating": "Enviar avaliação", 
+
+
+
+  
+  "serviceTypeTitle": "Tipo de Serviço",
+  "serviceTypeSubtitle": "Selecione a opção que melhor descreve sua carga.",
+  "st_simple_transport_title": "Transporte Simples",
+  "st_simple_transport_sub": "Documentos, chaves, pequenas encomendas.",
+  "st_store_pickup_title": "Pequena Mudança",
+  "st_store_pickup_sub": "Móveis, eletrodomésticos de loja.",
+  "st_small_move_title": "Mudança Média",
+  "st_small_move_sub": "Estúdio, mudança de estudante, poucos itens.",
+  "st_full_move_title": "Grande Mudança",
+  "st_full_move_sub": "2+ Quartos, móveis pesados, serviço completo.",
+
+
+  "userNotFound": "Usuário não encontrado.",
+    "wrongPassword": "Senha incorreta.",
+    "invalidEmail": "E-mail inválido.",
+    "userDisabled": "Usuário desativado.",
+    "signInFailed": "Falha ao entrar.",
+    "connectionError": "Erro de conexão. Tente novamente.",
+    "slogan": "Mudanças Fáceis",
+    "hello": "Olá!",
+    "signInToContinue": "Entre para continuar.",
+    "emailLabel": "Endereço de E-mail",
+    "emailError": "E-mail válido necessário",
+    "passwordLabel": "Senha",
+    "passwordError": "Mínimo 6 caracteres",
+    "forgotPassword": "Esqueceu a senha?",
+    "signInButton": "ENTRAR",
+    "or": "OU",
+    "noAccountYet": "Ainda não tem conta? ",
+    "createAccount": "Criar uma conta",
+    "invalidPhone": "Número de telefone inválido",
+    "codeSentTo": "Código de verificação enviado para {email}",
+    "wrongCode": "Código incorreto.",
+    "createUserFailed": "Falha ao criar usuário",
+    "newAccountTitle": "Nova Conta",
+    "clientInfoStep": "Info Cliente",
+    "securityStep": "Segurança",
+    "welcome": "Bem-vindo!",
+    "createAccountSubtitle": "Crie uma conta para reservar um caminhão.",
+    "fullNameLabel": "Nome Completo",
+    "mobilePhoneLabel": "Celular",
+    "verifyEmailButton": "VERIFICAR E-MAIL",
+    "emailValidationTitle": "Validação de E-mail",
+    "codeSentToLabel": "Código enviado para: {email}",
+    "verificationCodeLabel": "Código de Verificação",
+    "incompleteCode": "Código incompleto",
+    "createPasswordLabel": "Criar Senha",
+    "confirmPasswordLabel": "Confirmar Senha",
+    "createMyAccountButton": "CRIAR MINHA CONTA",
+    "editInfoButton": "Editar minhas informações",
+    "fieldRequired": "Campo obrigatório",
+    
+  "myActivity": "Minha Atividade",
+  "errorLoadingData": "Erro ao carregar dados",
+  "recentRides": "Corridas Recentes",
+  "total": "Total",
+  "completed": "Concluído",
+  "canceled": "Cancelado",
+  "totalSpent": "Total Gasto",
+  "ongoing": "Em Andamento",
+  "enRoute": "A Caminho",
+  "destinations": "Paradas",
+  "noActivityYet": "Nenhuma atividade ainda"
+
+
 
 }

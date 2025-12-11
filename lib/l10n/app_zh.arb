@@ -511,6 +511,80 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+    "selectStarError": "请至少选择一颗星。",
+  "ratingSuccess": "感谢您的评价！",
+  "rateRide": "评价您的行程",
+  "ratingHelper": "您的反馈有助于我们改进。",
+  "commentHint": "留下评论（可选）...",
+  "submitRating": "提交评论",
+
+
+  
+  "serviceTypeTitle": "服务类型",
+  "serviceTypeSubtitle": "请选择最能描述您货物的选项。",
+  "st_simple_transport_title": "简单运输",
+  "st_simple_transport_sub": "文件、钥匙、小包裹。",
+  "st_store_pickup_title": "小型搬家",
+  "st_store_pickup_sub": "家具、商店电器。",
+  "st_small_move_title": "中型搬家",
+  "st_small_move_sub": "单身公寓、学生搬家、少量物品。",
+  "st_full_move_title": "大型搬家",
+  "st_full_move_sub": "两居室以上、重型家具、全套服务。",
+
+
+   "userNotFound": "用户不存在。",
+    "wrongPassword": "密码错误。",
+    "invalidEmail": "无效的电子邮件。",
+    "userDisabled": "用户已禁用。",
+    "signInFailed": "登录失败。",
+    "connectionError": "连接错误。请重试。",
+    "slogan": "搬家变得简单",
+    "hello": "您好！",
+    "signInToContinue": "请登录以继续。",
+    "emailLabel": "电子邮件地址",
+    "emailError": "需要有效的电子邮件",
+    "passwordLabel": "密码",
+    "passwordError": "至少6个字符",
+    "forgotPassword": "忘记密码？",
+    "signInButton": "登录",
+    "or": "或",
+    "noAccountYet": "还没有账号？ ",
+    "createAccount": "创建账号",
+    "invalidPhone": "无效的电话号码",
+    "codeSentTo": "验证码已发送至 {email}",
+    "wrongCode": "验证码错误。",
+    "createUserFailed": "创建用户失败",
+    "newAccountTitle": "新账号",
+    "clientInfoStep": "客户信息",
+    "securityStep": "安全",
+    "welcome": "欢迎！",
+    "createAccountSubtitle": "创建账号以预订卡车。",
+    "fullNameLabel": "全名",
+    "mobilePhoneLabel": "手机号码",
+    "verifyEmailButton": "验证电子邮件",
+    "emailValidationTitle": "电子邮件验证",
+    "codeSentToLabel": "验证码已发送至：{email}",
+    "verificationCodeLabel": "验证码",
+    "incompleteCode": "代码不完整",
+    "createPasswordLabel": "创建密码",
+    "confirmPasswordLabel": "确认密码",
+    "createMyAccountButton": "创建我的账号",
+    "editInfoButton": "编辑我的信息",
+    "fieldRequired": "必填字段",
+  "myActivity": "我的活动",
+  "errorLoadingData": "加载数据错误",
+  "recentRides": "最近行程",
+  "total": "总计",
+  "completed": "已完成",
+  "canceled": "已取消",
+  "totalSpent": "总花费",
+  "ongoing": "进行中",
+  "enRoute": "在途中",
+  "destinations": "站点",
+  "noActivityYet": "暂无活动"
+
+
 
 }

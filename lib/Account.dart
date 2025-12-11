@@ -55,47 +55,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _deleteAccountAction() async {
-    final l10n = AppLocalizations.of(context)!;
-    if (_currentUser == null) return;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.deleteAccount),
-        content: Text(l10n.deleteAccountWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    setState(() => _isProcessing = true);
-    try {
-      await _firestore.collection('users').doc(_currentUser.uid).delete();
-      await _currentUser.delete();
-      if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const SignInScreen()),
-        (_) => false,
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorDeletingAccount(e.toString()))));
-        setState(() => _isProcessing = false);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _logoutAction,
                           ),
                           _buildSeparator(),
-                          _buildSettingsTile(
-                            Icons.delete_forever_outlined,
-                            l10n.deleteAccount,
-                            _deleteAccountAction,
-                            isDestructive: true,
-                          ),
+                  
                         ],
                       ),
                       const SizedBox(height: 20),

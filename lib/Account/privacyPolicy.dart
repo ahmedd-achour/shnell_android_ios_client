@@ -7,7 +7,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   // Helper method to determine if the locale is RTL
   bool _isRtl(String localeName) {
-    const rtlLanguages = ['ar']; // Extend as needed
+    const rtlLanguages = []; // Extend as needed
     return rtlLanguages.contains(localeName);
   }
 

@@ -210,7 +210,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Position bestätigen",
+"confirmPosition": "bestätigen",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 
@@ -452,7 +452,6 @@
     },
     "chooseLoadingPosition": "Ladeposition wählen",
     "back": "Zurück",
-    "confirmPosition": "Position bestätigen",
 
 
     "selectAtLeastOneDestination": "Bitte wählen Sie mindestens ein Ziel aus.",
@@ -513,5 +512,82 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+
+    "selectStarError": "Bitte wählen Sie mindestens einen Stern aus.",
+  "ratingSuccess": "Danke für Ihre Bewertung!",
+  "rateRide": "Bewerten Sie Ihre Fahrt",
+  "ratingHelper": "Ihr Feedback hilft uns, besser zu werden.",
+  "commentHint": "Hinterlassen Sie einen Kommentar (optional)...",
+  "submitRating": "Bewertung absenden",
+
+
+
+  
+  "serviceTypeTitle": "Dienstleistungsart",
+  "serviceTypeSubtitle": "Wählen Sie die Option, die Ihre Ladung am besten beschreibt.",
+  "st_simple_transport_title": "Einfacher Transport",
+  "st_simple_transport_sub": "Dokumente, Schlüssel, kleine Pakete.",
+  "st_store_pickup_title": "Kleiner Umzug",
+  "st_store_pickup_sub": "Möbel, Geräte von IKEA/Geschäft.",
+  "st_small_move_title": "Mittlerer Umzug",
+  "st_small_move_sub": "Einzimmerwohnung, Studentenumzug, wenige Teile.",
+  "st_full_move_title": "Großer Umzug",
+  "st_full_move_sub": "2+ Schlafzimmer, schwere Möbel, Vollservice.",
+
+
+   "userNotFound": "Benutzer nicht gefunden.",
+    "wrongPassword": "Falsches Passwort.",
+    "invalidEmail": "Ungültige E-Mail.",
+    "userDisabled": "Benutzer deaktiviert.",
+    "signInFailed": "Anmeldung fehlgeschlagen.",
+    "connectionError": "Verbindungsfehler. Bitte versuchen Sie es erneut.",
+    "slogan": "Umzug leicht gemacht",
+    "hello": "Hallo!",
+    "signInToContinue": "Melden Sie sich an, um fortzufahren.",
+    "emailLabel": "E-Mail-Adresse",
+    "emailError": "Gültige E-Mail erforderlich",
+    "passwordLabel": "Passwort",
+    "passwordError": "Mindestens 6 Zeichen",
+    "forgotPassword": "Passwort vergessen?",
+    "signInButton": "ANMELDEN",
+    "or": "ODER",
+    "noAccountYet": "Noch kein Konto? ",
+    "createAccount": "Konto erstellen",
+    "invalidPhone": "Ungültige Telefonnummer",
+    "codeSentTo": "Bestätigungscode gesendet an {email}",
+    "wrongCode": "Falscher Code.",
+    "createUserFailed": "Benutzer konnte nicht erstellt werden",
+    "newAccountTitle": "Neues Konto",
+    "clientInfoStep": "Kundeninfo",
+    "securityStep": "Sicherheit",
+    "welcome": "Willkommen!",
+    "createAccountSubtitle": "Erstellen Sie ein Konto, um einen LKW zu buchen.",
+    "fullNameLabel": "Vollständiger Name",
+    "mobilePhoneLabel": "Handynummer",
+    "verifyEmailButton": "E-MAIL BESTÄTIGEN",
+    "emailValidationTitle": "E-Mail-Bestätigung",
+    "codeSentToLabel": "Code gesendet an: {email}",
+    "verificationCodeLabel": "Bestätigungscode",
+    "incompleteCode": "Unvollständiger Code",
+    "createPasswordLabel": "Passwort erstellen",
+    "confirmPasswordLabel": "Passwort bestätigen",
+    "createMyAccountButton": "MEIN KONTO ERSTELLEN",
+    "editInfoButton": "Meine Infos bearbeiten",
+    "fieldRequired": "Feld erforderlich",
+    
+  "myActivity": "Meine Aktivität",
+  "errorLoadingData": "Fehler beim Laden",
+  "recentRides": "Letzte Fahrten",
+  "total": "Gesamt",
+  "completed": "Abgeschlossen",
+  "canceled": "Storniert",
+  "totalSpent": "Gesamtausgaben",
+  "ongoing": "Laufend",
+  "enRoute": "Unterwegs",
+  "destinations": "Stopps",
+  "noActivityYet": "Noch keine Aktivität"
+
+
 }

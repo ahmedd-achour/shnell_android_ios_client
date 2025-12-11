@@ -214,7 +214,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "تأكيد الموقع",
+"confirmPosition": "تأكيد",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 },
@@ -449,7 +449,6 @@
     },
     "chooseLoadingPosition": "اختر موقع التحميل",
     "back": "رجوع",
-    "confirmPosition": "تأكيد الموقع",
 
 
 
@@ -514,7 +513,81 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+    "selectStarError": "يرجى تحديد نجمة واحدة على الأقل.",
+  "ratingSuccess": "شكراً لتقييمك!",
+  "rateRide": "قيم رحلتك",
+  "ratingHelper": "ملاحظاتك تساعدنا على التحسن.",
+  "commentHint": "اترك تعليقاً (اختياري)...",
+  "submitRating": "إرسال التقييم",
+
+  
+  "serviceTypeTitle": "نوع الخدمة",
+  "serviceTypeSubtitle": "اختر الخيار الذي يصف حمولتك بشكل أفضل.",
+  "st_simple_transport_title": "نقل بسيط",
+  "st_simple_transport_sub": "مستندات، مفاتيح، طرود صغيرة.",
+  "st_store_pickup_title": "نقل صغير",
+  "st_store_pickup_sub": "أثاث، أجهزة منزلية من المتجر.",
+  "st_small_move_title": "نقل متوسط",
+  "st_small_move_sub": "ستوديو، نقل طلاب، عدد قليل من الأغراض.",
+  "st_full_move_title": "نقل كبير",
+  "st_full_move_sub": "غرفتين وأكثر، أثاث ثقيل، خدمة كاملة.",
+
+
+   "userNotFound": "المستخدم غير موجود.",
+    "wrongPassword": "كلمة المرور غير صحيحة.",
+    "invalidEmail": "بريد إلكتروني خاطئ.",
+    "userDisabled": "الحساب معطل.",
+    "signInFailed": "فشل تسجيل الدخول.",
+    "connectionError": "خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
+    "slogan": "الانتقال أصبح سهلاً",
+    "hello": "مرحباً!",
+    "signInToContinue": "سجل الدخول للمتابعة.",
+    "emailLabel": "البريد الإلكتروني",
+    "emailError": "مطلوب بريد إلكتروني صالح",
+    "passwordLabel": "كلمة المرور",
+    "passwordError": "6 أحرف كحد أدنى",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "signInButton": "تسجيل الدخول",
+    "or": "أو",
+    "noAccountYet": "ليس لديك حساب؟ ",
+    "createAccount": "إنشاء حساب",
+    "invalidPhone": "رقم الهاتف غير صالح",
+    "codeSentTo": "تم إرسال رمز التحقق إلى {email}",
+    "wrongCode": "الرمز غير صحيح.",
+    "createUserFailed": "فشل إنشاء المستخدم",
+    "newAccountTitle": "حساب جديد",
+    "clientInfoStep": "معلومات العميل",
+    "securityStep": "الحماية",
+    "welcome": "أهلاً بك!",
+    "createAccountSubtitle": "أنشئ حسابك لحجز شاحنة.",
+    "fullNameLabel": "الاسم الكامل",
+    "mobilePhoneLabel": "رقم الهاتف الجوال",
+    "verifyEmailButton": "تحقق من البريد الإلكتروني",
+    "emailValidationTitle": "التحقق من البريد الإلكتروني",
+    "codeSentToLabel": "تم إرسال الرمز إلى: {email}",
+    "verificationCodeLabel": "رمز التحقق",
+    "incompleteCode": "الرمز غير مكتمل",
+    "createPasswordLabel": "إنشاء كلمة مرور",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "createMyAccountButton": "إنشاء حسابي",
+    "editInfoButton": "تعديل معلوماتي",
+    "fieldRequired": "حقل مطلوب",
+    
+  "myActivity": "نشاطي",
+  "errorLoadingData": "خطأ في تحميل البيانات",
+  "recentRides": "الرحلات الأخيرة",
+  "total": "المجموع",
+  "completed": "مكتملة",
+  "canceled": "ملغاة",
+  "totalSpent": "إجمالي المصروفات",
+  "ongoing": "جارية",
+  "enRoute": "في الطريق",
+  "destinations": "نقطة توقف",
+  "noActivityYet": "لا يوجد نشاط بعد"
+
+
 
 
 

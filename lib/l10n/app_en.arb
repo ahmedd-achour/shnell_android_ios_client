@@ -216,7 +216,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Confirm Position",
+"confirmPosition": "Confirm",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 
@@ -474,7 +474,6 @@
     },
     "chooseLoadingPosition": "Choose loading position",
     "back": "Back",
-    "confirmPosition": "Confirm position",
 
 
 
@@ -548,6 +547,81 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+
+    "selectStarError": "Please select at least one star.",
+  "ratingSuccess": "Thank you for your rating!",
+  "rateRide": "Rate your ride",
+  "ratingHelper": "Your feedback helps us improve.",
+  "commentHint": "Leave a comment (optional)...",
+  "submitRating": "Submit Review",
+
+
+
+  
+  "serviceTypeTitle": "Service Type",
+  "serviceTypeSubtitle": "Select the option that best describes your load.",
+  "st_simple_transport_title": "Simple Transport",
+  "st_simple_transport_sub": "Documents, keys, small parcels.",
+  "st_store_pickup_title": "Small Move",
+  "st_store_pickup_sub": "Furniture, Appliances from IKEA/Store.",
+  "st_small_move_title": "Moderate Move",
+  "st_small_move_sub": "Studio apartment, student move, few items.",
+  "st_full_move_title": "Big Move",
+  "st_full_move_sub": "2+ Bedrooms, heavy furniture, full service.",
+  "userNotFound": "User not found.",
+    "wrongPassword": "Wrong password.",
+    "invalidEmail": "Invalid email.",
+    "userDisabled": "User disabled.",
+    "signInFailed": "Sign in failed.",
+    "connectionError": "Connection error. Please try again.",
+    "slogan": "Moving Made Easy",
+    "hello": "Hello!",
+    "signInToContinue": "Sign in to continue.",
+    "emailLabel": "Email Address",
+    "emailError": "Valid email required",
+    "passwordLabel": "Password",
+    "passwordError": "Min 6 characters",
+    "forgotPassword": "Forgot Password?",
+    "signInButton": "SIGN IN",
+    "or": "OR",
+    "noAccountYet": "No account yet? ",
+    "createAccount": "Create an account",
+    "invalidPhone": "Invalid phone number",
+    "codeSentTo": "Verification code sent to {email}",
+    "wrongCode": "Incorrect code.",
+    "createUserFailed": "Failed to create user",
+    "newAccountTitle": "New Account",
+    "clientInfoStep": "Client Info",
+    "securityStep": "Security",
+    "welcome": "Welcome!",
+    "createAccountSubtitle": "Create an account to book a truck.",
+    "fullNameLabel": "Full Name",
+    "mobilePhoneLabel": "Mobile Phone",
+    "verifyEmailButton": "VERIFY EMAIL",
+    "emailValidationTitle": "Email Validation",
+    "codeSentToLabel": "Code sent to: {email}",
+    "verificationCodeLabel": "Verification Code",
+    "incompleteCode": "Incomplete code",
+    "createPasswordLabel": "Create Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "createMyAccountButton": "CREATE MY ACCOUNT",
+    "editInfoButton": "Edit my info",
+    "fieldRequired": "Field required",
+
+
+    
+  "myActivity": "My Activity",
+  "errorLoadingData": "Error loading data",
+  "recentRides": "Recent Rides",
+  "total": "Total",
+  "completed": "Completed",
+  "canceled": "Canceled",
+  "totalSpent": "Total Spent",
+  "ongoing": "Ongoing",
+  "enRoute": "En Route",
+  "destinations": "Stops",
+  "noActivityYet": "No activity yet"
 
 }

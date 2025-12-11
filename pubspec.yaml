@@ -55,7 +55,13 @@ dependencies:
   firebase_messaging: ^16.0.0
   url_launcher: ^6.3.2
   google_fonts: ^6.3.1
-
+  intl_phone_field: ^3.2.0
+  email_otp: ^3.0.2
+  flutter_callkit_incoming: ^3.0.0
+  agora_rtc_engine: ^6.5.3
+  flutter_ringtone_player: ^4.0.0+4
+  cloud_functions: ^6.0.4
+  
 
 dev_dependencies:
   flutter_test:

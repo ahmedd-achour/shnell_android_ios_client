@@ -19,3 +19,4 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+ext["firebaseBomVersion"] = "32.7.4" // Utilisez la version BOM la plus récente ou celle de votre projet

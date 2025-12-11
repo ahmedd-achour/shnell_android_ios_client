@@ -1,15 +1,16 @@
 {
   "project_info": {
     "project_number": "217120837439",
+    "firebase_url": "https://shnell-393a6-default-rtdb.firebaseio.com",
     "project_id": "shnell-393a6",
     "storage_bucket": "shnell-393a6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:217120837439:android:b131cc947ce5d5004e0d8a",
+        "mobilesdk_app_id": "1:217120837439:android:58b1587f9b3fbe724e0d8a",
         "android_client_info": {
-          "package_name": "com.example.pfe"
+          "package_name": "com.example.shnell_driver"
         }
       },
       "oauth_client": [

@@ -3,30 +3,135 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:flutter_callkit_incoming/entities/android_params.dart';
+import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/entities/ios_params.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 // 1. Add localization imports
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shnell/FcmManagement.dart';
 
 import 'package:shnell/SignInScreen.dart';
-import 'package:shnell/SignUpScreen.dart';
+import 'package:shnell/calls/CallService.dart';
+import 'package:shnell/calls/callListnerWraper.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/firebase_options.dart';
-import 'package:shnell/mainUsers.dart' show MainUsersScreen;
+import 'package:shnell/mainUsers.dart';
+import 'package:shnell/updateApp.dart';
+
+// Dans votre main.dart ou un écran de splash
+// À ajouter dans le initState de votre widget principal ou dans main()
+Future<void> updateFcmToken() async {
+  // 1. Get the current token
+  String? token = await FirebaseMessaging.instance.getToken();
+  
+  if (token != null) {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    
+    // 2. Save it to Firestore (overwrite the old one)
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'fcmToken': token,
+    });
+  }
+
+  // 3. Listen for future changes (e.g. if token rotates while app is running)
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'fcmToken': newToken,
+    });
+ 
+  });
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+  if (message.data['type'] == 'call_terminated') {
+    await FlutterCallkitIncoming.endAllCalls();
+  }});
+}
+
+// 2. Import du Wrapper d'appel
+
+// 3. Clé de navigation globale (Doit être en top-level)
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  if (message.data['type'] == 'call') {
+    final data = message.data;
+
+    final params = CallKitParams(
+      id: data['uuid'] ?? data['dealId'],
+      nameCaller: data['driverId'] ?? 'Shnell Driver',
+      appName: 'Shnell',
+      handle: 'Appel entrant',
+      type: 0,
+      duration: 45000,
+      extra: <String, dynamic>{...data},
+      android: const AndroidParams(
+        isCustomNotification: true,
+        isShowLogo: true,
+        ringtonePath: 'system_ringtone_default',
+        backgroundColor: '#0955fa',
+        actionColor: '#4CAF50',
+        isShowFullLockedScreen: true,
+      ),
+      ios: const IOSParams(
+        handleType: 'generic',
+        supportsVideo: false,
+        maximumCallGroups: 1,
+        maximumCallsPerCallGroup: 1,
+      ),
+    );
+
+    await FlutterCallkitIncoming.showCallkitIncoming(params);
+
+  } // ← THIS } WAS MISSING!!!
+
+  else if (message.data['type'] == 'call_terminated') {
+    // This will now RUN
+    await Future.delayed(const Duration(milliseconds: 300));
+    await FlutterCallkitIncoming.endAllCalls();
+  }
+}
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  
+  // Initialisation FCM si user déjà connecté (pour le cold start)
+  if(FirebaseAuth.instance.currentUser != null) {
+    FCMTokenManager().initialize();
+  }
+   if(FirebaseAuth.instance.currentUser != null){
+      await updateFcmToken();
+    }
+
+
+    // THIS IS THE MAGIC LINE — GLOBAL LISTENER THAT WORKS EVEN AFTER COLD START
+// In callListnerWraper.dart OR in main.dart — wherever you listen
+await CallService().init();
+
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -36,6 +141,10 @@ class _MyAppState extends State<MyApp> {
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.mobile];
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  Locale? _locale;
+  static const String _currentAppVersion = "1.0.0";
 
   @override
   void initState() {
@@ -43,8 +152,15 @@ class _MyAppState extends State<MyApp> {
     initConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
+  
+  void setLocale(Locale value) {
+    setState(() {
+      _locale = value;
+    });
+  }
 
   @override
+
   void dispose() {
     _connectivitySubscription.cancel();
     super.dispose();
@@ -55,48 +171,31 @@ class _MyAppState extends State<MyApp> {
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
-      debugPrint('Couldn\'t check connectivity status, error: $e');
+      debugPrint('Connectivity Error: $e');
       return;
     }
-
-    if (!mounted) {
-      return Future.value(null);
-    }
-    return _updateConnectionStatus(result);
+    if (!mounted) return;
+    _updateConnectionStatus(result);
   }
 
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
-    setState(() {
-      _connectionStatus = result;
-    });
-    debugPrint('Connectivity changed: $_connectionStatus');
+    setState(() => _connectionStatus = result);
   }
 
   ThemeData getLightTheme() => ThemeData(
-            fontFamily: GoogleFonts.inter().fontFamily,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.amber, // 🌟 set amber as seed
-      brightness: Brightness.light, // or Brightness.dark if you want dark mode
-    ),
-        // ... (your light theme code)
-            primaryColor: const Color.fromARGB(255, 255, 193, 7),
-
-        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        fontFamily: GoogleFonts.inter().fontFamily,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber, brightness: Brightness.light),
+        primaryColor: const Color.fromARGB(255, 255, 193, 7),
+        scaffoldBackgroundColor: Colors.white,
         brightness: Brightness.light,
-        // ...
       );
 
   ThemeData getDarkTheme() => ThemeData(
-            fontFamily: GoogleFonts.inter().fontFamily,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.amber, // 🌟 set amber as seed
-      brightness: Brightness.dark, // or Brightness.dark if you want dark mode
-    ),
-    primaryColor: const Color.fromARGB(255, 255, 193, 7),
-        // ... (your dark theme code)
-        scaffoldBackgroundColor: const Color.fromARGB(255, 0, 0, 0),
+        fontFamily: GoogleFonts.inter().fontFamily,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber, brightness: Brightness.dark),
+        primaryColor: const Color.fromARGB(255, 255, 193, 7),
+        scaffoldBackgroundColor: Colors.black,
         brightness: Brightness.dark,
-        // ...
       );
 
   @override
@@ -104,89 +203,131 @@ class _MyAppState extends State<MyApp> {
     if (_connectionStatus.contains(ConnectivityResult.none)) {
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Center(child: RotatingDotsIndicator()),
+        home: Scaffold(body: Center(child: RotatingDotsIndicator())),
       );
     }
 
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('settings').doc('config').snapshots(),
+      builder: (context, settingsSnapshot) {
+        if (settingsSnapshot.connectionState == ConnectionState.waiting) {
           return const MaterialApp(
             debugShowCheckedModeBanner: false,
-            home: Center(child: RotatingDotsIndicator()),
+            home: Scaffold(body: Center(child: RotatingDotsIndicator())),
           );
         }
 
-        // Case: No user logged in
-        if (!snapshot.hasData) {
-          return MaterialApp(
+        if (settingsSnapshot.hasError || !settingsSnapshot.hasData || !settingsSnapshot.data!.exists) {
+          return const MaterialApp(
             debugShowCheckedModeBanner: false,
-            // Use default locale and delegates for unauthenticated users
-            locale: const Locale('fr'),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            theme: getDarkTheme(),
-            darkTheme: getDarkTheme(),
-            themeMode: ThemeMode.dark,
-            home: const SignInScreen(),
+            home: Scaffold(body: Center(child: Text("Config Error"))),
           );
         }
 
-        // Case: User is logged in
-        final user = snapshot.data!;
-        return StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-          builder: (context, userSnapshot) {
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
+        final settingsData = settingsSnapshot.data!.data() as Map<String, dynamic>;
+        final String requiredVersion = settingsData['version_customer_app'] ?? '';
+
+        if (requiredVersion != _currentAppVersion) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData.dark(),
+              home: const UpdateAppScreen(),
+          
+          );
+        }
+
+        return StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return const MaterialApp(
                 debugShowCheckedModeBanner: false,
-                home: Center(child: RotatingDotsIndicator()),
+                home: Scaffold(body: Center(child: RotatingDotsIndicator())),
               );
             }
 
-            final data = userSnapshot.data?.data() as Map<String, dynamic>?;
-
-            if (data == null) {
-              // Create default document if missing
-              FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                'email': user.email ?? '',
-                'name': user.displayName ?? 'User',
-                'language': 'fr',
-                'darkMode': true,
-              }, SetOptions(merge: true));
-
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
+            if (!snapshot.hasData) {
+              return 
+                MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  locale: _locale ?? const Locale('fr'), 
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  theme: getLightTheme(),
+                  darkTheme: getDarkTheme(),
+                  themeMode: ThemeMode.light,
+                  home: const SignInScreen(),
                 
-                // Use default locale and delegates while data is being set
-                locale: const Locale('fr'),
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                theme: getDarkTheme(),
-                darkTheme: getDarkTheme(),
-                themeMode: ThemeMode.dark,
-                home: const MainUsersScreen(),
               );
             }
 
-            // Retrieve values from Firebase
-            final bool darkMode = data['darkMode'] ?? true;
-            final String role = data['role'] ?? 'user';
-            final String languageCode = data['language'] ?? 'fr';
+            final user = snapshot.data!;
+            return StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                  );
+                }
 
-            return MaterialApp(
-              
-              debugShowCheckedModeBanner: false,
-              // Set the locale based on the Firebase value
-              locale: Locale(languageCode),
-              // Use the generated delegates and supported locales
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              theme: getLightTheme(),
-              darkTheme: getDarkTheme(),
-              themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-              home: role == 'user' ? const MainUsersScreen() : const SignupScreen(),
+                final data = userSnapshot.data?.data() as Map<String, dynamic>?;
+
+                // Default User creation logic
+                if (data == null) {
+                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+                    'email': user.email ?? '',
+                    'name': user.displayName ?? 'User',
+                    'language': 'fr',
+                    'darkMode': true,
+                  }, SetOptions(merge: true));
+
+                  return MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    locale: const Locale('fr'),
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    theme: getDarkTheme(),
+                    darkTheme: getDarkTheme(),
+                    themeMode: ThemeMode.dark,
+                    // WRAPPER AJOUTÉ ICI
+                    home:   MaterialApp(
+  home: CallListenerWrapper(
+    navigatorKey: navigatorKey,
+    child: MainUsersScreen(),
+  ),
+)
+                  );
+                }
+
+                final bool darkMode = data['darkMode'] ?? true;
+                final String role = data['role'] ?? 'user';
+                final String languageCode = data['language'] ?? 'fr';
+
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  locale: Locale(languageCode),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  theme: getLightTheme(),
+                  darkTheme: getDarkTheme(),
+                  themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+                  // WRAPPER AJOUTÉ ICI (Le plus important)
+                  builder: (context, child) {
+                    return child ?? const SizedBox();
+                    
+                  },
+                  home: role == 'user' ?              CallListenerWrapper(
+                    navigatorKey: GlobalKey<NavigatorState>(),
+                    child: CallListenerWrapper(
+    navigatorKey: navigatorKey,
+    child: MainUsersScreen(),
+  ),
+)
+ : const SignInScreen(),
+                );
+              },
             );
           },
         );

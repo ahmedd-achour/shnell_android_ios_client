@@ -210,7 +210,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Confirmer la position",
+"confirmPosition": "Confirmer",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 
@@ -444,7 +444,6 @@
     },
     "chooseLoadingPosition": "Choisir la position de chargement",
     "back": "Retour",
-    "confirmPosition": "Confirmer la position",
 
 
 
@@ -506,7 +505,81 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    }, 
+    "selectStarError": "Veuillez sélectionner au moins une étoile.",
+  "ratingSuccess": "Merci pour votre évaluation !",
+  "rateRide": "Évaluez votre course",
+  "ratingHelper": "Votre avis nous aide à nous améliorer.",
+  "commentHint": "Laissez un commentaire (optionnel)...",
+  "submitRating": "Envoyer l'évaluation", 
+
+  
+  "serviceTypeTitle": "Type de Service",
+  "serviceTypeSubtitle": "Sélectionnez l'option qui décrit le mieux votre chargement.",
+  "st_simple_transport_title": "Transport Simple",
+  "st_simple_transport_sub": "Documents, clés, petits colis.",
+  "st_store_pickup_title": "Petit Déménagement",
+  "st_store_pickup_sub": "Meubles, électroménager (IKEA/Magasin).",
+  "st_small_move_title": "Déménagement Moyen",
+  "st_small_move_sub": "Studio, étudiant, quelques meubles.",
+  "st_full_move_title": "Grand Déménagement",
+  "st_full_move_sub": "2+ Chambres, meubles lourds, service complet.",
+
+
+   "userNotFound": "Compte introuvable.",
+    "wrongPassword": "Mot de passe incorrect.",
+    "invalidEmail": "Email invalide.",
+    "userDisabled": "Compte désactivé.",
+    "signInFailed": "Échec de connexion.",
+    "connectionError": "Erreur de connexion. Veuillez réessayer.",
+    "slogan": "Déménager Facilement",
+    "hello": "Bonjour !",
+    "signInToContinue": "Connectez-vous pour continuer.",
+    "emailLabel": "Adresse Email",
+    "emailError": "Email valide requis",
+    "passwordLabel": "Mot de passe",
+    "passwordError": "Min 6 caractères",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signInButton": "SE CONNECTER",
+    "or": "OU",
+    "noAccountYet": "Pas encore de compte ? ",
+    "createAccount": "Créer un compte",
+    "invalidPhone": "Numéro de téléphone invalide",
+    "codeSentTo": "Code de vérification envoyé à {email}",
+    "wrongCode": "Code incorrect.",
+    "createUserFailed": "Échec création utilisateur",
+    "newAccountTitle": "Nouveau Compte",
+    "clientInfoStep": "Infos Client",
+    "securityStep": "Sécurité",
+    "welcome": "Bienvenue !",
+    "createAccountSubtitle": "Créez votre compte pour réserver un camion.",
+    "fullNameLabel": "Nom Complet",
+    "mobilePhoneLabel": "Téléphone Mobile",
+    "verifyEmailButton": "VÉRIFIER EMAIL",
+    "emailValidationTitle": "Validation Email",
+    "codeSentToLabel": "Code envoyé à : {email}",
+    "verificationCodeLabel": "Code de vérification",
+    "incompleteCode": "Code incomplet",
+    "createPasswordLabel": "Créer un mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "createMyAccountButton": "CRÉER MON COMPTE",
+    "editInfoButton": "Modifier mes infos",
+    "fieldRequired": "Champ requis",
+
+    
+  "myActivity": "Mon activité",
+  "errorLoadingData": "Erreur de chargement",
+  "recentRides": "Courses récentes",
+  "total": "Total",
+  "completed": "Terminée",
+  "canceled": "Annulée",
+  "totalSpent": "Total dépensé",
+  "ongoing": "En cours",
+  "enRoute": "En route",
+  "destinations": "Arrêts",
+  "noActivityYet": "Aucune activité pour le moment"
+
+
 
 
 }

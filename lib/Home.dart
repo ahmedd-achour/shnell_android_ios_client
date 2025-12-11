@@ -7,8 +7,8 @@ import 'package:latlong2/latlong.dart' as lt;
 import 'package:http/http.dart' as http;
 import 'package:shnell/dots.dart';
 import 'package:shnell/googlePlaces.dart';
+import 'package:shnell/jobType.dart';
 import 'package:shnell/locationService.dart';
-import 'package:shnell/selectionType.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:convert';
 import 'package:shnell/model/destinationdata.dart';
@@ -69,9 +69,14 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     return false;
   }
 
+  // --- LOGIQUE API & MAP ---
+
   Future<void> _updateMapElements({bool forceBoundsUpdate = false}) async {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
+    
+    // Récupération de la couleur primaire pour la polyline
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
     _debounceTimer = Timer(_debounceDuration, () async {
@@ -110,16 +115,18 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
 
       if (_pickupLocation != null &&
           _dropOffData.any((data) => data.destination.latitude != 0 && data.destination.longitude != 0)) {
+        
+        // Appel de la logique API
         final result = await _optimizeRoute();
+        
         if (result['points'].isNotEmpty) {
           newPolylines.add(
             Polyline(
               polylineId: const PolylineId('route'),
               points: result['points'],
-              color: Colors.amber,
+              color: primaryColor, // Utilisation de la couleur du thème
               width: 5,
-              patterns: [PatternItem.dash(20), PatternItem.gap(10)], // dashed line
-
+              patterns: [PatternItem.dash(20), PatternItem.gap(10)],
             ),
           );
         }
@@ -180,6 +187,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     final allPoints = [_pickupLocation!, ...orderedDropOffs.map((data) => data.destination)];
     List<LatLng> routePoints = [];
 
+    // 1. Essai avec OSRM (Open Source Routing Machine)
     try {
       final coordinates = allPoints
           .map((loc) => '${loc.longitude.toStringAsFixed(6)},${loc.latitude.toStringAsFixed(6)}')
@@ -197,11 +205,11 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
         }
       }
     } catch (e) {
-      //_showError(l10n.osrmError(e.toString())); we try without showing errors ,
     }
 
+    // 2. Fallback Google Maps Directions API
     try {
-      const int maxWaypoints = 23;
+      const int maxWaypoints = 9;
       final List<List<LatLng>> chunks = [];
       for (int i = 0; i < allPoints.length; i += maxWaypoints) {
         final chunk = allPoints.sublist(
@@ -298,7 +306,6 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     );
   }
 
-
   void _onLocationSelected(String type, GooglePlacePrediction? place, {int? index}) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
@@ -386,66 +393,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     }
   }
 
-  void _onReorder(int oldIndex, int newIndex) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Text(l10n.confirmReorderTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
-        content: Text(l10n.reorderWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel, style: const TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _performReorder(oldIndex, newIndex);
-            },
-            child: Text(l10n.confirm, style: const TextStyle(color: Colors.amber)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _performReorder(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-    if (mounted) {
-      setState(() {
-        final controllers = List<TextEditingController>.from(_dropOffControllersNotifier.value);
-        final dropOffController = controllers.removeAt(oldIndex);
-        controllers.insert(newIndex, dropOffController);
-        _dropOffControllersNotifier.value = controllers;
-
-        if (_dropOffData.length > oldIndex) {
-          final dropOffData = _dropOffData.removeAt(oldIndex);
-          _dropOffData.insert(newIndex, dropOffData);
-          _needsBoundsUpdate = true;
-        }
-      });
-      _updateMapElements(forceBoundsUpdate: true);
-    }
-  }
-
-  void _showCustomerInfoDialog(int index) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return;
-
-    final nameController = TextEditingController(text: _dropOffData[index].customerName ?? '');
-    final phoneController = TextEditingController(text: _dropOffData[index].customerPhoneNumber ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) => _buildCustomerInfoDialog(nameController, phoneController, index),
-    );
-  }
 
   void _navigateToVehicleSelection() {
     final l10n = AppLocalizations.of(context);
@@ -470,10 +418,10 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
             context,
             MaterialPageRoute(
               builder: (context) {
-                return VehicleSelectionScreen(
+                return ServiceTypeSelectionScreen(
                   pickup: _pickupLocation!,
-                  pickup_name: _pickupAddress ?? l10n.pickupLocation,
-                  dropOffDestination: _dropOffData,
+                  pickupName: _pickupAddress ?? l10n.pickupLocation,
+                  dropOffDestination: _dropOffData, 
                 );
               },
             ),
@@ -484,8 +432,6 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
       }
     });
   }
-
-
 
   Future<void> _openSearch(String type, {int? index}) async {
     final l10n = AppLocalizations.of(context);
@@ -507,16 +453,17 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
   }
 
   void _showError(String message, {VoidCallback? retry}) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
+            Icon(Icons.error_outline, color: theme.colorScheme.onError),
             const SizedBox(width: 8),
-            Expanded(child: Text(message)),
+            Expanded(child: Text(message, style: TextStyle(color: theme.colorScheme.onError))),
           ],
         ),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: theme.colorScheme.error,
         duration: const Duration(seconds: 4),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -524,7 +471,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
         action: retry != null
             ? SnackBarAction(
                 label: AppLocalizations.of(context)?.retry ?? 'Retry',
-                textColor: Colors.amber,
+                textColor: theme.colorScheme.onError,
                 onPressed: retry,
               )
             : null,
@@ -532,102 +479,8 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     );
   }
 
+  // --- WIDGETS UI ---
 
-  Widget _buildCustomerInfoDialog(TextEditingController nameController, TextEditingController phoneController, int index) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: Colors.white,
-      title: Text(
-        l10n.customerInfo,
-        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87),
-      ),
-      content: Directionality(
-        textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
-        child: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.customerName,
-                  hintText: l10n.optional,
-                  prefixIcon: const Icon(Icons.person, color: Colors.amber),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.amber, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.black87),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(
-                  labelText: l10n.customerPhone,
-                  hintText: l10n.optional,
-                  prefixIcon: const Icon(Icons.phone, color: Colors.amber),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.amber, width: 2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                keyboardType: TextInputType.phone,
-                style: const TextStyle(color: Colors.black87),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            l10n.cancel,
-            style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (mounted) {
-              setState(() {
-                _dropOffData[index] = DropOffData(
-                  destination: _dropOffData[index].destination,
-                  destinationName: _dropOffData[index].destinationName,
-                  customerName: nameController.text.isNotEmpty ? nameController.text : null,
-                  customerPhoneNumber: phoneController.text.isNotEmpty ? phoneController.text : null,
-                );
-              });
-              Navigator.of(context).pop();
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amber,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-          child: Text(
-            l10n.confirm,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -667,115 +520,336 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                 );
               },
             ),
-            if (_isWaitingForSet) Center(child: RotatingDotsIndicator()),
+            if (_isWaitingForSet) const Center(child: RotatingDotsIndicator()),
           ],
         ),
       ),
       bottomSheet: _buildDraggableSheet(),
     );
   }
-
-  Widget _buildDraggableSheet() {
+Widget _buildDropOffFieldSliver({
+    required BuildContext context,
+    required TextEditingController controller,
+    required int index,
+  }) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
-    double _deviceWHeight = MediaQuery.of(context).size.height;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryColor = colorScheme.primary;
+
+    return ReorderableDragStartListener(
+      index: index,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        // Suppression de l'ombre ici pour la performance (on la mettra au drag)
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Poignée visuelle
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, right: 4.0),
+                child: Icon(Icons.drag_indicator, color: colorScheme.outline.withOpacity(0.5)),
+              ),
+              _buildDotsAndLines(index, _dropOffControllersNotifier.value.length, primaryColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  readOnly: true,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _openSearch('dropoff', index: index);
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.destinationWithNumber('${index + 1}'),
+                    prefixIcon: Icon(Icons.location_on_outlined, color: primaryColor, size: 24),
+                    border: InputBorder.none, // Suppression des bordures internes pour alléger le rendu
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
+                ),
+              ),
+              // Boutons d'action
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.close, color: colorScheme.onSurface.withOpacity(0.6), size: 20),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _removeDropOffField(index);
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  // Ajoutez cette méthode dans votre classe State
+
+
+Widget _buildDraggableSheet() {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryColor = colorScheme.primary;
 
     return AnimatedBuilder(
       animation: _dropOffControllersNotifier,
       builder: (context, child) {
-        final colorScheme = Theme.of(context).colorScheme;
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        // Utilisation de LayoutBuilder pour obtenir la hauteur totale de l'écran
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final double screenHeight = constraints.maxHeight;
 
-        final primaryAmber = const Color(0xFFFFBF00);
-        final onSurfaceColor = isDarkMode ? Colors.white : Colors.black87;
+            // --- CALCUL DES HAUTEURS EN PIXELS (Fixes) ---
+            
+            // 1. Footer (Bouton + Padding)
+            // Bouton (48px) + Padding Top (10px) + Padding Bottom (16px pour safe area/marge)
+            const double footerPixels = 48.0 + 10.0 + 16.0;
 
-        return DraggableScrollableSheet(
-          key: _bottomSheetKey,
-          initialChildSize: 0.62,
-          minChildSize: 0.11,
-          maxChildSize: 0.85,
-          expand: false,
-          snap: true,
-          snapSizes: const [0.11 , 0.62 , 0.85],
-          builder: (BuildContext context, ScrollController scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDarkMode ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, -10),
+            // 2. Header (Poignée + Titre "Where to go")
+            // Poignée (4px) + Marges (32px) + Texte (22px * 1.2 line height ≈ 27px)
+            const double headerPixels = 70.0;
+
+            // 3. Calcul du ratio (0.0 à 1.0)
+            // On ajoute une petite marge de sécurité (+10px)
+            final double minSizeCalculated = (footerPixels + headerPixels) / screenHeight;
+            
+            // Sécurité : on s'assure que la valeur reste entre 0.1 et 0.5
+            final double minChildSize = minSizeCalculated.clamp(0.1, 0.5);
+
+            return DraggableScrollableSheet(
+              key: _bottomSheetKey,
+              initialChildSize: 0.55,
+              minChildSize: minChildSize, // Valeur dynamique calculée
+              maxChildSize: 0.8,
+              expand: false,
+              snap: true,
+              // Le premier point de snap est maintenant exactement la hauteur du header + bouton
+              snapSizes: [minChildSize, 0.55, 0.8],
+              builder: (BuildContext context, ScrollController scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.shadow.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, -10),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                physics: const ClampingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: _isRtl(l10n.localeName) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Center(
+                      // --- COUCHE 1 : LE CONTENU DÉFILANT ---
+                      CustomScrollView(
+                        controller: scrollController,
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        slivers: [
+                          // Poignée
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Container(
+                                width: 48,
+                                height: 4,
+                                margin: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Titre + Pickup
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.whereDoYouWantToGo,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildLocationCard(
+                                    context: context,
+                                    title: l10n.pickup,
+                                    icon: Icons.my_location_rounded,
+                                    controller: _pickupController,
+                                    hintText: l10n.pickupLocation,
+                                    onTap: () => _openSearch('pickup'),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text(
+                                    l10n.destination,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurface.withOpacity(0.6),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Liste des destinations
+                         // Liste des destinations (Sans réorganisation manuelle)
+ValueListenableBuilder<List<TextEditingController>>(
+  valueListenable: _dropOffControllersNotifier,
+  builder: (context, controllers, child) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          // No RepaintBoundary or Reorderable wrapper needed here for standard lists
+          return _buildDropOffFieldSliver(
+            context: context,
+            controller: controllers[index],
+            index: index,
+          );
+        },
+        childCount: controllers.length,
+      ),
+    );
+  },
+),
+
+                          // Bouton "Ajouter une destination"
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              child: _dropOffControllersNotifier.value.length < _maxDropOffs
+                                  ? _buildAddDestinationButton(context)
+                                  : const SizedBox(height: 20),
+                            ),
+                          ),
+
+                          // Espace vide pour ne pas cacher le dernier élément derrière le footer
+                          SliverToBoxAdapter(
+                            child: SizedBox(height: footerPixels + MediaQuery.of(context).viewInsets.bottom),
+                          ),
+                        ],
+                      ),
+
+                      // --- COUCHE 2 : LE BOUTON FIXE (REDUIT) ---
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
                         child: Container(
-                          width: 48,
-                          height: 5,
-                          margin: const EdgeInsets.only(bottom: 24),
+                          // Padding réduit pour gagner de la place (10 en haut, 16 en bas)
+                          padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
                           decoration: BoxDecoration(
-                            color: Colors.amber,
-                            borderRadius: BorderRadius.circular(12),
+                            color: colorScheme.surface,
+                            // Optionnel : petite ligne de séparation subtile si désiré
+                            border: Border(top: BorderSide(color: colorScheme.outline.withOpacity(0.05))),
+                          ),
+                          child: SafeArea(
+                            top: false,
+                            child: _pickupAddress == null || _dropOffData.isEmpty
+                                ? _buildContinueButton(context, isActive: false)
+                                : _buildContinueButton(context, isActive: true),
                           ),
                         ),
                       ),
-                      Text(
-                        l10n.whereDoYouWantToGo,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: onSurfaceColor,
-                        ),
-                        textAlign: _isRtl(l10n.localeName) ? TextAlign.end : TextAlign.start,
-                      ),
-                       SizedBox(height: _deviceWHeight * 0.01),
-                      _buildLocationCard(
-                        context: context,
-                        title: l10n.pickup,
-                        icon: Icons.my_location_rounded,
-                        iconColor: primaryAmber,
-                        controller: _pickupController,
-                        hintText: l10n.pickupLocation,
-                        onTap: () =>  _openSearch('pickup'),
-                      ),
-                       SizedBox(height: _deviceWHeight * 0.03),
-                      _buildDropOffsList(context, primaryAmber),
-                       SizedBox(height: _deviceWHeight * 0.03),
-
-                       
-                      if (_dropOffControllersNotifier.value.length < _maxDropOffs)
-                        _buildAddDestinationButton(context, primaryAmber),
-                       SizedBox(height: _deviceWHeight * 0.01),
-
-                      _pickupAddress==null || _dropOffData.isEmpty ?_buildContinueButton(context, const Color.fromARGB(120, 158, 158, 158)) :
-                      _buildContinueButton(context, primaryAmber),
                     ],
                   ),
-                ),
-              ),
+                );
+              },
             );
-          },
+          }
         );
       },
     );
   }
 
-  Widget _buildLocationCard({
+  // --- BOUTON CONTINUER RÉDUIT ---
+  Widget _buildContinueButton(BuildContext context, {required bool isActive}) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryColor = colorScheme.primary;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 48, // Hauteur réduite (avant c'était 60 ou plus)
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 1.0, end: _isWaitingForSet ? 0.95 : 1.0),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        builder: (context, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: ElevatedButton(
+              onPressed: _isWaitingForSet || !isActive
+                  ? isActive ? (){} : null
+                  : () {
+                      HapticFeedback.mediumImpact();
+                      _navigateToVehicleSelection();
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isActive ? primaryColor : colorScheme.onSurface.withOpacity(0.12),
+                foregroundColor: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
+                // Padding interne réduit
+                padding: const EdgeInsets.symmetric(vertical: 0), 
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16), // Rayon un peu plus petit pour matcher la taille
+                ),
+                elevation: isActive ? 4 : 0, // Élévation réduite
+                shadowColor: primaryColor.withOpacity(0.4),
+              ),
+              child: _isWaitingForSet
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: RotatingDotsIndicator(), // Assurez-vous que votre indicateur s'adapte à 20px
+                    )
+                  : Text(
+                      l10n.continueText,
+                      style: TextStyle(
+                        fontSize: 16, // Police légèrement réduite pour l'équilibre
+                        fontWeight: FontWeight.w600,
+                        color: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
+                      ),
+                    ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+  
+  
+   Widget _buildLocationCard({
     required BuildContext context,
     required String title,
     required IconData icon,
-    required Color iconColor,
     required TextEditingController controller,
     required String hintText,
     required VoidCallback onTap,
@@ -784,10 +858,11 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     if (l10n == null) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest, // Remplaçant de surfaceVariant dans M3
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -815,7 +890,6 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
             controller: controller,
             hintText: hintText,
             icon: icon,
-            iconColor: iconColor,
             onTap: onTap,
           ),
         ],
@@ -823,84 +897,19 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     );
   }
 
-  Widget _buildDropOffsList(BuildContext context, Color primaryAmber) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: _isRtl(l10n.localeName) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.destination,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface.withOpacity(0.6),
-            ),
-            textAlign: _isRtl(l10n.localeName) ? TextAlign.end : TextAlign.start,
-          ),
-          ValueListenableBuilder<List<TextEditingController>>(
-            valueListenable: _dropOffControllersNotifier,
-            builder: (context, controllers, child) {
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: controllers.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Text(
-                          l10n.noContentAvailable,
-                          style: TextStyle(color: colorScheme.onSurface.withOpacity(0.4)),
-                        ),
-                      )
-                    : ReorderableListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        onReorder: _onReorder,
-                        children: [
-                          for (int i = 0; i < controllers.length; i++)
-                            _buildDropOffField(
-                              key: ValueKey(i),
-                              controller: controllers[i],
-                              index: i,
-                              context: context,
-                              primaryAmber: primaryAmber,
-                            ),
-                        ],
-                      ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildTextField({
     required BuildContext context,
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
-    required Color iconColor,
     required VoidCallback onTap,
   }) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
+
     return TextField(
       controller: controller,
       readOnly: true,
@@ -910,7 +919,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
       },
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: Icon(icon, color: iconColor, size: 24),
+        prefixIcon: Icon(icon, color: colorScheme.primary, size: 24),
         filled: true,
         fillColor: colorScheme.surface,
         border: OutlineInputBorder(
@@ -924,107 +933,29 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     );
   }
 
-  Widget _buildDropOffField({
-    required Key key,
-    required TextEditingController controller,
-    required int index,
-    required BuildContext context,
-    required Color primaryAmber,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
-        children: [
-          _buildDotsAndLines(index, _dropOffControllersNotifier.value.length, primaryAmber),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              readOnly: true,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                _openSearch('dropoff' , index: index);
-              },
-              decoration: InputDecoration(
-                hintText: l10n.destinationWithNumber('${index + 1}'),
-                prefixIcon: Icon(Icons.location_on_outlined, color: primaryAmber, size: 24),
-                filled: true,
-                fillColor: colorScheme.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                suffixIcon:Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    IconButton(
-      icon: (index < _dropOffData.length && (_dropOffData[index].customerName != null || _dropOffData[index].customerPhoneNumber != null))
-          ? Icon(
-              (_dropOffData[index].customerName != null && _dropOffData[index].customerPhoneNumber != null)
-                  ? Icons.done_all
-                  : Icons.done,
-              color: (_dropOffData[index].customerName != null && _dropOffData[index].customerPhoneNumber != null)
-                  ? Colors.green
-                  : const Color.fromARGB(255, 108, 216, 112),
-              size: 24,
-            )
-          : Icon(
-              Icons.person_add_alt_1_outlined,
-              color: colorScheme.onSurface.withOpacity(0.6),
-              size: 24,
-            ),
-      onPressed: () {
-        HapticFeedback.lightImpact();
-        _showCustomerInfoDialog(index);
-      },
-    ),
-    IconButton(
-      icon: Icon(Icons.close, color: colorScheme.onSurface.withOpacity(0.6), size: 24),
-      onPressed: () {
-        HapticFeedback.lightImpact();
-        _removeDropOffField(index);
-      },
-    ),
-  ],
-)
-              ),
-              style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
-              textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDotsAndLines(int index, int total, Color primaryAmber) {
+ 
+  Widget _buildDotsAndLines(int index, int total, Color primaryColor) {
     return Column(
       children: [
         if (index == 0)
-          Icon(Icons.circle, size: 12, color: primaryAmber)
+          Icon(Icons.circle, size: 12, color: primaryColor)
         else
-          Icon(Icons.circle, size: 12, color: primaryAmber),
+          Icon(Icons.circle, size: 12, color: primaryColor),
         if (index < total - 1)
           Container(
             height: 32,
             width: 2,
-            color: primaryAmber.withOpacity(0.5),
+            color: primaryColor.withOpacity(0.5),
           ),
       ],
     );
   }
 
-  Widget _buildAddDestinationButton(BuildContext context, Color primaryAmber) {
+  Widget _buildAddDestinationButton(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
+
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Align(
       alignment: _isRtl(l10n.localeName) ? Alignment.centerRight : Alignment.centerLeft,
@@ -1033,17 +964,17 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
           HapticFeedback.lightImpact();
           _addDropOffField();
         },
-        icon: Icon(Icons.add_location_alt_rounded, color: primaryAmber),
+        icon: Icon(Icons.add_location_alt_rounded, color: primaryColor),
         label: Text(
           l10n.addDestination,
           style: TextStyle(
-            color: primaryAmber,
+            color: primaryColor,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
         style: TextButton.styleFrom(
-          foregroundColor: primaryAmber,
+          foregroundColor: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1053,55 +984,4 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     );
   }
 
-  Widget _buildContinueButton(BuildContext context, Color primaryAmber) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: double.infinity,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 1.0, end: _isWaitingForSet ? 0.95 : 1.0),
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        builder: (context, scale, child) {
-          return Transform.scale(
-            scale: scale,
-            child: ElevatedButton(
-              onPressed: _isWaitingForSet
-                  ? (){}
-                  : () {
-                      HapticFeedback.mediumImpact();
-                      _navigateToVehicleSelection();
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryAmber,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 6,
-                shadowColor: primaryAmber.withOpacity(0.4),
-              ),
-              child: _isWaitingForSet
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: RotatingDotsIndicator(
-                      ),
-                    )
-                  : Text(
-                      l10n.continueText,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 }

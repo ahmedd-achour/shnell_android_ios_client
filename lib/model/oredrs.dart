@@ -10,9 +10,9 @@ class Orders {
   List<String> stops; // List of stop IDs
   String vehicleType;
   String userId;
-  bool isInstantDelivery;
   Map<String, dynamic>? additionalInfo;
   bool isAcepted;
+  String id;
 
   Orders({
     required this.price,
@@ -20,9 +20,9 @@ class Orders {
     required this.namePickUp,
     required this.pickUpLocation,
     required this.stops,
+    required this.id,
     required this.vehicleType,
     required this.userId,
-    this.isInstantDelivery = false,
     this.additionalInfo,
     this.isAcepted = false,
   });
@@ -31,10 +31,9 @@ class Orders {
     return {
       'userID': FirebaseAuth.instance.currentUser!.uid,
       'price': price,
-      'isInstantDelivery': isInstantDelivery,
-      'additionalInfo': additionalInfo,
       'distance': distance,
       'namePickUp': namePickUp,
+      'id' : id,
       'pickUpLocation': pickUpLocation.toJson(),
       'stops': stops, // Stored as a Firestore array
       'timestamp': Timestamp.now(),
@@ -59,11 +58,10 @@ class Orders {
       distance: (data['distance'] as num).toDouble(),
       namePickUp: data['namePickUp'],
       pickUpLocation: pickUpLoc,
+      id: data['id'],
       stops: List<String>.from(data['stops'] ?? []),
       vehicleType: data['vehicleType'],
-      isInstantDelivery: data['isInstantDelivery'] ?? false,
       isAcepted: data['isAcepted'] ?? false,
-      additionalInfo: data['additionalInfo'],
     );
   }
 }

@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shnell/model/rating.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Popup widget for rating a user/driver and storing the rating in Firestore.
 class RatingPopupWidget extends StatefulWidget {
   final String userIdToRate;
+  final String driverRated;
 
   const RatingPopupWidget({
     super.key,
     required this.userIdToRate,
+    required this.driverRated,
   });
 
   @override
@@ -17,25 +20,23 @@ class RatingPopupWidget extends StatefulWidget {
 
 class _RatingPopupWidgetState extends State<RatingPopupWidget> {
   int _currentRating = 0;
-  final TextEditingController _infoController = TextEditingController();
-
-  static const Color _amberColor = Color(0xFFFFBF00);
-  static const Color _darkBackgroundColor = Color(0xFF1A1A1A);
-  static const Color _lightTextColor = Colors.white;
-  static const Color _darkTextColor = Color(0xFF1A1A1A);
-  static const Color _subtleTextColor = Color(0xFFBDBDBD);
-  static const Color _dialogBackgroundColor = Color(0xFF2C2C2C);
 
   @override
   void dispose() {
-    _infoController.dispose();
     super.dispose();
   }
 
   Future<void> _submitRating() async {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     if (_currentRating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner au moins une étoile.')),
+        SnackBar(
+          content: Text(l10n.selectStarError),
+          backgroundColor: theme.colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -43,111 +44,149 @@ class _RatingPopupWidgetState extends State<RatingPopupWidget> {
     final rating = Rating(
       userId: widget.userIdToRate,
       rating: _currentRating,
-      additionalInfos: _infoController.text,
+      driverRated: widget.driverRated,
     );
 
     try {
-      // Save rating to Firestore
       await FirebaseFirestore.instance.collection('ratings').add(rating.toJson());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Merci pour votre évaluation!')),
-      );
-
-      Navigator.of(context).pop(); // Close the dialog
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.ratingSuccess),
+            backgroundColor: theme.colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'envoi: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error(e.toString())}'),
+            backgroundColor: theme.colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    // RESPONSIVE CALCULATIONS
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
+    
+    // Dynamic dimensions
+    final double contentPadding = isTablet ? 32.0 : 20.0;
+    final double starSize = isTablet ? 48.0 : 40.0;
+    final double titleSize = isTablet ? 26.0 : 22.0;
+
     return Dialog(
-      backgroundColor: _dialogBackgroundColor,
+      backgroundColor: colorScheme.surface,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24.0),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              "Évaluez votre course",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: _lightTextColor,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+      child: ConstrainedBox(
+        // RESPONSIVE: Limit max width for tablets/web
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.all(contentPadding),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.rateRide,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontSize: titleSize,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.ratingHelper,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // RESPONSIVE: Star Rating
+                _buildStarRating(colorScheme, starSize),
+                
+                const SizedBox(height: 24),
+                
+                // Input Field
+                
+                
+                // Submit Button
+                _buildSubmitButton(colorScheme, l10n),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStarRating(ColorScheme colorScheme, double starSize) {
+    // RESPONSIVE: FittedBox ensures stars shrink if the screen is extremely narrow
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(5, (index) {
+          final starIndex = index + 1;
+          return IconButton(
+            // Reduce splash radius to fit tighter spaces if needed
+            splashRadius: starSize * 0.6, 
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            constraints: const BoxConstraints(), // Removes default minimum padding
+            onPressed: () => setState(() => _currentRating = starIndex),
+            icon: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+              child: Icon(
+                starIndex <= _currentRating ? Icons.star_rounded : Icons.star_border_rounded,
+                key: ValueKey<bool>(starIndex <= _currentRating),
+                color: starIndex <= _currentRating ? colorScheme.primary : colorScheme.outline,
+                size: starSize,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "Votre avis nous aide à nous améliorer.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: _subtleTextColor, fontSize: 15),
-            ),
-            const SizedBox(height: 24),
-            _buildStarRating(),
-            const SizedBox(height: 24),
-            _buildAdditionalInfoField(),
-            const SizedBox(height: 32),
-            _buildSubmitButton(),
-          ],
-        ),
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildStarRating() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(5, (index) {
-        return IconButton(
-          onPressed: () => setState(() => _currentRating = index + 1),
-          icon: Icon(
-            index < _currentRating ? Icons.star_rounded : Icons.star_border_rounded,
-            color: _amberColor,
-            size: 40,
-          ),
-        );
-      }),
-    );
-  }
 
-  Widget _buildAdditionalInfoField() {
-    return TextField(
-      controller: _infoController,
-      maxLines: 3,
-      style: const TextStyle(color: _lightTextColor),
-      decoration: InputDecoration(
-        hintText: "Laissez un commentaire (optionnel)...",
-        hintStyle: const TextStyle(color: _subtleTextColor),
-        filled: true,
-        fillColor: _darkBackgroundColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _amberColor,
-        foregroundColor: _darkTextColor,
+  Widget _buildSubmitButton(ColorScheme colorScheme, AppLocalizations l10n) {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 0,
       ),
       onPressed: _submitRating,
-      child: const Text(
-        "Envoyer l'évaluation",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: Text(
+        l10n.submitRating,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }

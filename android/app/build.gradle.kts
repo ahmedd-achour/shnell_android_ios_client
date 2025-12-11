@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.shnell"
+    namespace = "com.shnell.app"
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 
@@ -31,9 +31,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        ndk {
-        abiFilters += listOf("arm64-v8a")
-    }
+  
         
     }
 
@@ -42,10 +40,25 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+    getDefaultProguardFile("proguard-android.txt"), 
+    "pro-guard-rules.pro"
+)
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+// android/app/build.gradle.kts
+
+dependencies {
+    // ... (votre ligne 'platform' BOM existante, si elle est là)
+    
+    // 🛑 REMPLACER par une version fixe pour résoudre le 'Could not find...'
+    // Utilisez la version 24.0.0 comme point de départ.
+    implementation("com.google.firebase:firebase-messaging-ktx:24.0.0") 
+    
+    // ... (autres dépendances)
 }

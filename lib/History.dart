@@ -1,663 +1,421 @@
-import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:shnell/dots.dart';
-import 'package:shnell/drawer.dart';
-import 'package:shnell/model/destinationdata.dart';
-import 'package:shnell/model/oredrs.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shnell/drawer.dart';
 
-// --- Helper Models ---
-class Deal {
-  final String id;
-  final String idUser;
-  final String idDriver;
-  final String idOrder;
-  final String status;
-  final Timestamp time;
+// Internal Imports
+import 'package:shnell/model/deals.dart'; // Ensure this has the timestamp & fromFirestore updates
+import 'package:shnell/model/oredrs.dart';
 
-  Deal({
-    required this.id,
-    required this.idUser,
-    required this.idDriver,
-    required this.idOrder,
-    required this.status,
-    required this.time,
-  });
-
-  factory Deal.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return Deal(
-      id: doc.id,
-      idUser: data['idUser'] ?? '',
-      idDriver: data['idDriver'] ?? '',
-      idOrder: data['idOrder'] ?? '',
-      status: data['status'] ?? 'accepted',
-      time: data['time'] ?? Timestamp.now(),
-    );
-  }
-}
-
-class DealHistory {
-  final Deal deal;
+// Helper class for the Join
+class HistoryItem {
+  final Deals deal;
   final Orders order;
-
-  DealHistory({
-    required this.deal,
-    required this.order,
-  });
+  HistoryItem(this.deal, this.order);
 }
 
-// --- Custom RotatingDotsIndicator Widget ---
-
-// --- HistoryScreen Widget ---
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+class UserActivityDashboard extends StatefulWidget {
+  const UserActivityDashboard({super.key});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<UserActivityDashboard> createState() => _UserActivityDashboardState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
-  // Helper to fetch stop document by ID
-  Future<DocumentSnapshot> getStopsFromFirebasebyId(String id) async {
-    if (id.isEmpty) {
-      throw Exception('Invalid stop ID: ID cannot be empty');
-    }
-    return await FirebaseFirestore.instance.collection("stops").doc(id).get();
+class _UserActivityDashboardState extends State<UserActivityDashboard> {
+  final String? _uid = FirebaseAuth.instance.currentUser?.uid;
+
+  Stream<List<HistoryItem>> get _historyStream {
+    if (_uid == null) return const Stream.empty();
+
+    return FirebaseFirestore.instance
+        .collection('deals')
+        .where('idUser', isEqualTo: _uid)
+        .orderBy('timestamp', descending: true) // Requires Index
+        .snapshots()
+        .asyncMap((dealSnapshot) async {
+          List<HistoryItem> items = [];
+          for (var doc in dealSnapshot.docs) {
+            try {
+              final deal = Deals.fromFirestore(doc);
+              // Fetch Order for details
+              final orderDoc = await FirebaseFirestore.instance
+                  .collection('orders')
+                  .doc(deal.idOrder)
+                  .get();
+
+              if (orderDoc.exists) {
+                final order = Orders.fromFirestore(orderDoc);
+                items.add(HistoryItem(deal, order));
+              }
+            } catch (e) {
+              debugPrint("Error parsing item: $e");
+            }
+          }
+          return items;
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final l10n = AppLocalizations.of(context)!;
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please sign in to view history')),
-      );
-    }
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          bottom: const TabBar(
-            isScrollable: false,
-            indicatorColor: Colors.amber,
-            labelColor: Colors.amber,
-            unselectedLabelColor: Colors.grey,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            tabs: [
-              Tab(text: 'All'),
-              Tab(text: 'Ongoing'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Canceled'),
-            ],
-          ),
-          title: Text(
-            l10n.history,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          centerTitle: false,
-          leading: Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.primary, size: 30),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              );
-            },
-          ),
+    // Fallback if l10n is missing context
+    if (l10n == null) return const SizedBox();
+
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+
+       appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          l10n.myActivity,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        drawer: const ShnellDrawer(),
-        body: Column(
-          children: [
-            _buildStatisticsCard(user.uid),
-            Expanded(
-              child: StreamBuilder<List<DealHistory>>(
-                stream: _fetchHistoryStream(user.uid),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: RotatingDotsIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          'Error: ${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red.shade400, fontSize: 16),
-                        ),
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset("assets/empty.png", height: 200, fit: BoxFit.contain),
-                          const SizedBox(height: 24),
-                          const Text(
-                            'No history items found',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.primary, size: 30),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            );
+          },
+        ),
+      ),
+            drawer: const ShnellDrawer(),
 
-                  final allItems = snapshot.data!;
-                  final ongoingItems = allItems
-                      .where((d) => d.deal.status == 'accepted' || d.deal.status == 'almost')
-                      .toList();
-                  final finishedItems = allItems.where((d) => d.deal.status == 'terminated').toList();
-                  final canceledItems = allItems.where((d) => d.deal.status == 'canceled').toList();
+ 
+      body: StreamBuilder<List<HistoryItem>>(
+        stream: _historyStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (snapshot.hasError) {
+            return Center(child: Text(l10n.errorLoadingData));
+          }
 
-                  return TabBarView(
-                    children: [
-                      _buildHistoryList(allItems),
-                      _buildHistoryList(ongoingItems),
-                      _buildHistoryList(finishedItems),
-                      _buildHistoryList(canceledItems),
-                    ],
-                  );
-                },
+          final history = snapshot.data ?? [];
+
+          if (history.isEmpty) {
+            return _buildEmptyState(l10n, colorScheme);
+          }
+
+          return Column(
+            children: [
+              // 1. SUBTLE SUMMARY ROW (Spending is just a stat here)
+              _buildSummaryRow(history, theme, l10n),
+              
+              const Divider(height: 1),
+
+              // 2. LIST HEADER
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(
+                  children: [
+                    Text(
+                      l10n.recentRides, 
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface
+                      )
+                    ),
+                    const Spacer(),
+                    Text(
+                      "${history.length} ${l10n.total}", 
+                      style: TextStyle(fontSize: 12, color: colorScheme.outline)
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+
+              // 3. HISTORY LIST
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: history.length,
+                  itemBuilder: (context, index) {
+                    return _buildHistoryCard(history[index], theme, l10n);
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStatisticsCard(String userId) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('deals').where('idUser', isEqualTo: userId).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
+  // --- STATS / SUMMARY ---
 
-        final deals = snapshot.data!.docs;
-        final totalTrips = deals.length;
-        final canceledTrips = deals.where((doc) => doc['status'] == 'canceled').length;
-        final completionPercentage = totalTrips > 0 ? ((totalTrips - canceledTrips) / totalTrips) * 100 : 0.0;
-        final cancellationPercentage = totalTrips > 0 ? (canceledTrips / totalTrips) * 100 : 0.0;
+  Widget _buildSummaryRow(List<HistoryItem> data, ThemeData theme, AppLocalizations l10n) {
+    double totalSpent = 0.0;
+    int completedCount = 0;
+    int canceledCount = 0;
 
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  'Total Trips',
-                  totalTrips.toString(),
-                  Icons.local_taxi,
-                  Colors.amber,
-                ),
-                _buildStatItem(
-                  'Completed',
-                  '${completionPercentage.toStringAsFixed(0)}%',
-                  Icons.check_circle_outline,
-                  Colors.green,
-                ),
-                _buildStatItem(
-                  'Canceled',
-                  '${cancellationPercentage.toStringAsFixed(0)}%',
-                  Icons.cancel_outlined,
-                  Colors.red,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 30),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Stream<List<DealHistory>> _fetchHistoryStream(String userId) {
-    final dealsAsUserStream = FirebaseFirestore.instance
-        .collection('deals')
-        .where('idUser', isEqualTo: userId)
-        .snapshots();
-
-    final dealsAsDriverStream = FirebaseFirestore.instance
-        .collection('deals')
-        .where('idDriver', isEqualTo: userId)
-        .snapshots();
-
-    return dealsAsUserStream.asyncMap((userSnapshot) async {
-      final driverSnapshot = await dealsAsDriverStream.first;
-      final Map<String, Deal> uniqueDeals = {};
-
-      for (var doc in userSnapshot.docs) {
-        uniqueDeals[doc.id] = Deal.fromFirestore(doc);
+    for (var item in data) {
+      if (item.deal.status == 'terminated') {
+        totalSpent += item.order.price;
+        completedCount++;
+      } else if (item.deal.status == 'canceled') {
+        canceledCount++;
       }
-      for (var doc in driverSnapshot.docs) {
-        uniqueDeals[doc.id] = Deal.fromFirestore(doc);
-      }
-
-      final List<Future<DealHistory?>> futureHistories = uniqueDeals.values.map((deal) async {
-        final orderDoc = await FirebaseFirestore.instance.collection('orders').doc(deal.idOrder).get();
-        if (orderDoc.exists) {
-          return DealHistory(
-            deal: deal,
-            order: Orders.fromFirestore(orderDoc),
-          );
-        }
-        return null;
-      }).toList();
-
-      final histories = (await Future.wait(futureHistories)).whereType<DealHistory>().toList();
-
-      histories.sort((a, b) => b.deal.time.compareTo(a.deal.time));
-      return histories;
-    });
-  }
-
-  Widget _buildHistoryList(List<DealHistory> items) {
-    if (items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset("assets/empty.png", height: 200, fit: BoxFit.contain),
-            const SizedBox(height: 24),
-            const Text(
-              'No items found for this category',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
     }
-    return ListView.builder(
+
+    return Container(
       padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      itemBuilder: (context, i) {
-        final item = items[i];
-        return _DealCard(item: item, getStopsFromFirebasebyId: getStopsFromFirebasebyId);
-      },
-    );
-  }
-}
-
-// --- DealCard Widget ---
-class _DealCard extends StatefulWidget {
-  final DealHistory item;
-  final Future<DocumentSnapshot> Function(String id) getStopsFromFirebasebyId;
-
-  const _DealCard({required this.item, required this.getStopsFromFirebasebyId});
-
-  @override
-  _DealCardState createState() => _DealCardState();
-}
-
-class _DealCardState extends State<_DealCard> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final status = widget.item.deal.status;
-    final statusInfo = _getStatusInfo(status);
-    final timestamp = widget.item.deal.time;
-    final date = DateFormat('dd MMM yyyy, HH:mm').format(timestamp.toDate());
-    final pickupLocation = widget.item.order.namePickUp;
-    final price = widget.item.order.price;
-    final isScheduled = !widget.item.order.isInstantDelivery &&
-        widget.item.order.additionalInfo?['scheduledTimestamp'] != null;
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
+      color: theme.colorScheme.surface,
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Package image
-                Container(
-                  width: 50,
-                  height: 50,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Image.asset("assets/box.png"),
-                ),
-                const SizedBox(width: 16),
-                // Main content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Status and Date
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: statusInfo['color']!.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              _getStatusText(status),
-                              style: TextStyle(
-                                color: statusInfo['color'],
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            date,
-                            style: TextStyle(
-                              color: theme.textTheme.bodySmall?.color,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Price
-                      Text(
-                        'TND ${price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: theme.primaryColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      // Trip ID and scheduled info
-                      Row(
-                        children: [
-                          Icon(Icons.trip_origin, size: 16, color: theme.textTheme.bodySmall?.color),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              'ID: ${widget.item.deal.id.substring(0, 8)}...',
-                              style: TextStyle(
-                                color: theme.textTheme.bodySmall?.color,
-                                fontSize: 12,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (isScheduled) ...[
-                            const SizedBox(width: 8),
-                            Icon(Icons.schedule, color: theme.primaryColor, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Scheduled',
-                              style: TextStyle(
-                                color: theme.primaryColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          // Completed
+          Expanded(
+            child: _buildInfoChip(
+              theme,
+              label: l10n.completed ,
+              value: "$completedCount",
+              icon: Icons.check_circle_outline,
+              iconColor: Colors.green,
             ),
           ),
-          // See Details Button
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Text(
-              _isExpanded ? 'Hide Details' : 'See Details',
-              style: const TextStyle(
-                color: Colors.amber,
-                fontWeight: FontWeight.w600,
-              ),
+          const SizedBox(width: 12),
+          
+          // Canceled
+          Expanded(
+            child: _buildInfoChip(
+              theme,
+              label: l10n.canceled,
+              value: "$canceledCount",
+              icon: Icons.cancel_outlined,
+              iconColor: theme.colorScheme.error,
             ),
           ),
-          // Timeline section (only shown when expanded)
-          if (_isExpanded)
-            _buildTimeline(context, pickupLocation, widget.item.order.stops),
+          const SizedBox(width: 12),
+
+          // Spending (Small and blended in)
+          Expanded(
+            child: _buildInfoChip(
+              theme,
+              label: l10n.totalSpent,
+              value: "${totalSpent.toStringAsFixed(0)}", // Removed currency symbol for cleanliness, or add small suffix
+              suffix: " TND",
+              icon: Icons.account_balance_wallet_outlined,
+              iconColor: theme.colorScheme.primary,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTimeline(BuildContext context, String pickup, List<String> stopIds) {
-    final ids = stopIds.where((id) => id.isNotEmpty).toList();
-
-    return FutureBuilder<List<DropOffData>>(
-      future: Future.wait(ids.map((id) => widget.getStopsFromFirebasebyId(id).then((doc) {
-        if (doc.exists) {
-          return DropOffData.fromFirestore(doc);
-        }
-        throw Exception('Stop document $id not found');
-      }))),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor.withOpacity(0.5),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: const Center(child: RotatingDotsIndicator()),
-          );
-        }
-        if (snapshot.hasError) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor.withOpacity(0.5),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                'Error loading stops: ${snapshot.error}',
-                style: const TextStyle(color: Colors.red, fontSize: 14),
-              ),
-            ),
-          );
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor.withOpacity(0.5),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                'No stops found',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ),
-          );
-        }
-
-        final dropOffs = snapshot.data!;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor.withOpacity(0.5),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
-          ),
-          child: Column(
+  Widget _buildInfoChip(ThemeData theme, {
+    required String label, 
+    required String value, 
+    required IconData icon, 
+    required Color iconColor,
+    String suffix = ""
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.3))
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _TimelineItem(
-                icon: Icons.my_location,
-                location: pickup,
-                isCompleted: true,
-                isFirst: true,
-                isLast: dropOffs.isEmpty,
-                isPickup: true,
+              Icon(icon, size: 16, color: iconColor),
+              const SizedBox(width: 6),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: value,
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.bold, 
+                        color: theme.colorScheme.onSurface
+                      )
+                    ),
+                    if (suffix.isNotEmpty)
+                      TextSpan(
+                        text: suffix,
+                        style: TextStyle(
+                          fontSize: 10, 
+                          color: theme.colorScheme.onSurfaceVariant
+                        )
+                      ),
+                  ]
+                ),
               ),
-              ...dropOffs.asMap().entries.map((entry) {
-                final dropOff = entry.value;
-                final isLast = entry.key == dropOffs.length - 1;
-                return _TimelineItem(
-                  icon: Icons.location_on,
-                  location: dropOff.destinationName,
-                  isCompleted: dropOff.isDelivered == true,
-                  isLast: isLast,
-                  isPickup: false,
-                );
-              }).toList(),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 4),
+          Text(
+            label, 
+            style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
-  Map<String, dynamic> _getStatusInfo(String status) {
+  // --- HISTORY CARD ---
+
+  Widget _buildHistoryCard(HistoryItem item, ThemeData theme, AppLocalizations l10n) {
+    final colors = theme.colorScheme;
+    final statusInfo = _getStatusInfo(item.deal.status, colors, l10n);
+    final dateStr = DateFormat('MMM dd, HH:mm').format(item.deal.timestamp ?? DateTime.now());
+
+    
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: colors.outlineVariant.withOpacity(0.5))
+      ),
+      color: colors.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Row 1: Header
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: colors.outlineVariant)
+                  ),
+                  child: Icon(_getVehicleIcon(item.order.vehicleType), color: colors.primary, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: statusInfo.color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: statusInfo.color.withOpacity(0.3))
+                            ),
+                            child: Text(
+                              statusInfo.text.toUpperCase(),
+                              style: TextStyle(color: statusInfo.color, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Text(
+                            "${item.order.price.toStringAsFixed(0)} TND",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: colors.onSurface),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(dateStr, style: TextStyle(color: colors.outline, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+
+            // Row 2: Addresses
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Icon(Icons.circle, size: 8, color: colors.primary),
+                    Container(height: 20, width: 1, color: colors.outlineVariant),
+                    Icon(Icons.square, size: 8, color: colors.secondary),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.order.namePickUp,
+                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 13, color: colors.onSurface, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        // Just showing destination count or first destination for brevity
+                        "${item.order.stops.length} ${l10n.destinations}", 
+                        style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(AppLocalizations l10n, ColorScheme colors) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.history_toggle_off, size: 60, color: colors.outlineVariant),
+          const SizedBox(height: 16),
+          Text(l10n.noActivityYet , style: TextStyle(color: colors.outline)),
+        ],
+      ),
+    );
+  }
+
+  // --- HELPERS ---
+
+  _StatusInfo _getStatusInfo(String status, ColorScheme colors, AppLocalizations l10n) {
     switch (status) {
-      case 'accepted':
-      case 'almost':
-        return {'color': Colors.orange, 'icon': Icons.fire_truck_rounded};
-      case 'terminated':
-        return {'color': Colors.green, 'icon': Icons.check_circle};
-      case 'canceled':
-        return {'color': Colors.red, 'icon': Icons.cancel};
-      default:
-        return {'color': Colors.grey, 'icon': Icons.help_outline};
+      case 'terminated': 
+        return _StatusInfo(Colors.green, l10n.completed);
+      case 'canceled': 
+        return _StatusInfo(colors.error, l10n.canceled );
+      case 'accepted': 
+        return _StatusInfo(colors.primary, l10n.ongoing );
+      case 'almost': 
+        return _StatusInfo(colors.tertiary, l10n.enRoute);
+      default: 
+        return _StatusInfo(colors.outline, status);
     }
   }
 
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'accepted':
-      case 'almost':
-        return 'Ongoing';
-      case 'terminated':
-        return 'Completed';
-      case 'canceled':
-        return 'Canceled';
-      default:
-        return 'Unknown';
-    }
+  IconData _getVehicleIcon(String type) {
+    if (type.contains("moto")) return Icons.two_wheeler;
+    if (type.contains("heavy")) return Icons.local_shipping;
+    return Icons.directions_car;
   }
 }
 
-// --- TimelineItem Widget ---
-class _TimelineItem extends StatelessWidget {
-  const _TimelineItem({
-    required this.icon,
-    required this.location,
-    required this.isCompleted,
-    this.isFirst = false,
-    this.isLast = false,
-    this.isPickup = false,
-  });
-
-  final IconData icon;
-  final String location;
-  final bool isCompleted;
-  final bool isFirst;
-  final bool isLast;
-  final bool isPickup;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = isPickup ? Colors.green : (isCompleted ? Colors.amber : Colors.red);
-    final textColor = isCompleted ? theme.textTheme.bodyMedium?.color : theme.textTheme.bodySmall?.color;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            if (!isFirst)
-              Container(
-                width: 2,
-                height: 20,
-                color: Colors.grey[400],
-              ),
-            Icon(icon, color: color, size: 24),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 20,
-                color: Colors.grey[400],
-              ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
-            child: Text(
-              location,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
-                color: textColor,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+class _StatusInfo {
+  final Color color;
+  final String text;
+  _StatusInfo(this.color, this.text);
 }

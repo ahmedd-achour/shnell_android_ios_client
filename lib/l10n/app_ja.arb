@@ -512,6 +512,81 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+    "selectStarError": "少なくとも星を1つ選択してください。",
+  "ratingSuccess": "評価ありがとうございます！",
+  "rateRide": "乗車を評価",
+  "ratingHelper": "あなたのご意見は改善に役立ちます。",
+  "commentHint": "コメントを残す（任意）...",
+  "submitRating": "レビューを送信",
+
+
+  
+  "serviceTypeTitle": "サービスの種類",
+  "serviceTypeSubtitle": "お荷物に最適なオプションを選択してください。",
+  "st_simple_transport_title": "簡易配送",
+  "st_simple_transport_sub": "書類、鍵、小包など。",
+  "st_store_pickup_title": "小規模な引越し",
+  "st_store_pickup_sub": "家具、家電（店舗からの配送）。",
+  "st_small_move_title": "中規模な引越し",
+  "st_small_move_sub": "ワンルーム、学生の引越し、少量の荷物。",
+  "st_full_move_title": "大規模な引越し",
+  "st_full_move_sub": "2部屋以上、大型家具、フルサービス。",
+
+   "userNotFound": "ユーザーが見つかりません。",
+    "wrongPassword": "パスワードが間違っています。",
+    "invalidEmail": "無効なメールアドレスです。",
+    "userDisabled": "ユーザーが無効です。",
+    "signInFailed": "サインインに失敗しました。",
+    "connectionError": "接続エラー。もう一度お試しください。",
+    "slogan": "引っ越しを簡単に",
+    "hello": "こんにちは！",
+    "signInToContinue": "続けるにはサインインしてください。",
+    "emailLabel": "メールアドレス",
+    "emailError": "有効なメールアドレスが必要です",
+    "passwordLabel": "パスワード",
+    "passwordError": "最低6文字",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "signInButton": "サインイン",
+    "or": "または",
+    "noAccountYet": "アカウントをお持ちでないですか？ ",
+    "createAccount": "アカウントを作成",
+    "invalidPhone": "無効な電話番号",
+    "codeSentTo": "認証コードを {email} に送信しました",
+    "wrongCode": "コードが間違っています。",
+    "createUserFailed": "ユーザーの作成に失敗しました",
+    "newAccountTitle": "新しいアカウント",
+    "clientInfoStep": "顧客情報",
+    "securityStep": "セキュリティ",
+    "welcome": "ようこそ！",
+    "createAccountSubtitle": "トラックを予約するためにアカウントを作成してください。",
+    "fullNameLabel": "氏名",
+    "mobilePhoneLabel": "携帯電話番号",
+    "verifyEmailButton": "メールを認証",
+    "emailValidationTitle": "メール認証",
+    "codeSentToLabel": "コード送信先: {email}",
+    "verificationCodeLabel": "認証コード",
+    "incompleteCode": "コードが不完全です",
+    "createPasswordLabel": "パスワードを作成",
+    "confirmPasswordLabel": "パスワードを確認",
+    "createMyAccountButton": "アカウントを作成",
+    "editInfoButton": "情報を編集",
+    "fieldRequired": "必須項目",
+
+    
+  "myActivity": "アクティビティ",
+  "errorLoadingData": "データの読み込みエラー",
+  "recentRides": "最近の乗車",
+  "total": "合計",
+  "completed": "完了",
+  "canceled": "キャンセル済み",
+  "totalSpent": "総支出",
+  "ongoing": "進行中",
+  "enRoute": "移動中",
+  "destinations": "経由地",
+  "noActivityYet": "まだアクティビティがありません"
+
+
 
 }

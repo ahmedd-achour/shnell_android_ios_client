@@ -5,7 +5,6 @@ import 'package:shnell/Account/privacyPolicy.dart';
 import 'package:shnell/mainUsers.dart';
 import 'package:shnell/dots.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shnell/trackDriverPerPhone.dart';
 
 
 class ShnellDrawer extends StatefulWidget {
@@ -22,6 +21,7 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Helper function to navigate to a specific index in MainUsersScreen
+
   void _navigateToMainUsersScreen(BuildContext context, int index) {
    
       Navigator.pop(context);
@@ -41,7 +41,7 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.amber),
+      leading: Icon(icon, color:Theme.of(context).colorScheme.primary),
       title: Text(
         title,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -100,7 +100,7 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
             padding: EdgeInsets.zero,
             children: [
               DrawerHeader(
-                decoration: const BoxDecoration(color: Colors.amber),
+                decoration:  BoxDecoration(color: Theme.of(context).colorScheme.primary),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -136,13 +136,6 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
                 title: l10n.drawerMyServices,
                 onTap: () => _navigateToMainUsersScreen(context, 1),
               ),
-               _buildDrawerTile(
-                icon: Icons.search,
-                title: l10n.drawerSearchingCouriers,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SearchCourierByPhoneNumber())),
-              ),
-             
-             
               const Divider(color: Colors.amber),
               _buildDrawerTile(
                 icon: Icons.help_outline,

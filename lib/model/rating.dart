@@ -3,14 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Rating {
 String userId;
 int rating;
-String? additionalInfos;
+String driverRated;
 
   Rating({
     required this.userId,
     required this.rating,
-     String? additionalInfos,
-    
-
+    required  this.driverRated,
   });
 
 
@@ -20,7 +18,7 @@ String? additionalInfos;
       'userId': userId,
       'rating': rating,
       'time': Timestamp.now(),
-      'additionalInfos' : additionalInfos
+      'driverId' : driverRated
     
     };
   }

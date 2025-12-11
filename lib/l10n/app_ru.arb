@@ -214,7 +214,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Подтвердить позицию",
+"confirmPosition": "Подтвердить",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 },
@@ -449,7 +449,6 @@
     },
     "chooseLoadingPosition": "Выберите позицию загрузки",
     "back": "Назад",
-    "confirmPosition": "Подтвердить позицию",
 
 
 
@@ -516,6 +515,80 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+    "selectStarError": "Пожалуйста, выберите хотя бы одну звезду.",
+  "ratingSuccess": "Спасибо за вашу оценку!",
+  "rateRide": "Оцените поездку",
+  "ratingHelper": "Ваш отзыв помогает нам стать лучше.",
+  "commentHint": "Оставьте комментарий (необязательно)...",
+  "submitRating": "Отправить отзыв",
+
+
+  
+  "serviceTypeTitle": "Тип услуги",
+  "serviceTypeSubtitle": "Выберите вариант, который лучше всего описывает ваш груз.",
+  "st_simple_transport_title": "Простая доставка",
+  "st_simple_transport_sub": "Документы, ключи, мелкие посылки.",
+  "st_store_pickup_title": "Малый переезд",
+  "st_store_pickup_sub": "Мебель, техника из магазина.",
+  "st_small_move_title": "Средний переезд",
+  "st_small_move_sub": "Студия, студенческий переезд, немного вещей.",
+  "st_full_move_title": "Большой переезд",
+  "st_full_move_sub": "2+ комнат, тяжелая мебель, полный сервис.",
+
+
+
+  "userNotFound": "Пользователь не найден.",
+    "wrongPassword": "Неверный пароль.",
+    "invalidEmail": "Неверный email.",
+    "userDisabled": "Пользователь отключен.",
+    "signInFailed": "Ошибка входа.",
+    "connectionError": "Ошибка подключения. Попробуйте еще раз.",
+    "slogan": "Переезд — это просто",
+    "hello": "Привет!",
+    "signInToContinue": "Войдите, чтобы продолжить.",
+    "emailLabel": "Электронная почта",
+    "emailError": "Требуется действительный email",
+    "passwordLabel": "Пароль",
+    "passwordError": "Минимум 6 символов",
+    "forgotPassword": "Забыли пароль?",
+    "signInButton": "ВОЙТИ",
+    "or": "ИЛИ",
+    "noAccountYet": "Ещё нет аккаунта? ",
+    "createAccount": "Создать аккаунт",
+    "invalidPhone": "Неверный номер телефона",
+    "codeSentTo": "Код подтверждения отправлен на {email}",
+    "wrongCode": "Неверный код.",
+    "createUserFailed": "Не удалось создать пользователя",
+    "newAccountTitle": "Новый аккаунт",
+    "clientInfoStep": "Инфо о клиенте",
+    "securityStep": "Безопасность",
+    "welcome": "Добро пожаловать!",
+    "createAccountSubtitle": "Создайте аккаунт, чтобы забронировать грузовик.",
+    "fullNameLabel": "Полное имя",
+    "mobilePhoneLabel": "Мобильный телефон",
+    "verifyEmailButton": "ПОДТВЕРДИТЬ EMAIL",
+    "emailValidationTitle": "Проверка email",
+    "codeSentToLabel": "Код отправлен на: {email}",
+    "verificationCodeLabel": "Код подтверждения",
+    "incompleteCode": "Неполный код",
+    "createPasswordLabel": "Придумайте пароль",
+    "confirmPasswordLabel": "Подтвердите пароль",
+    "createMyAccountButton": "СОЗДАТЬ АККАУНТ",
+    "editInfoButton": "Изменить данные",
+    "fieldRequired": "Обязательное поле",
+  "myActivity": "Моя активность",
+  "errorLoadingData": "Ошибка загрузки",
+  "recentRides": "Недавние поездки",
+  "total": "Всего",
+  "completed": "Завершено",
+  "canceled": "Отменено",
+  "totalSpent": "Всего потрачено",
+  "ongoing": "Текущие",
+  "enRoute": "В пути",
+  "destinations": "Остановки",
+  "noActivityYet": "Пока нет активности"
+
+
 
 }

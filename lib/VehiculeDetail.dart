@@ -3,25 +3,89 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as lt;
-import 'package:intl/intl.dart';
-// Note: Assuming 'dots.dart', 'mainUsers.dart', 'destinationdata.dart',
-// and 'oredrs.dart', 'orderService.dart' are in your project.
-import 'package:shnell/dots.dart';
+import 'package:shnell/dots.dart'; 
 import 'package:shnell/mainUsers.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/orderService.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+// --- SERVICE TYPE MODEL (From your instruction) ---
+class ServiceType {
+  final String id;
+  final String title;
+  final String subtitle;
+  final String iconAsset;
+  final double priceMultiplier; 
+  final List<String> allowedVehicles;
+
+  ServiceType({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.iconAsset,
+    required this.allowedVehicles,
+    required this.priceMultiplier
+  });
+
+  factory ServiceType.fromMap(Map<String, dynamic> map) {
+    return ServiceType(
+      id: map['id'] ?? '',
+      title: map['title'] ?? '',
+      priceMultiplier: (map['price_multiplier'] ?? 1.0).toDouble(), // Critical: Parse Multiplier
+      subtitle: map['subtitle'] ?? '',
+      iconAsset: map['icon_asset'] ?? 'assets/box.png',
+      allowedVehicles: List<String>.from(map['allowed_vehicles'] ?? []),
+    );
+  }
+}
+
+// --- VEHICLE SETTINGS MODEL ---
+class VehicleSettings {
+  final String name;
+  final double maxWeight;
+  final double volume;
+  final double basePrice;
+  final double shortDistThreshold;
+  final double shortDistMin;
+  final double shortDistMult;
+  final double longDistRate;
+
+  VehicleSettings({
+    required this.name,
+    required this.maxWeight,
+    required this.volume,
+    required this.basePrice,
+    required this.shortDistThreshold,
+    required this.shortDistMin,
+    required this.shortDistMult,
+    required this.longDistRate,
+  });
+
+  factory VehicleSettings.fromMap(Map<String, dynamic> map) {
+    return VehicleSettings(
+      name: map['name'] ?? 'Unknown',
+      maxWeight: (map['max_weight'] ?? 0).toDouble(),
+      volume: (map['volume'] ?? 0).toDouble(),
+      basePrice: (map['base_price'] ?? 0).toDouble(),
+      shortDistThreshold: (map['short_dist_threshold'] ?? 300).toDouble(),
+      shortDistMin: (map['short_dist_min'] ?? 0).toDouble(),
+      shortDistMult: (map['short_dist_mult'] ?? 0).toDouble(),
+      longDistRate: (map['long_dist_rate'] ?? 0).toDouble(),
+    );
+  }
+}
+
 class VehicleDetailScreen extends StatefulWidget {
-  final String type;
+  final String type; // Vehicle ID (e.g. 'light')
   final String image;
   final lt.LatLng pickupLocation;
   final List<DropOffData> dropOffDestination;
   final String pickup_name;
-
+  final String? serviceTypeId; // Passed from Service Selection
 
   const VehicleDetailScreen({
     Key? key,
@@ -30,6 +94,7 @@ class VehicleDetailScreen extends StatefulWidget {
     required this.pickupLocation,
     required this.dropOffDestination,
     required this.pickup_name,
+    this.serviceTypeId,
   }) : super(key: key);
 
   @override
@@ -37,73 +102,141 @@ class VehicleDetailScreen extends StatefulWidget {
 }
 
 class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
-  // State variables
+  // State
   bool _isLoading = true;
-  bool _isInstantBooking = true;
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-
   double _calculatedDistanceKm = 0.0;
   double _calculatedEstimatedPrice = 0.0;
-  double _userOfferPrice = 0.0;
   
-  bool _isMakingOffer = false;
+  // Cloud Data
+  VehicleSettings? _vehicleSettings;
+  double _stopFee = 0.4;
+  double _serviceMultiplier = 1.0; // Defaults to 1.0 if not set
 
-  // Google Maps API key
+  // Manual Offer Logic
+  late TextEditingController _offerController;
+  String? _offerErrorText;
+  Color _priceStatusColor = Colors.grey; 
+
   static const String _googleMapsApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w";
-  
 
   @override
   void initState() {
     super.initState();
-    _setAndCalculateRouteData();
+    _offerController = TextEditingController();
+    _initializeAppLogic();
   }
 
-  void _setAndCalculateRouteData() async {
-    if (widget.dropOffDestination.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Veuillez sélectionner au moins une destination.")),
-        );
-        setState(() => _isLoading = false);
-      }
-      return;
-    }
+  @override
+  void dispose() {
+    _offerController.dispose();
+    super.dispose();
+  }
 
-    if (_googleMapsApiKey == "YOUR_GOOGLE_MAPS_API_KEY_HERE") {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Veuillez fournir une clé API Google Maps valide.")),
-        );
-        setState(() => _isLoading = false);
-      }
-      return;
-    }
+  // --- LOGIC SECTION ---
+
+  Future<void> _initializeAppLogic() async {
+    await _calculateRouteDistance();
+    await _fetchCloudSettingsAndCalculate();
+  }
+
+  Future<void> _calculateRouteDistance() async {
+    if (widget.dropOffDestination.isEmpty) return;
 
     final List<lt.LatLng> destinations = widget.dropOffDestination.map((dropOff) => dropOff.destination).toList();
-
-    final distance = await getGoogleRoadDistance(
-      widget.pickupLocation,
-      destinations,
-      _googleMapsApiKey,
-    );
+    final distance = await getGoogleRoadDistance(widget.pickupLocation, destinations, _googleMapsApiKey);
 
     if (mounted && distance != null) {
-      setState(() {
-        _calculatedDistanceKm = distance;
-        _calculatedEstimatedPrice = _calculatePrice(_calculatedDistanceKm, widget.type);
-        _userOfferPrice = _calculatedEstimatedPrice; // Initialize offer to estimated price
-        _isLoading = false;
-      });
-    } else if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Impossible de calculer la distance.")),
-      );
+      setState(() => _calculatedDistanceKm = distance);
     }
+  }
+
+  Future<void> _fetchCloudSettingsAndCalculate() async {
+    try {
+      // 1. Fetch all settings in parallel
+      final results = await Future.wait([
+        FirebaseFirestore.instance.collection('settings').doc('config').get(),        // Index 0
+        FirebaseFirestore.instance.collection('settings').doc('vehicles').get(),      // Index 1
+        FirebaseFirestore.instance.collection('settings').doc('service_types').get(), // Index 2
+      ]);
+
+      final configDoc = results[0];
+      final vehiclesDoc = results[1];
+      final servicesDoc = results[2];
+
+      if (mounted) {
+        // A. Parse Global Config
+        if (configDoc.exists && configDoc.data() != null) {
+          _stopFee = (configDoc['stop_fee'] ?? 0.4).toDouble();
+        }
+
+        // B. Parse Service Type to get Multiplier
+        if (widget.serviceTypeId != null && servicesDoc.exists && servicesDoc.data() != null) {
+          final data = servicesDoc.data() as Map<String, dynamic>;
+          if (data['types'] is List) {
+            final List<dynamic> rawTypes = data['types'];
+            // Find the specific service the user selected
+            final selectedServiceData = rawTypes.firstWhere(
+              (item) => item['id'] == widget.serviceTypeId,
+              orElse: () => null,
+            );
+
+            if (selectedServiceData != null) {
+              // Create Object using the class you provided
+              final serviceObj = ServiceType.fromMap(selectedServiceData as Map<String, dynamic>);
+              _serviceMultiplier = serviceObj.priceMultiplier; // Apply the multiplier (e.g. 1.5)
+            }
+          }
+        }
+
+        // C. Parse Vehicle Data & Calculate Final Price
+        if (vehiclesDoc.exists && vehiclesDoc.data() != null) {
+          final data = vehiclesDoc.data() as Map<String, dynamic>;
+          if (data.containsKey(widget.type)) {
+            _vehicleSettings = VehicleSettings.fromMap(data[widget.type]);
+            
+            // Calculate
+            _calculatedEstimatedPrice = _calculateDynamicPrice(
+              _calculatedDistanceKm, 
+              _vehicleSettings!,
+              widget.dropOffDestination.length
+            );
+            
+            // Set UI values
+            _offerController.text = _calculatedEstimatedPrice.toStringAsFixed(0);
+            _validateOffer(_offerController.text);
+          }
+        }
+        
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      debugPrint("Error fetching cloud settings: $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // CORE PRICING LOGIC
+  double _calculateDynamicPrice(double distance, VehicleSettings v, int stops) {
+    double pricePerKm;
+    
+    // 1. Base Distance Rate
+    if (distance < v.shortDistThreshold) {
+      double factor = (1 - (distance / 1000)) * v.shortDistMult;
+      pricePerKm = max(v.shortDistMin, factor);
+    } else {
+      pricePerKm = v.longDistRate;
+    }
+
+    // 2. Base Calculation
+    double baseCalculation = v.basePrice + (distance * pricePerKm) + (stops * _stopFee);
+    
+    // 3. APPLY SERVICE MULTIPLIER (The Job Type Factor)
+    // Moving Service (1.5x) costs more than Simple Transport (1.0x) for the same truck/distance
+    return baseCalculation * _serviceMultiplier;
   }
 
   Future<double?> getGoogleRoadDistance(lt.LatLng origin, List<lt.LatLng> destinations, String apiKey) async {
+    // ... (Keep existing Google Distance implementation)
     String originStr = '${origin.latitude},${origin.longitude}';
     String destinationStr = '${destinations.last.latitude},${destinations.last.longitude}';
     String waypointsStr = '';
@@ -126,127 +259,69 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           for (var leg in data['routes'][0]['legs']) {
             totalDistance += leg['distance']['value'];
           }
-          return totalDistance / 1000; // Convert to km
-        } else {
-          print("Erreur API Google Maps: ${data['status']}");
-          if (data['error_message'] != null) {
-            print("Message: ${data['error_message']}");
-          }
+          return totalDistance / 1000; 
         }
-      } else {
-        print("Erreur HTTP: ${response.statusCode}");
       }
     } catch (e) {
-      print("Erreur réseau: $e");
+      debugPrint("Network Error: $e");
     }
     return null;
   }
 
-  double _calculatePrice(double distance, String vehicleType) {
-    double basePrice, pricePerKm;
-    switch (vehicleType) {
-      case 'super_light':
-        basePrice = 1.0;
-        pricePerKm = distance < 300 ? max(0.4, (1 - (distance / 1000)) * 0.5) : 0.35;
-        break;
-      case 'light':
-        basePrice = 25.0;
-        pricePerKm = distance < 300 ? max(0.8, (1 - (distance / 1000)) * 1.4) : 0.9;
-        break;
-      case 'light_medium':
-        basePrice = 30.0;
-        pricePerKm = distance < 300 ? max(1.0, (1 - (distance / 1000)) * 1.8) : 1.2;
-        break;
-      case 'medium':
-        basePrice = 60.0;
-        pricePerKm = distance < 300 ? max(1.2, (1 - (distance / 1000)) * 2.0) : 1.4;
-        break;
-      case 'medium_heavy':
-        basePrice = 80.0;
-        pricePerKm = distance < 300 ? max(1.4, (1 - (distance / 1000)) * 2.3) : 1.6;
-        break;
-      case 'heavy':
-        basePrice = 110.0;
-        pricePerKm = distance < 300 ? max(1.8, (1 - (distance / 1000)) * 3.0) : 2.0;
-        break;
-      case 'super_heavy':
-        basePrice = 180.0;
-        pricePerKm = distance < 300 ? max(2.2, (1 - (distance / 1000)) * 3.5) : 2.5;
-        break;
-      default:
-        basePrice = 0.0;
-        pricePerKm = 0.0;
-    }
-    return basePrice + (distance * pricePerKm) + widget.dropOffDestination.length * 0.4;
-  }
+  // --- VALIDATION LOGIC ---
 
-  Map<String, dynamic> getVehicleData(String type) {
-    switch (type) {
-      case 'super_light':
-        return {'name': 'moto', 'maxWeight': 100, 'volume': 0.5};
-      case 'light':
-        return {'name': 'Small Van', 'maxWeight': 500, 'volume': 3};
-      case 'light_medium':
-        return {'name': 'Isuzu/D max', 'maxWeight': 1500, 'volume': 5};
-      case 'medium':
-        return {'name': 'Estafette', 'maxWeight': 3500, 'volume': 13};
-      case 'medium_heavy':
-        return {'name': 'Construction', 'maxWeight': 7500, 'volume': 15};
-      case 'heavy':
-        return {'name': 'Large Truck', 'maxWeight': 12000, 'volume': 20};
-      case 'super_heavy':
-        return {'name': 'Large Truck', 'maxWeight': 33000, 'volume': 25};
-      default:
-        return {'name': 'Unknown', 'maxWeight': 0, 'volume': 0};
-    }
-  }
+  // Min/Max also scales with multiplier automatically since they use _calculatedEstimatedPrice
+  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.75;
+  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.50;
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() => _selectedDate = pickedDate);
-    }
-  }
+  void _validateOffer(String value) {
+    double? val = double.tryParse(value);
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime ?? TimeOfDay.now(),
-    );
-    if (pickedTime != null && pickedTime != _selectedTime) {
-      setState(() => _selectedTime = pickedTime);
+    if (val == null || val <= 0) {
+      setState(() {
+        _offerErrorText = "Enter amount";
+        _priceStatusColor = Colors.grey;
+      });
+      return;
+    }
+
+    if (val < _minAllowedPrice) {
+      setState(() {
+        _offerErrorText = "Too low";
+        _priceStatusColor = Colors.orange; 
+      });
+    } else if (val > _maxAllowedPrice) {
+      setState(() {
+        _offerErrorText = "Too high";
+        _priceStatusColor = Colors.red; 
+      });
+    } else {
+      setState(() {
+        _offerErrorText = null; 
+        _priceStatusColor = Colors.green; 
+      });
     }
   }
 
   Future<void> _passAnOrder() async {
+    double currentOffer = double.tryParse(_offerController.text) ?? 0;
+    
+    // Strict Validation
+    if (currentOffer < _minAllowedPrice || currentOffer > _maxAllowedPrice) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Price must be between ${_minAllowedPrice.toStringAsFixed(0)} and ${_maxAllowedPrice.toStringAsFixed(0)} DT"),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
+
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception("Utilisateur non connecté. Veuillez vous connecter.");
-      }
-
-      Map<String, dynamic>? additionalInfo;
-      if (!_isInstantBooking) {
-        if (_selectedDate == null || _selectedTime == null) {
-          throw Exception("Veuillez sélectionner une date et une heure pour la planification.");
-        }
-        final fullDateTime = DateTime(
-          _selectedDate!.year,
-          _selectedDate!.month,
-          _selectedDate!.day,
-          _selectedTime!.hour,
-          _selectedTime!.minute,
-        );
-        additionalInfo = {
-          'scheduledTimestamp': Timestamp.fromDate(fullDateTime),
-        };
-      }
+      if (user == null) throw Exception("User not logged in");
 
       final List<String> stopIds = [];
       for (final dropOff in widget.dropOffDestination) {
@@ -255,18 +330,19 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         stopIds.add(stopRef.id);
       }
 
-      final orderPrice = _isMakingOffer ? _userOfferPrice : _calculatedEstimatedPrice;
-
       final newOrder = Orders(
-        price: orderPrice,
+        price: currentOffer,
         distance: _calculatedDistanceKm,
         namePickUp: widget.pickup_name,
         pickUpLocation: widget.pickupLocation,
         stops: stopIds,
         vehicleType: widget.type,
+        id: '',
         userId: user.uid,
-        isInstantDelivery: _isInstantBooking,
-        additionalInfo: additionalInfo,
+        additionalInfo: {
+          'serviceType': widget.serviceTypeId ?? 'transport', 
+          'appliedMultiplier': _serviceMultiplier, // Save the multiplier used for audit
+        },
         isAcepted: false,
       );
 
@@ -275,10 +351,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Commande créée avec succès !"),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text("Booking confirmed!")),
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const MainUsersScreen()),
@@ -287,313 +360,127 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Erreur : ${e.toString()}"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}"), backgroundColor: Theme.of(context).colorScheme.error),
+        );
       }
     }
   }
+
+  // --- UI BUILDING ---
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: RotatingDotsIndicator());
-    }
+    if (_isLoading) return const Scaffold(body: Center(child: RotatingDotsIndicator()));
 
-    final vehicle = getVehicleData(widget.type);
+    final vehicleName = _vehicleSettings?.name ?? "Transport";
+    final vehicleMaxWeight = _vehicleSettings?.maxWeight ?? 0;
+    final vehicleVolume = _vehicleSettings?.volume ?? 0;
+
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-        final l10n = AppLocalizations.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
-
-    return Theme(
-      data: theme.copyWith(
-        primaryColor: const Color(0xFFE5B800),
-        colorScheme: theme.colorScheme.copyWith(
-          primary: const Color(0xFFE5B800),
-          secondary: const Color(0xFFF9DC5C),
-        ),
-        textTheme: theme.textTheme.apply(
-        ),
-      ),
-      child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _passAnOrder,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFE5B800),
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // 1. TOP GRADIENT BACKGROUND
+          Container(
+            height: 320,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primaryContainer,
+                ],
               ),
-              child:  Text(
-                l10n!.confirmBooking,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
               ),
             ),
           ),
-        ),
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 280.0,
-              pinned: true,
-              stretch: true,
-              leading: IconButton(
-                icon: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(Icons.arrow_back,),
-                  ),
+
+          // 2. SCROLLABLE CONTENT
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(top: 100, bottom: 100),
+            child: Column(
+              children: [
+                // A. FLOATING VEHICLE CARD
+                _buildFloatingVehicleCard(colorScheme, textTheme),
+
+                const SizedBox(height: 25),
+
+                // B. PRICE CARD (MANUAL ENTRY)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildPriceNegotiationCard(l10n, colorScheme, textTheme),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  vehicle['name'],
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24,),
+
+                const SizedBox(height: 20),
+
+                // C. TRIP DETAILS
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildDetailsCard(vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme),
                 ),
-                centerTitle: true,
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
-                      widget.image,
-                      fit: BoxFit.fitWidth,
+              ],
+            ),
+          ),
+
+          // 3. HEADER
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: colorScheme.surface,
+                    foregroundColor: colorScheme.onSurface,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                      tooltip: 'Back',
                     ),
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Color.fromARGB(150, 0, 0, 0),
-                            Color.fromARGB(255, 0, 0, 0),
-                          ],
-                        ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      vehicleName,
+                      textAlign: TextAlign.center,
+                      style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
-                  ],
-                ),
-                stretchModes: const [StretchMode.zoomBackground],
+                  ),
+                  const SizedBox(width: 40),
+                ],
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPriceSummaryCard(),
-                      const SizedBox(height: 24),
-                      _buildOfferToggle(),
-                      if (_isMakingOffer) _buildOfferSlider(),
-                      const SizedBox(height: 24),
-                      _buildBookingTypeSelector(),
-                      if (!_isInstantBooking) _buildDateTimePicker(),
-                      const SizedBox(height: 24),
-                      _buildDetailsSection(vehicle),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
-                ),
-              ]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPriceSummaryCard() {
-    final displayPrice = _isMakingOffer ? _userOfferPrice : _calculatedEstimatedPrice;
-    final l10n = AppLocalizations.of(context);
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isMakingOffer ? l10n!.yourOffer : l10n!.estimatedPrice,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Icon(Icons.savings),
-                Text(
-                  "${displayPrice.toStringAsFixed(2)} DT",
-                  style: const TextStyle(
-                    color: Color(0xFFE5B800),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                 Text(
-                  l10n.distance,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "${_calculatedDistanceKm.toStringAsFixed(1)} km",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOfferToggle() {
-    final l10n = AppLocalizations.of(context);
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SwitchListTile(
-        title:  Text(
-          l10n!.makeCustomOffer,
-          style: TextStyle(fontWeight: FontWeight.bold,),
-        ),
-        value: _isMakingOffer,
-        activeColor: const Color(0xFFE5B800),
-        onChanged: (bool value) {
-          setState(() {
-            _isMakingOffer = value;
-            if (!value) {
-              _userOfferPrice = _calculatedEstimatedPrice;
-            }
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildOfferSlider() {
-    final minPrice = _calculatedEstimatedPrice * 0.8;
-    final maxPrice = _calculatedEstimatedPrice * 1.4;
-    final l10n = AppLocalizations.of(context);
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             Text(
-              l10n!.adjustYourOffer,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
-            ),
-            const SizedBox(height: 8),
-            Slider(
-              value: _userOfferPrice,
-              min: minPrice,
-              max: maxPrice,
-              divisions: 100,
-              activeColor: const Color(0xFFE5B800),
-              label: "${_userOfferPrice.toStringAsFixed(2)} DT",
-              onChanged: (double value) {
-                setState(() {
-                  _userOfferPrice = value;
-                });
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("${minPrice.toStringAsFixed(2)} DT",),
-                Text("${maxPrice.toStringAsFixed(2)} DT"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookingTypeSelector() {
-    final l10n = AppLocalizations.of(context);
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            _buildBookingButton(
-              label: l10n!.instantTrip,
-              isSelected: _isInstantBooking,
-              onTap: () => setState(() => _isInstantBooking = true),
-            ),
-            _buildBookingButton(
-              label: l10n.schedule,
-              isSelected: !_isInstantBooking,
-              onTap: () => setState(() => _isInstantBooking = false),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookingButton({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFE5B800) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(
+        ],
+      ),
+
+      // 4. BIG CONFIRM BUTTON
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _passAnOrder,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              backgroundColor: _offerErrorText == null ? colorScheme.primary : Colors.grey, // Grise le bouton si erreur
+            ),
             child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              l10n?.confirmBooking.toUpperCase() ?? "CONFIRM NOW",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.2),
             ),
           ),
         ),
@@ -601,28 +488,58 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
-  Widget _buildDateTimePicker() {
-    final l10n = AppLocalizations.of(context);
+  // --- SUB-WIDGETS ---
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: Row(
+  Widget _buildFloatingVehicleCard(ColorScheme colorScheme, TextTheme textTheme) {
+    return Container(
+      height: 240,
+      margin: const EdgeInsets.symmetric(horizontal: 30),
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Expanded(
-            child: _buildDateTimeButton(
-              icon: Icons.calendar_today,
-              label: _selectedDate == null
-                  ? l10n!.selectDate
-                  : DateFormat('dd/MM/yyyy').format(_selectedDate!),
-              onPressed: () => _selectDate(context),
+          Positioned(
+            top: -30,
+            right: -30,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: colorScheme.onPrimary.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildDateTimeButton(
-              icon: Icons.access_time,
-              label: _selectedTime == null ? l10n!.selectTime : _selectedTime!.format(context),
-              onPressed: () => _selectTime(context),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Image.asset(
+              widget.image,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: colorScheme.shadow.withOpacity(0.1), blurRadius: 8),
+                ]
+              ),
+              child: Row(
+                children: [
+                   Icon(Icons.route, size: 18, color: colorScheme.outline),
+                  const SizedBox(width: 6),
+                  Text(
+                    "${_calculatedDistanceKm.toStringAsFixed(1)} km",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -630,103 +547,211 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
-  Widget _buildDateTimeButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return OutlinedButton.icon(
-      icon: Icon(icon, size: 20,),
-      label: Text(label,),
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        side: const BorderSide( width: 1),
-        padding: const EdgeInsets.symmetric(vertical: 18),
-      ),
-    );
-  }
-
-  Widget _buildDetailsSection(Map<String, dynamic> vehicle) {
-    final l10n = AppLocalizations.of(context);
-
+  Widget _buildPriceNegotiationCard(AppLocalizations? l10n, ColorScheme colorScheme, TextTheme textTheme) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shadowColor: colorScheme.shadow.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(25),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(
-              l10n!.details,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,),
+            // 1. Label
+            Text(
+              "SET YOUR PRICE",
+              style: textTheme.labelLarge?.copyWith(
+                color: colorScheme.outline,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5
+              ),
             ),
-            const Divider(height: 24,),
-            _buildLocationRow(Icons.my_location, l10n.pickup, widget.pickup_name),
-            const SizedBox(height: 16),
-            ...widget.dropOffDestination.asMap().entries.map((entry) {
-              int index = entry.key;
-              String name = entry.value.destinationName;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: _buildLocationRow(
-                  Icons.location_on,
-                  '${l10n.arrival(index + 1)} ',
-                  name,
+
+            const SizedBox(height: 20),
+
+            // 2. The Big Manual Input Field
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _priceStatusColor, 
+                  width: 2,
                 ),
-              );
-            }).toList(),
-            const Divider(height: 32,),
-            _buildInfoRow(Icons.fitness_center_rounded, l10n.maxWeight, "${vehicle['maxWeight']} kg"),
-            const SizedBox(height: 12),
-            _buildInfoRow(Icons.aspect_ratio_rounded, l10n.maxVolume, "${vehicle['volume']} m³"),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   IntrinsicWidth(
+                    child: TextField(
+                      controller: _offerController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: colorScheme.onSurface,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "0",
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        LengthLimitingTextInputFormatter(6),
+                      ],
+                      onChanged: _validateOffer,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "DT",
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // 3. Min / Max Visual Guide
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildPriceLimitBadge("Min", _minAllowedPrice, colorScheme, textTheme),
+                
+                if (_offerErrorText != null)
+                   Text(
+                    _offerErrorText!,
+                    style: TextStyle(
+                      color: _priceStatusColor, 
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12
+                    ),
+                  )
+                else
+                   const Text("Fair Price", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+
+                _buildPriceLimitBadge("Max", _maxAllowedPrice, colorScheme, textTheme),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLocationRow(IconData icon, String title, String location) {
-    return Row(
+  Widget _buildPriceLimitBadge(String label, double price, ColorScheme colorScheme, TextTheme textTheme) {
+    return Column(
+      crossAxisAlignment: label == "Min" ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
-        Icon(icon, color: const Color(0xFFE5B800), size: 20),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 14,),
-              ),
-              Text(
-                location,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        Text(
+          label.toUpperCase(),
+          style: textTheme.labelSmall?.copyWith(color: colorScheme.outline),
+        ),
+        const SizedBox(height: 2),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            "${price.toStringAsFixed(0)} DT",
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildDetailsCard(String name, double weight, double vol, ColorScheme colorScheme, TextTheme textTheme) {
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow(Icons.my_location, widget.pickup_name, colorScheme, textTheme, isStart: true),
+            ...widget.dropOffDestination.map((d) => _buildDetailRow(Icons.location_on, d.destinationName, colorScheme, textTheme)).toList(),
+
+            const SizedBox(height: 25),
+
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildTechSpec(Icons.scale, "${weight.toStringAsFixed(0)} kg", "Max Load", colorScheme, textTheme),
+                  Container(height: 30, width: 1, color: colorScheme.outlineVariant),
+                  _buildTechSpec(Icons.view_in_ar, "${vol.toStringAsFixed(1)} m³", "Volume", colorScheme, textTheme),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text, ColorScheme colorScheme, TextTheme textTheme, {bool isStart = false}) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20,),
-        const SizedBox(width: 16),
+        Column(
+          children: [
+            Icon(icon, color: colorScheme.primary, size: 24),
+            if (isStart)
+              Container(height: 24, width: 2, color: colorScheme.outlineVariant, margin: const EdgeInsets.symmetric(vertical: 2)),
+          ],
+        ),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 16,),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+                color: colorScheme.onSurface
+              ),
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildTechSpec(IconData icon, String value, String label, ColorScheme colorScheme, TextTheme textTheme) {
+    return Column(
+      children: [
+        Icon(icon, color: colorScheme.secondary, size: 22),
+        const SizedBox(height: 4),
         Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+          value, 
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface)
+        ),
+        Text(
+          label, 
+          style: textTheme.bodySmall?.copyWith(color: colorScheme.outline)
         ),
       ],
     );

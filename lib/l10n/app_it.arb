@@ -207,7 +207,7 @@
 "@back": {
 "description": "Text for the back button on the map view."
 },
-"confirmPosition": "Conferma posizione",
+"confirmPosition": "Conferma",
 "@confirmPosition": {
 "description": "Text for the button to confirm the selected position on the map."
 },
@@ -440,7 +440,6 @@
     },
     "chooseLoadingPosition": "Scegli la posizione di carico",
     "back": "Indietro",
-    "confirmPosition": "Conferma posizione",
 
 
      "selectAtLeastOneDestination": "Seleziona almeno una destinazione.",
@@ -501,7 +500,81 @@
         "placeholders": {
             "volume": {}
         }
-    }
+    },
+
+    "selectStarError": "Seleziona almeno una stella.",
+  "ratingSuccess": "Grazie per la tua valutazione!",
+  "rateRide": "Valuta la tua corsa",
+  "ratingHelper": "Il tuo feedback ci aiuta a migliorare.",
+  "commentHint": "Lascia un commento (facoltativo)...",
+  "submitRating": "Invia recensione",
+
+
+  
+  "serviceTypeTitle": "Tipo di Servizio",
+  "serviceTypeSubtitle": "Seleziona l'opzione che descrive meglio il tuo carico.",
+  "st_simple_transport_title": "Trasporto Semplice",
+  "st_simple_transport_sub": "Documenti, chiavi, piccoli pacchi.",
+  "st_store_pickup_title": "Piccolo Trasloco",
+  "st_store_pickup_sub": "Mobili, elettrodomestici da negozio.",
+  "st_small_move_title": "Trasloco Medio",
+  "st_small_move_sub": "Monolocale, studenti, pochi oggetti.",
+  "st_full_move_title": "Grande Trasloco",
+  "st_full_move_sub": "2+ Camere, mobili pesanti, servizio completo.",
+
+
+  "userNotFound": "Utente non trovato.",
+    "wrongPassword": "Password errata.",
+    "invalidEmail": "Email non valida.",
+    "userDisabled": "Utente disabilitato.",
+    "signInFailed": "Accesso fallito.",
+    "connectionError": "Errore di connessione. Riprova.",
+    "slogan": "Traslochi Facili",
+    "hello": "Ciao!",
+    "signInToContinue": "Accedi per continuare.",
+    "emailLabel": "Indirizzo Email",
+    "emailError": "Email valida richiesta",
+    "passwordLabel": "Password",
+    "passwordError": "Minimo 6 caratteri",
+    "forgotPassword": "Password dimenticata?",
+    "signInButton": "ACCEDI",
+    "or": "O",
+    "noAccountYet": "Non hai ancora un account? ",
+    "createAccount": "Crea un account",
+    "invalidPhone": "Numero di telefono non valido",
+    "codeSentTo": "Codice di verifica inviato a {email}",
+    "wrongCode": "Codice errato.",
+    "createUserFailed": "Impossibile creare utente",
+    "newAccountTitle": "Nuovo Account",
+    "clientInfoStep": "Info Cliente",
+    "securityStep": "Sicurezza",
+    "welcome": "Benvenuto!",
+    "createAccountSubtitle": "Crea un account per prenotare un camion.",
+    "fullNameLabel": "Nome Completo",
+    "mobilePhoneLabel": "Telefono Cellulare",
+    "verifyEmailButton": "VERIFICA EMAIL",
+    "emailValidationTitle": "Convalida Email",
+    "codeSentToLabel": "Codice inviato a: {email}",
+    "verificationCodeLabel": "Codice di Verifica",
+    "incompleteCode": "Codice incompleto",
+    "createPasswordLabel": "Crea Password",
+    "confirmPasswordLabel": "Conferma Password",
+    "createMyAccountButton": "CREA IL MIO ACCOUNT",
+    "editInfoButton": "Modifica le mie info",
+    "fieldRequired": "Campo obbligatorio",
+  "myActivity": "La mia attività",
+  "errorLoadingData": "Errore caricamento dati",
+  "recentRides": "Corse recenti",
+  "total": "Totale",
+  "completed": "Completato",
+  "canceled": "Cancellato",
+  "totalSpent": "Spesa totale",
+  "ongoing": "In corso",
+  "enRoute": "In viaggio",
+  "destinations": "Fermate",
+  "noActivityYet": "Nessuna attività ancora"
+
+
 
 
 }

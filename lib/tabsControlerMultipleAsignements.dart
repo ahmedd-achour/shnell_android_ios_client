@@ -28,7 +28,8 @@ class _MultipleTrackingScreenState extends State<MultipleTrackingScreen>
   @override
   void initState() {
     super.initState();
-    // No need to initialize TabController here
+    // No ne
+    //ed to initialize TabController here
   }
 
   @override
@@ -68,7 +69,6 @@ class _MultipleTrackingScreenState extends State<MultipleTrackingScreen>
     // Dispose the old controller before creating a new one
     _tabController?.dispose();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -88,13 +88,12 @@ class _MultipleTrackingScreenState extends State<MultipleTrackingScreen>
                   builder: (context) {
                     return ClipOval(
                       child: Material(
-                        color: isDarkMode ? Colors.black : Colors.white,
                         child: InkWell(
                           onTap: () => Scaffold.of(context).openDrawer(),
-                          child: const SizedBox(
+                          child:  SizedBox(
                             width: 50,
                             height: 50,
-                            child: Icon(Icons.menu, color: Colors.amber, size: 28),
+                            child: Icon(Icons.menu, color:Theme.of(context).colorScheme.primary, size: 28),
                           ),
                         ),
                       ),
@@ -107,18 +106,17 @@ class _MultipleTrackingScreenState extends State<MultipleTrackingScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.black38.withOpacity(0.9) : Colors.white.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(30),
+                      color: Theme.of(context).colorScheme.surface
                     ),
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
-                      labelColor: Colors.amber,
-                      unselectedLabelColor: Colors.grey,
+                      labelColor: Theme.of(context).colorScheme.primary,
                       labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      indicator: const UnderlineTabIndicator(
+                      indicator:  UnderlineTabIndicator(
                         borderSide: BorderSide(
-                          color: Colors.amber,
+                          color: Theme.of(context).colorScheme.primary,
                           width: 3.0,
                         ),
                         insets: EdgeInsets.only(bottom: 4),

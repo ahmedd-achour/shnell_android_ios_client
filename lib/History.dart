@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shnell/dots.dart';
 import 'package:shnell/drawer.dart';
 
 // Internal Imports
@@ -91,7 +92,7 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
         stream: _historyStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: RotatingDotsIndicator());
           }
           
           if (snapshot.hasError) {
@@ -112,33 +113,19 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
               const Divider(height: 1),
 
               // 2. LIST HEADER
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Row(
-                  children: [
-                    Text(
-                      l10n.recentRides, 
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface
-                      )
-                    ),
-                    const Spacer(),
-                    Text(
-                      "${history.length} ${l10n.total}", 
-                      style: TextStyle(fontSize: 12, color: colorScheme.outline)
-                    ),
-                  ],
-                ),
-              ),
-
+      
               // 3. HISTORY LIST
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: history.length,
                   itemBuilder: (context, index) {
-                    return _buildHistoryCard(history[index], theme, l10n);
+                    return Column(
+                      children: [
+                            
+                        _buildHistoryCard(history[index], theme, l10n),
+                      ],
+                    );
                   },
                 ),
               ),
@@ -205,6 +192,7 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
               iconColor: theme.colorScheme.primary,
             ),
           ),
+
         ],
       ),
     );

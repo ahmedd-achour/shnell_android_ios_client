@@ -29,7 +29,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   int? _remoteUid;
   bool _isMicMuted = false;
   bool _isSpeakerOn = true;
-  bool _isCallEnded = false;
   bool _isConnected = false;
 
   final String _appId = "392d2910e2f34b4a885212cd49edcffa";
@@ -51,7 +50,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused && !_isCallEnded) {
+    if (state == AppLifecycleState.paused) {
       _endCall(reason: 'ended');
     }
   }
@@ -160,43 +159,66 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   }
 
 Future<void> _endCall({String reason = 'ended'}) async {
-  if (_isCallEnded) return;
-  _isCallEnded = true;
-    
+  if (!mounted) return; // ← PREVENT CRASH IF WIDGET ALREADY DISPOSED
 
   _ringtonePlayer.stop();
   _durationTimer?.cancel();
   _callStatusSubscription?.cancel();
-   final receiverDoc = await FirebaseFirestore.instance.collection('users').doc(widget.call.driverId).get();
-    final fcmToken = receiverDoc.data()?['fcmToken'] as String?;
-    await http.post(
-    Uri.parse('https://us-central1-shnell-393a6.cloudfunctions.net/terminateCall'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'dealId': widget.call.dealId,
-      'status': 'ended',
-      'receiverFCMToken': fcmToken,  // kills receiver's ringing CallKit
-      // You can optionally pass FCM tokens if you have them
-    }));
 
+  // Safely get FCM token — NO CRASH if null
+  String? receiverFcmToken;
+  try {
+    final receiverId = widget.isCaller ? widget.call.receiverId : widget.call.driverId;
+    if (receiverId.isNotEmpty) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(receiverId)
+          .get();
+      receiverFcmToken = doc.data()?['fcmToken'] as String?;
+    }
+  } catch (e) {
+    debugPrint("Failed to get FCM token for terminateCall: $e");
+    // Continue anyway — not critical
+  }
+
+  // Call terminateCall — safe even if token is null
+  try {
+    await http.post(
+      Uri.parse('https://us-central1-shnell-393a6.cloudfunctions.net/terminateCall'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'dealId': widget.call.dealId,
+        'status': reason,
+        if (receiverFcmToken != null) 'receiverFCMToken': receiverFcmToken,
+      }),
+    );
+  } catch (e) {
+    debugPrint("terminateCall HTTP failed (non-critical): $e");
+    // Don't let this crash the app
+  }
+
+  // Leave Agora channel safely
   try {
     await _engine.leaveChannel();
   } catch (_) {}
-  _engine.release();
 
+  try {
+    _engine.release();
+  } catch (_) {}
 
-  // Always clean CallKit state on exit
-  await FlutterCallkitIncoming.endAllCalls();
+  // Kill CallKit
+  try {
+    await FlutterCallkitIncoming.endAllCalls();
+  } catch (_) {}
 
+  // Navigate only if still mounted
   if (!mounted) return;
 
-  if (Navigator.canPop(context)) {
-    Navigator.pop(context);
-  } else {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainUsersScreen()));
-  }
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const MainUsersScreen()),
+  );
 }
-
 
   void _toggleMute() {
     setState(() => _isMicMuted = !_isMicMuted);

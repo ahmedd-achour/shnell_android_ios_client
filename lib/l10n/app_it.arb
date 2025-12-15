@@ -40,7 +40,9 @@
   "driverPerformanceHeading": "13. Visualizzazione delle prestazioni dell'autista e accettazione delle offerte",
   "driverPerformanceBody": "shnell Logistics consente agli Autisti di prendere decisioni informate sull'accettazione delle richieste di consegna, supportate da dati di prestazione trasparenti.",
   "pickupLocation": "Luogo di ritiro",
-"whereDoYouWantToGo": "Dove vorresti andare?",
+
+"whereDoYouWantToGo": "Dove vuoi traslocare?",
+"notSuitable": "Non adatto",
 "retry": "Riprova",
 "selectLocationTitle": "Seleziona luogo di {type}",
 "searchForALocation": "Cerca una posizione",

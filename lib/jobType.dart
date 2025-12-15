@@ -144,127 +144,244 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+@override
+Widget build(BuildContext context) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final l10n = AppLocalizations.of(context)!;
 
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: colorScheme.surface,
-        body: const Center(child: RotatingDotsIndicator()),
-      );
-    }
-
+  if (_isLoading) {
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(context, colorScheme, l10n),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Text(
-                    l10n.serviceTypeTitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: colorScheme.onSurface),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.serviceTypeSubtitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                itemCount: _serviceTypes.length,
-                separatorBuilder: (ctx, i) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final type = _serviceTypes[index];
-                  final isSelected = _selectedTypeId == type.id;
-                  return _buildServiceCard(type, isSelected, colorScheme, l10n);
-                },
-              ),
-            ),
-            _buildBottomBar(colorScheme, l10n),
-          ],
-        ),
-      ),
+      body: const Center(child: RotatingDotsIndicator()),
     );
   }
-  
-  Widget _buildHeader(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+
+  return Scaffold(
+    backgroundColor: colorScheme.surface,
+    body: SafeArea(
+      child: Column(
         children: [
-          CircleAvatar(
-            backgroundColor: colorScheme.surfaceContainerHighest,
-            foregroundColor: colorScheme.onSurface,
-            child: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+          // === Enhanced Header ===
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 24, 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    l10n.serviceTypeTitle,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const Spacer(),
-          
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              l10n.serviceTypeSubtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // === Service Type Cards ===
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              itemCount: _serviceTypes.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final type = _serviceTypes[index];
+                final isSelected = _selectedTypeId == type.id;
+
+                return _buildServiceCard(type, isSelected, colorScheme, l10n);
+              },
+            ),
+          ),
+
+          // === Bottom Continue Button ===
+          _buildBottomBar(colorScheme, l10n),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildServiceCard(ServiceTypeUiModel data, bool isSelected, ColorScheme colorScheme, AppLocalizations l10n) {
-    final title = _getLocalizedTitle(data.id, l10n, data.title);
-    final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
+Widget _buildServiceCard(
+  ServiceTypeUiModel data,
+  bool isSelected,
+  ColorScheme colorScheme,
+  AppLocalizations l10n,
+) {
+  final title = _getLocalizedTitle(data.id, l10n, data.title);
+  final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
 
-    return GestureDetector(
-      onTap: () { setState(() => _selectedTypeId = data.id); HapticFeedback.lightImpact(); },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primaryContainer : colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? colorScheme.primary : Colors.transparent, width: 2),
+  return GestureDetector(
+    onTap: () {
+      HapticFeedback.lightImpact();
+      setState(() => _selectedTypeId = data.id);
+    },
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? colorScheme.primaryContainer.withOpacity(0.35)
+            : colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isSelected ? colorScheme.primary : colorScheme.outline.withOpacity(0.15),
+          width: isSelected ? 2.5 : 1,
         ),
-        child: Row(
-          children: [
-            SizedBox(width: 50, height: 50, child: Image.asset(data.iconAsset, fit: BoxFit.cover)),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                  Text(subtitle, style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
-                ],
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          // === ICON CONTAINER – FULL COVERAGE ===
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18), // Slightly rounded for elegance
+            child: Container(
+              width: 80,
+              height: 80,
+              color: isSelected
+                  ? colorScheme.primary.withOpacity(0.18)
+                  : colorScheme.primaryContainer.withOpacity(0.35),
+              child: Image.asset(
+                data.iconAsset,
+                fit: BoxFit.cover, // ← Critical: covers entire space, including edges
+                width: 80,
+                height: 80,
+                // Optional: slight tint when selected, but keeps image clear
+                color: isSelected
+                    ? colorScheme.primary.withOpacity(0.25)
+                    : null,
+                colorBlendMode: isSelected ? BlendMode.srcATop : null,
               ),
             ),
-            if (isSelected) Icon(Icons.check_circle, color: colorScheme.primary),
-          ],
-        ),
-      ),
-    );
-  }
+          ),
 
-  Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 34),
-      decoration: BoxDecoration(color: colorScheme.surface, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -5))]),
+          const SizedBox(width: 20),
+
+          // === TEXT CONTENT ===
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18.5,
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // === SELECTION CHECKMARK ===
+          AnimatedScale(
+            scale: isSelected ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.elasticOut,
+            child: Icon(
+              Icons.check_circle_rounded,
+              color: colorScheme.primary,
+              size: 34,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
+  final bool isEnabled = _selectedTypeId != null;
+
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(24, 16, 24, 34),
+    decoration: BoxDecoration(
+      color: colorScheme.surface,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 20,
+          offset: const Offset(0, -8),
+        ),
+      ],
+    ),
+    child: SafeArea(
+      top: false,
       child: SizedBox(
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: _selectedTypeId != null ? _onContinue : null,
-          style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-          child: Text(l10n.continueText.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        height: 56,
+        child: FilledButton.tonal(
+          onPressed: isEnabled ? _onContinue : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: isEnabled ? colorScheme.primary : colorScheme.surfaceContainerHighest,
+            foregroundColor: isEnabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            elevation: isEnabled ? 6 : 0,
+            shadowColor: isEnabled ? colorScheme.primary.withOpacity(0.4) : Colors.transparent,
+          ),
+          child: Text(
+            l10n.continueText,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

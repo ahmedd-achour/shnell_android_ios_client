@@ -44,7 +44,9 @@
   "driverPerformanceHeading": "13. Просмотр эффективности водителя и принятие предложений",
   "driverPerformanceBody": "shnell Logistics позволяет Водителям принимать обоснованные решения о принятии запросов на доставку, подкрепленные прозрачными данными об эффективности.",
   "pickupLocation": "Место посадки",
-"whereDoYouWantToGo": "Куда вы хотите поехать?",
+
+"whereDoYouWantToGo": "Куда вы хотите переехать?",
+"notSuitable": "Не подходит",
 "retry": "Повторить",
 "selectLocationTitle": "Выбрать место {type}",
 "searchForALocation": "Искать местоположение",

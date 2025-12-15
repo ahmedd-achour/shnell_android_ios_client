@@ -400,7 +400,7 @@ Future<void> _initiateInAppCall() async {
       );
       final isproceed =  await CallService().makeCall(call: call); // Ceci appelle la fonction Cloud
 
-        if (!isproceed) {
+        if (isproceed == false) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Call initiation failed')),

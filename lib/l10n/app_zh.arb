@@ -41,7 +41,11 @@
   "driverPerformanceHeading": "13. 司机表现展示和接受报价",
   "driverPerformanceBody": "shnell Logistics 使司机能够根据透明的表现数据做出关于接受投递请求的明智决定。",
   "pickupLocation": "取货地点",
-"whereDoYouWantToGo": "你想去哪里？",
+
+
+"whereDoYouWantToGo": "您想搬到哪里？",
+"notSuitable": "不合适",
+
 "retry": "重试",
 "selectLocationTitle": "选择 {type} 地点",
 "searchForALocation": "搜索地点",

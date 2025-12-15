@@ -20,6 +20,7 @@ class CallService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? _currentActiveCallId;
 
+
   Future<void> init() async {
     await _requestPermissions();
     _setupFCMListener();
@@ -46,7 +47,7 @@ class CallService {
   }
 
   Future<void> _checkForActiveCallOnColdStart() async {
-    await Future.delayed(const Duration(milliseconds: 1000));
+   // await Future.delayed(const Duration(milliseconds: 1000));
 
     final activeCalls = await FlutterCallkitIncoming.activeCalls();
     if (activeCalls.isEmpty) return;
@@ -114,13 +115,6 @@ class CallService {
     );
 
     await FlutterCallkitIncoming.showCallkitIncoming(params);
-
-    Timer(const Duration(seconds: 45), () {
-      if (_currentActiveCallId == dealId) {
-        updateCallStatus(dealId, 'missed');
-        _currentActiveCallId = null;
-      }
-    });
   }
 
   Future<void> updateCallStatus(String dealId, String status) async {
@@ -139,16 +133,7 @@ class CallService {
     final fcmToken = receiverDoc.data()?['fcmToken'] as String?;
 
     if (fcmToken == null) return false;
-
-    await _firestore.collection('calls').doc(call.dealId).set({
-      'callerId': user.uid,
-      'receiverId': call.driverId,
-      'callStatus': 'dialing',
-      'agoraChannel': call.agoraChannel,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-
-    final response = await http.post(
+final response = await http.post(
       Uri.parse('https://us-central1-shnell-393a6.cloudfunctions.net/initiateCall'),
       headers: {
         'Content-Type': 'application/json',
@@ -159,12 +144,24 @@ class CallService {
         'dealId': call.dealId,
       }),
     );
+if(response.statusCode == 200){
+    await _firestore.collection('calls').doc(call.dealId).set({
+      'callerId': user.uid,
+      'receiverId': call.driverId,
+      'callStatus': 'dialing',
+      'agoraChannel': call.agoraChannel,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+}
+  
+
+   
 
     return response.statusCode == 200;
   }
 
   Future<Call?> getActiveIncomingCallIfAny() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+   // await Future.delayed(const Duration(milliseconds: 800));
 
     final activeCalls = await FlutterCallkitIncoming.activeCalls();
     if (activeCalls.isEmpty) return null;

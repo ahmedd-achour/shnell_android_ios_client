@@ -40,7 +40,11 @@
   "driverPerformanceHeading": "13. ドライバーのパフォーマンス表示と取引の受け入れ",
   "driverPerformanceBody": "shnell Logisticsは、ドライバーが配達リクエストを受け入れることについて、透明なパフォーマンスデータによって裏付けられた、十分な情報に基づいた決定を下せるようにします。",
   "pickupLocation": "ピックアップ場所",
-"whereDoYouWantToGo": "どこに行きたいですか？",
+
+
+"whereDoYouWantToGo": "どこに引っ越したいですか？",
+"notSuitable": "不適合",
+
 "retry": "再試行",
 "selectLocationTitle": "{type}場所を選択",
 "searchForALocation": "場所を検索",

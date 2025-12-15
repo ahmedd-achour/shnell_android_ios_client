@@ -40,7 +40,10 @@
   "driverPerformanceHeading": "13. Visualización del rendimiento del conductor y aceptación de ofertas",
   "driverPerformanceBody": "shnell Logistics capacita a los Conductores para que tomen decisiones informadas sobre la aceptación de las solicitudes de entrega, respaldadas por datos de rendimiento transparentes.",
   "pickupLocation": "Lugar de recogida",
-"whereDoYouWantToGo": "¿A dónde te gustaría ir?",
+
+"whereDoYouWantToGo": "¿Adónde quieres mudarte?",
+"notSuitable": "No adecuado",
+
 "retry": "Reintentar",
 "selectLocationTitle": "Seleccionar ubicación de {type}",
 "searchForALocation": "Buscar una ubicación",

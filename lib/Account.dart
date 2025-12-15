@@ -79,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
       ),
-      drawer: const ShnellDrawer(),
+      drawer:  ShnellDrawer(),
       body: Stack(
         children: [
           StreamBuilder<DocumentSnapshot>(

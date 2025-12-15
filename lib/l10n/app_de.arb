@@ -40,7 +40,9 @@
   "driverPerformanceHeading": "13. Anzeige der Fahrerleistung und Angebotsannahme",
   "driverPerformanceBody": "shnell Logistics befähigt Fahrer, fundierte Entscheidungen über die Annahme von Lieferanfragen zu treffen, unterstützt durch transparente Leistungsdaten.",
   "pickupLocation": "Abholort",
-"whereDoYouWantToGo": "Wohin möchten Sie gehen?",
+
+"whereDoYouWantToGo": "Wohin möchten Sie umziehen?",
+"notSuitable": "Nicht geeignet",
 "retry": "Wiederholen",
 "selectLocationTitle": "Standort für {type} auswählen",
 "searchForALocation": "Standort suchen",

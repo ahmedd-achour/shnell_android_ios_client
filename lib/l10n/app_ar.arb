@@ -40,8 +40,12 @@
   "driverPerformanceHeading": "13. عرض أداء السائق وقبول الصفقات",
   "driverPerformanceBody": "تمنح شركة شنيل اللوجستية السائقين الاستقلالية لاتخاذ قرارات مستنيرة بشأن قبول طلبات التوصيل، مدعومة ببيانات أداء شفافة.",
   "pickupLocation": "موقع الالتقاء",
-"whereDoYouWantToGo": "إلى أين تريد الذهاب؟",
+"whereDoYouWantToGo": "إلى أين تريد الانتقال؟",
+"notSuitable": "غير مناسب",
+
 "retry": "أعد المحاولة",
+
+
 "selectLocationTitle": "اختر موقع {type}",
 "searchForALocation": "البحث عن موقع",
 "useCurrentLocation": "استخدام الموقع الحالي",

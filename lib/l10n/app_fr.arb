@@ -40,7 +40,11 @@
   "driverPerformanceHeading": "13. Affichage des performances du chauffeur et acceptation des offres",
   "driverPerformanceBody": "shnell Logistics donne aux chauffeurs l'autonomie nécessaire pour prendre des décisions éclairées concernant l'acceptation des demandes de livraison, avec le soutien de données de performance transparentes.",
   "pickupLocation": "Lieu de départ",
-"whereDoYouWantToGo": "Où souhaitez-vous aller ?",
+
+"whereDoYouWantToGo": "Où voulez-vous déménager ?",
+"notSuitable": "Non adapté",
+
+
 "retry": "Réessayer",
 "selectLocationTitle": "Sélectionner le lieu de {type}",
 "searchForALocation": "Rechercher un lieu",

@@ -59,8 +59,8 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
           padding: EdgeInsets.zero,
           children: [
             _buildDrawerTile(
-              icon: Icons.dashboard,
-              title: l10n.drawerUpdateApp,
+              icon: Icons.home,
+              title: l10n.home,
               onTap: () => _navigateToMainUsersScreen(context, 0),
             ),
             _buildDrawerTile(
@@ -122,21 +122,21 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
                 ),
               ),
               _buildDrawerTile(
-                icon: Icons.dashboard,
-                title: l10n.drawerUpdateApp,
+                icon: Icons.home,
+                title: l10n.home,
                 onTap: () => _navigateToMainUsersScreen(context, 0),
               ),
               _buildDrawerTile(
-                icon: Icons.settings,
-                title: l10n.drawerAccountSettings,
+                icon: Icons.person,
+                title: l10n.account,
                 onTap: () => _navigateToMainUsersScreen(context, 2),
               ),
               _buildDrawerTile(
-                icon: Icons.fire_truck,
+                icon: Icons.history,
                 title: l10n.drawerMyServices,
                 onTap: () => _navigateToMainUsersScreen(context, 1),
               ),
-              const Divider(color: Colors.amber),
+               Divider(color: Theme.of(context).dividerColor),
               _buildDrawerTile(
                 icon: Icons.help_outline,
                 title: l10n.drawerHelpAndSupport,

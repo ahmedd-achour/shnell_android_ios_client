@@ -17,14 +17,17 @@ import 'dart:ui' show TextDirection;
 
 class ShnellMAp extends StatefulWidget {
   const ShnellMAp({super.key});
+  
 
   @override
   State<ShnellMAp> createState() => _MapViewState();
 }
 
 class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   static const String _googleApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w";
-  static const int _maxDropOffs = 24;
+  static const int _maxDropOffs = 9;
   static const Duration _debounceDuration = Duration(milliseconds: 500);
 
   final Completer<GoogleMapController> _mapController = Completer();
@@ -41,8 +44,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
   bool _isWaitingForSet = false;
   bool _needsBoundsUpdate = false;
 
-  @override
-  bool get wantKeepAlive => true;
+
 
   @override
   void initState() {
@@ -527,6 +529,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
       bottomSheet: _buildDraggableSheet(),
     );
   }
+
 Widget _buildDropOffFieldSliver({
     required BuildContext context,
     required TextEditingController controller,
@@ -598,196 +601,203 @@ Widget _buildDropOffFieldSliver({
   }
 
 
-  // Ajoutez cette méthode dans votre classe State
-
-
 Widget _buildDraggableSheet() {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) return const SizedBox.shrink();
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final primaryColor = colorScheme.primary;
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final primaryColor = colorScheme.primary;
 
-    return AnimatedBuilder(
-      animation: _dropOffControllersNotifier,
-      builder: (context, child) {
-        // Utilisation de LayoutBuilder pour obtenir la hauteur totale de l'écran
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final double screenHeight = constraints.maxHeight;
+  // Condition: Continue button is valid only if pickup is set AND at least one valid drop-off exists
+  final bool canContinue = _pickupAddress != null &&
+      _dropOffData.any((d) => d.destination.latitude != 0 && d.destination.longitude != 0);
 
-            // --- CALCUL DES HAUTEURS EN PIXELS (Fixes) ---
-            
-            // 1. Footer (Bouton + Padding)
-            // Bouton (48px) + Padding Top (10px) + Padding Bottom (16px pour safe area/marge)
-            const double footerPixels = 48.0 + 10.0 + 16.0;
+  return AnimatedBuilder(
+    animation: _dropOffControllersNotifier,
+    builder: (context, child) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final double screenHeight = constraints.maxHeight;
 
-            // 2. Header (Poignée + Titre "Where to go")
-            // Poignée (4px) + Marges (32px) + Texte (22px * 1.2 line height ≈ 27px)
-            const double headerPixels = 70.0;
+          // Fixed heights
+          const double headerPixels = 70.0; // Handle + title + small margins
+          const double pickupCardPixels = 110.0; // Approx height of pickup card + spacing
+          const double destinationTitlePixels = 40.0; // "Destination" label + spacing
 
-            // 3. Calcul du ratio (0.0 à 1.0)
-            // On ajoute une petite marge de sécurité (+10px)
-            final double minSizeCalculated = (footerPixels + headerPixels) / screenHeight;
-            
-            // Sécurité : on s'assure que la valeur reste entre 0.1 et 0.5
-            final double minChildSize = minSizeCalculated.clamp(0.1, 0.5);
+          // Footer when button is shown
+          const double footerVisiblePixels = 48.0 + 10.0 + 16.0; // button 48 + padding top 10 + bottom 16
 
-            return DraggableScrollableSheet(
-              key: _bottomSheetKey,
-              initialChildSize: 0.55,
-              minChildSize: minChildSize, // Valeur dynamique calculée
-              maxChildSize: 0.8,
-              expand: false,
-              snap: true,
-              // Le premier point de snap est maintenant exactement la hauteur du header + bouton
-              snapSizes: [minChildSize, 0.55, 0.8],
-              builder: (BuildContext context, ScrollController scrollController) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, -10),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      // --- COUCHE 1 : LE CONTENU DÉFILANT ---
-                      CustomScrollView(
-                        controller: scrollController,
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                        slivers: [
-                          // Poignée
-                          SliverToBoxAdapter(
-                            child: Center(
-                              child: Container(
-                                width: 48,
-                                height: 4,
-                                margin: const EdgeInsets.symmetric(vertical: 16),
-                                decoration: BoxDecoration(
-                                  color: primaryColor.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(12),
+          // Footer when button is hidden (minimal safe area margin)
+          const double footerHiddenPixels = 20.0;
+
+          // Choose footer height based on button visibility
+          final double footerPixels = canContinue ? footerVisiblePixels : footerHiddenPixels;
+
+          // Base content height (always present)
+          double baseContentPixels = headerPixels + pickupCardPixels + destinationTitlePixels;
+
+          // Add approximate height for drop-off fields (only if any exist)
+          // Each drop-off field ≈ 64px (including margins)
+          if (_dropOffControllersNotifier.value.isNotEmpty) {
+            baseContentPixels += _dropOffControllersNotifier.value.length * 72.0;
+            baseContentPixels += 40.0; // Add destination button space if present
+          }
+
+          // Final min height calculation
+          final double totalMinPixels = baseContentPixels + footerPixels + 20; // +20 safety
+          final double minChildSize = (totalMinPixels / screenHeight).clamp(0.15, 0.5);
+
+          return DraggableScrollableSheet(
+            key: _bottomSheetKey,
+            initialChildSize: canContinue ? 0.55 : minChildSize + 0.05, // Slightly larger than min when small
+            minChildSize: minChildSize,
+            maxChildSize: 0.8,
+            expand: false,
+            snap: true,
+            snapSizes: [minChildSize, 0.55, 0.8],
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, -10),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    // Scrollable content
+                    CustomScrollView(
+                      controller: scrollController,
+                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                      slivers: [
+                        // Handle
+                        SliverToBoxAdapter(
+                          child: Center(
+                            child: Container(
+                              width: 48,
+                              height: 4,
+                              margin: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Title + Pickup
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.whereDoYouWantToGo,
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.onSurface,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 16),
+                                _buildLocationCard(
+                                  context: context,
+                                  title: l10n.pickup,
+                                  icon: Icons.my_location_rounded,
+                                  controller: _pickupController,
+                                  hintText: l10n.pickupLocation,
+                                  onTap: () => _openSearch('pickup'),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  l10n.destination,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface.withOpacity(0.6),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
                             ),
                           ),
+                        ),
 
-                          // Titre + Pickup
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.whereDoYouWantToGo,
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _buildLocationCard(
+                        // Drop-off fields
+                        ValueListenableBuilder<List<TextEditingController>>(
+                          valueListenable: _dropOffControllersNotifier,
+                          builder: (context, controllers, child) {
+                            return SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  return _buildDropOffFieldSliver(
                                     context: context,
-                                    title: l10n.pickup,
-                                    icon: Icons.my_location_rounded,
-                                    controller: _pickupController,
-                                    hintText: l10n.pickupLocation,
-                                    onTap: () => _openSearch('pickup'),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(
-                                    l10n.destination,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onSurface.withOpacity(0.6),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
+                                    controller: controllers[index],
+                                    index: index,
+                                  );
+                                },
+                                childCount: controllers.length,
                               ),
-                            ),
+                            );
+                          },
+                        ),
+
+                        // Add destination button
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: _dropOffControllersNotifier.value.length < _maxDropOffs
+                                ? _buildAddDestinationButton(context)
+                                : const SizedBox(height: 20),
                           ),
+                        ),
 
-                          // Liste des destinations
-                         // Liste des destinations (Sans réorganisation manuelle)
-ValueListenableBuilder<List<TextEditingController>>(
-  valueListenable: _dropOffControllersNotifier,
-  builder: (context, controllers, child) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          // No RepaintBoundary or Reorderable wrapper needed here for standard lists
-          return _buildDropOffFieldSliver(
-            context: context,
-            controller: controllers[index],
-            index: index,
-          );
-        },
-        childCount: controllers.length,
-      ),
-    );
-  },
-),
-
-                          // Bouton "Ajouter une destination"
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                              child: _dropOffControllersNotifier.value.length < _maxDropOffs
-                                  ? _buildAddDestinationButton(context)
-                                  : const SizedBox(height: 20),
-                            ),
+                        // Bottom padding to avoid overlap with footer
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: footerPixels + MediaQuery.of(context).viewInsets.bottom,
                           ),
+                        ),
+                      ],
+                    ),
 
-                          // Espace vide pour ne pas cacher le dernier élément derrière le footer
-                          SliverToBoxAdapter(
-                            child: SizedBox(height: footerPixels + MediaQuery.of(context).viewInsets.bottom),
-                          ),
-                        ],
-                      ),
-
-                      // --- COUCHE 2 : LE BOUTON FIXE (REDUIT) ---
+                    // Fixed Continue button — only shown when valid
+                    if (canContinue)
                       Positioned(
                         left: 0,
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          // Padding réduit pour gagner de la place (10 en haut, 16 en bas)
                           padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
                           decoration: BoxDecoration(
                             color: colorScheme.surface,
-                            // Optionnel : petite ligne de séparation subtile si désiré
                             border: Border(top: BorderSide(color: colorScheme.outline.withOpacity(0.05))),
                           ),
                           child: SafeArea(
                             top: false,
-                            child: _pickupAddress == null || _dropOffData.isEmpty
-                                ? _buildContinueButton(context, isActive: false)
-                                : _buildContinueButton(context, isActive: true),
+                            child: _buildContinueButton(context, isActive: true),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-        );
-      },
-    );
-  }
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+}
 
-  // --- BOUTON CONTINUER RÉDUIT ---
+// --- BOUTON CONTINUER RÉDUIT ---
   Widget _buildContinueButton(BuildContext context, {required bool isActive}) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();

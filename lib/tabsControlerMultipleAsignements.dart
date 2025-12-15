@@ -28,8 +28,7 @@ class _MultipleTrackingScreenState extends State<MultipleTrackingScreen>
   @override
   void initState() {
     super.initState();
-    // No ne
-    //ed to initialize TabController here
+    // No need to initialize TabController here
   }
 
   @override

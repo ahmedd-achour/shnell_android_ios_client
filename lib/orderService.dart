@@ -61,7 +61,6 @@ class OrderService {
           stops: data['stops'],
           vehicleType: data['vehicleType'],
           isAcepted: data['isAcepted'] ?? false,
-          additionalInfo: data['additionalInfo'],
           id: data['id'],
         );
       }

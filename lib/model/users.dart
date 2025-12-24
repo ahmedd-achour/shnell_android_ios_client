@@ -18,7 +18,6 @@ class shnellUsers {
     required this.phone,
     required this.role,
     this.fcmToken,
-    
     this.balance,
     this.vehicleType,
     this.vehicleId,

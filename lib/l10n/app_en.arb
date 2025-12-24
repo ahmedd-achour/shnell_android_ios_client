@@ -32,17 +32,22 @@
   "childrenPrivacyHeading": "9. Children's Privacy",
   "childrenPrivacyBody": "The App is not intended for users under 18 years of age. We do not knowingly collect personal information from children under 18.\n\n**9.1 Age Restrictions**\n\n- Users must be at least 18 years old to create an account or use our services.\n- Drivers must meet additional age and licensing requirements as specified in our Terms of Use (e.g., minimum age of 21 for certain vehicle types).\n\n**9.2 Parental Consent**\n\n- If we become aware that a user under 18 has provided personal information without verifiable parental consent, we will delete the information promptly.\n- Parents or guardians who believe their child has submitted data to the App should contact support@shnell.com immediately.\n\n**9.3 COPPA Compliance**\n\n- For U.S. users, we comply with the Children’s Online Privacy Protection Act (COPPA). We do not collect, use, or share data from children under 13 without parental consent.",
   "commissionHeading": "10. Commission Structure",
-  "commissionBody": "shnell Logistics operates on a transparent commission-based model to ensure fair compensation for Drivers and sustainable operations for the platform.\n\n**10.1 Commission Rate**\n\n- **Standard Commission**: shnell deducts a **9% commission** from the total fare of each completed delivery or service. This commission covers platform maintenance, customer support, and operational costs.\n- **Example**: If a delivery fare is 100 TND (Tunisian Dinar), shnell deducts 9 TND as commission, and the Driver receives 91 TND.\n- **Transparency**: The commission is clearly displayed to Drivers before accepting a delivery request and in the transaction history within the App.\n\n**10.2 Additional Fees**\n\n- **Service Fees**: Customers may incur additional fees for premium services, such as express delivery or secure transport. These fees are disclosed during the booking process and do not affect the Driver’s commission.\n- **Taxes**: Applicable taxes (e.g., VAT, sales tax) are calculated and added to the fare based on local regulations. Taxes are separate from the commission and are clearly itemized in receipts.\n- **Surge Pricing**: During high-demand periods, fares may increase due to surge pricing. The 9% commission applies to the surged fare, increasing Driver earnings proportionally.\n\n**10.3 Payment Processing**\n\n- Customer payments are processed via in-office cash payments or mandat payments for account recharges, as online payments are not currently supported.\n- Driver payouts are processed weekly (every Monday) to the Driver’s registered bank account or digital wallet, after deducting the 9% commission and any applicable taxes.\n- Drivers can view their earnings, commission deductions, and payout schedules in the App’s “Earnings” section.\n\n**10.4 Disputes**\n\n- If a Customer disputes a charge, shnell will investigate and may temporarily hold the Driver’s payout until the dispute is resolved.\n- Drivers will be notified of any disputes via email or in-app notifications and can provide evidence (e.g., delivery confirmation, photos) to support their case.\n- Resolved disputes in favor of the Driver will result in immediate payout, minus the standard 9% commission.",
-  "cancellationHeading": "11. Cancellation Policy",
-  "cancellationBody": "shnell Logistics has a clear cancellation policy to ensure fairness for Customers, Drivers, and the platform. Cancellations are handled differently based on the party initiating the cancellation and the timing.\n\n**11.1 Customer Cancellations**\n\n- **Before Driver Acceptance**: Customers may cancel a service request at any time before a Driver accepts it, with no penalty or fee.\n- **After Driver Acceptance**: If a Customer cancels after a Driver has accepted the request but before pickup, a cancellation fee of 20% of the estimated fare (minimum 5 TND) may apply to compensate the Driver for time and fuel.\n- **After Pickup**: Cancellations after the Driver has picked up the package are not permitted unless the Driver agrees or there is a valid reason (e.g., unsafe conditions). A full fare may be charged.\n- **Process**: Customers can cancel via the App’s “Cancel Order” button or by contacting support@shnell.com. Refunds for cancellation fees are processed within 7 business days.\n- **Frequent Cancellations**: Customers who frequently cancel their shipments risk temporary restrictions or account suspension.\n\n**11.2 Driver Cancellations**\n\n- **Before Pickup**: Drivers may not cancel a request after acceptance unless they arrive at the pickup location and wait 12 minutes without the Customer appearing. In such cases, Drivers are free to cancel without penalty.\n- **After Pickup**: Drivers must complete the delivery unless there is a valid reason (e.g., safety concerns, Customer misconduct). Unauthorized cancellations after pickup may result in a penalty (e.g., 10 TND deduction from credits) and a lower performance rating.\n- **Process**: Drivers cancel via the App’s “Cancel Delivery” feature, and Customers are notified immediately with an option to rebook with another Driver.\n\n**11.3 shnell-Initiated Cancellations**\n\n- **System Errors**: If a technical issue (e.g., server downtime, mapping errors) prevents service fulfillment, shnell may cancel the request. Customers receive a full refund, and Drivers are not penalized.\n- **Policy Violations**: shnell may cancel requests involving fraudulent activity, prohibited items (e.g., hazardous materials), or violations of our Terms of Use. Affected parties will be notified with details.\n- **Manual Cancellations**: Shipments accepted but not completed within 24 hours may be manually canceled by the admin, with penalties applied to both the Driver and Customer.\n- **Force Majeure**: Cancellations due to unforeseen events (e.g., natural disasters, government restrictions) are exempt from fees, and both parties are notified promptly.\n\n**11.4 Refunds**\n\n- Refunds for Customer cancellations are processed to the original payment method within 7 business days.\n- Drivers are not charged commissions for cancelled deliveries unless they are at fault (e.g., unauthorized cancellation after pickup).\n- Refund disputes can be escalated to support@shnell.com for review.\n\n**11.5 Notifications**\n\n- All cancellations trigger automatic notifications to affected parties via email, SMS, or in-app alerts.\n- Customers and Drivers can track cancellation history in the App’s “Order History” or “Earnings” sections.",
-  "suspensionHeading": "12. Account Suspension and Termination",
-  "suspensionBody": "shnell Logistics reserves the right to suspend or terminate accounts to ensure platform integrity, safety, and compliance with our Terms of Use.\n\n**12.1 Account Suspension**\n\n- **Reasons for Suspension**: Breaches of our Terms of Use, such as providing false information, engaging in harassment, or transporting prohibited items. Detected fraud, unauthorized access, or attempts to manipulate ratings or earnings. Requirements from law enforcement or regulatory bodies to suspend an account pending investigation. Drivers with consistently low ratings (below 3.0 out of 5.0 for 10 consecutive deliveries) or frequent cancellations may face suspension. Customers who frequently cancel their shipments risk temporary restrictions or account suspension.\n- **Process**: Suspended users receive an email and in-app notification detailing the reason, duration (e.g., 7 days, 30 days), and appeal instructions. During suspension, users cannot book or accept new services but can access their account to view history or submit appeals. Suspensions are reviewed regularly, and accounts may be reinstated upon resolution of the issue (e.g., payment clearance, policy compliance).\n\n**12.2 Account Termination**\n\n- **Reasons for Termination**: Engaging in deliberate fraud, such as falsifying delivery confirmations or payment details. Harassment, discrimination, or violence toward other users, shnell staff, or third parties. Transporting illegal goods, violating transportation laws, or engaging in criminal conduct. Multiple suspensions without corrective action.\n- **Process**: Terminated users receive a detailed notice via email and in-app notification, unless prohibited by law (e.g., ongoing investigations). Upon termination, all scheduled deliveries are cancelled, and Customer refunds are processed within 7 business days. Drivers’ remaining credit balances (after commission deductions) are paid out within 30 days, subject to verification. Terminated accounts cannot be reactivated, but users may appeal for reconsideration.\n\n**12.3 Appeals Process**\n\n- Users may appeal suspensions or terminations within **14 days** of notification by emailing support@shnell.com or using the App’s “Appeal Decision” feature. Appeals must include the user’s name, account details, and any supporting evidence (e.g., delivery records, communication logs). shnell will review appeals within 10 business days and provide a written response. Decisions are final but may be escalated to an independent mediator for Business Partners.\n\n**12.4 Performance Monitoring**\n\n- We monitor user performance to ensure quality and safety. Customers and Drivers receive ratings based on feedback from each other. Low performance (e.g., frequent cancellations, poor communication) may trigger warnings before suspension or termination. Users are notified of performance issues via email or in-app alerts and given 7 days to improve before further action.",
-  "driverPerformanceHeading": "13. Driver Performance Display and Deal Acceptance",
-  "driverPerformanceBody": "shnell Logistics empowers Drivers with the autonomy to make informed decisions about accepting delivery requests, supported by transparent performance data.",
+  "commissionBody": "shnell Logistics operates on a transparent commission-based model to ensure fair compensation for Drivers and sustainable operations for the platform.\n\n**10.1 Commission Rate**\n\n- **Standard Commission**: shnell deducts a **7% commission** from the total fare of each completed delivery or service. This commission covers platform maintenance, customer support, and operational costs.\n- **Example**: If a delivery fare is 100 TND (Tunisian Dinar), shnell deducts 7 TND as commission, and the Driver receives 93 TND.\n- **Transparency**: The commission is clearly displayed to Drivers before accepting a delivery request and in the transaction history within the App.\n\n**10.2 Additional Fees**\n\n- **Service Fees**: Customers may incur additional fees for premium services, such as express delivery or secure transport. These fees are disclosed during the booking process and do not affect the Driver’s commission.\n- **Taxes**: Applicable taxes (e.g., VAT, sales tax) are calculated and added to the fare based on local regulations. Taxes are separate from the commission and are clearly itemized in receipts.\n- **Surge Pricing**: During high-demand periods, fares may increase due to surge pricing. The 7% commission applies to the surged fare, increasing Driver earnings proportionally.\n\n**10.3 Payment Processing**\n\n- Customer payments are processed via in-office cash payments or mandat payments for account recharges, as online payments are not currently supported.\n- Driver payouts are processed weekly (every Monday) to the Driver’s registered bank account or digital wallet, after deducting the 7% commission and any applicable taxes.\n- Drivers can view their earnings, commission deductions, and payout schedules in the App’s “Earnings” section.\n\n**10.4 Disputes**\n\n- If a Customer disputes a charge, shnell will investigate and may temporarily hold the Driver’s payout until the dispute is resolved.\n- Drivers will be notified of any disputes via email or in-app notifications and can provide evidence (e.g., delivery confirmation, photos) to support their case.\n- Resolved disputes in favor of the Driver will result in immediate payout, minus the standard 7% commission.",
+
+ 
+
+  "cancellationHeading": "11. Cancellation Policy & The 2ⁿ Discipline System",
+  "cancellationBody": "To ensure fairness in high-stakes logistics, shnell applies a strict policy based on the timing of the cancellation and the party at fault.\n\n**11.1 Customer Scenarios**\n- **Free Cancellation**: Allowed anytime *before* a driver accepts the request.\n- **10% Penalty**: If you cancel *after* a driver accepts but *before* the goods are loaded. This fee compensates the driver for fuel and approach time.\n- **Full Charge (100%) / Admin Decision**: Once the goods are loaded or the driver is in transit, cancellation via the app is locked. You must contact an Admin. If the cancellation is not due to a driver error or force majeure, the **Full Fare** is charged to cover the completed logistical effort.\n\n**11.2 Driver Discipline (The 2ⁿ Exponential System)**\nWe do not fine drivers financially. Instead, we use a reliability system based on time suspensions. Penalties escalate exponentially (2 to the power of n) for unjustified cancellations:\n- **Exceptions (Free Cancellation)**: Drivers may cancel without penalty ONLY if the Customer is a 'No-Show' after waiting 12 minutes at the pickup location.\n- **The Punishment Ladder**:\n  1. **1st Offense**: Warning + Admin Call (0 Days).\n  2. **2nd Offense**: **1 Day** Suspension.\n  3. **3rd Offense**: **2 Days** Suspension.\n  4. **4th Offense**: **4 Days** Suspension.\n  5. **5th Offense**: **8 Days** Suspension.\n  6. **Subsequent**: 16, 32, up to **64 Days**.\n- **Reset**: This record resets annually.\n\n**11.3 Mutual Agreement**: If both parties agree to cancel (e.g., item does not fit), the Admin can waive all penalties.",
+
+"suspensionBody": "We maintain platform integrity through automated and manual protocols.\n\n**12.1 Automated Suspension (Discipline System)**\n\n- Driver accounts are automatically suspended according to the 2ⁿ system mentioned in Section 11.2. During suspension (1 to 64 days), drivers cannot receive new orders but can view history.\n- This automated ban cannot be lifted manually unless a technical error is proven.\n\n**12.2 Termination & Permanent Ban**\n\n- **Fraud**: Fake orders or price manipulation.\n- **Commission Evasion**: Attempting to complete deals off-platform.\n- **Behavior**: Harassment or unsafe conduct.\n- **User Abuse**: Customers who repeatedly cancel after driver arrival will be permanently banned.",
+  "driverPerformanceHeading": "13. Driver Autonomy",
+  "driverPerformanceBody": "Drivers have full autonomy to accept or reject requests before booking. Once accepted, strict reliability protocols apply.",
   "pickupLocation": "Pickup Location",
   "whereDoYouWantToGo": "Where do you want to move?",
-"notSuitable": "Not suitable",
-"retry": "Retry",
+  "notSuitable": "Not suitable",
+  "retry": "Retry",
+
+
 "selectLocationTitle": "Select {type} Location",
 "searchForALocation": "Search for a location",
 "useCurrentLocation": "Use current location",
@@ -623,6 +628,155 @@
   "ongoing": "Ongoing",
   "enRoute": "En Route",
   "destinations": "Stops",
-  "noActivityYet": "No activity yet"
+  "noActivityYet": "No activity yet",
+
+
+  
+  "personalInformation": "Personal Information",
+  "@personalInformation": {
+    "description": "Title of the personal info page in the app bar"
+  },
+  "userDataNotFound": "Profile not found",
+  "@userDataNotFound": {
+    "description": "Message when user profile data is not found in Firestore"
+  },
+  "accountInfo": "Account",
+  "@accountInfo": {
+    "description": "Section title for account information"
+  },
+  "name": "Name",
+  "@name": {
+    "description": "Label for the user's name field"
+  },
+  "security": "Security",
+  "@security": {
+    "description": "Section title for security settings"
+  },
+  "changePassword": "Change password",
+  "@changePassword": {
+    "description": "Title for the change password action"
+  },
+  "passwordResetSent": "Reset email sent",
+  "@passwordResetSent": {
+    "description": "Success message when password reset email is sent"
+  },
+  "updateNameHelper": "Your name will be updated in your profile and Firebase Authentication",
+  "@updateNameHelper": {
+    "description": "Helper text for editing the name field"
+  },
+  "changePasswordHelper": "A password reset link will be sent to your email",
+  "@changePasswordHelper": {
+    "description": "Helper text for the change password action"
+  },
+
+
+  
+  "contactUs": "Contact Us",
+  "@contactUs": {
+    "description": "Title of the contact/support section"
+  },
+  "emergencyAndSupport": "Emergency & Support",
+  "@emergencyAndSupport": {
+    "description": "Subtitle for the phone number contact"
+  },
+  "sendUsAnEmail": "Send us an email",
+  "@sendUsAnEmail": {
+    "description": "Subtitle for the email contact"
+  },
+  "ourLocation": "Our Location",
+  "@ourLocation": {
+    "description": "Section title for the business location"
+  },
+  "addressLine1": "15 Rue de Sfax, Boumhal Basatine",
+  "@addressLine1": {
+    "description": "First line of the physical address"
+  },
+  "addressLine2": "Tunis, Tunisia",
+  "@addressLine2": {
+    "description": "Second line of the address (city and country)"
+  },
+  "openInMaps": "Open in Maps",
+  "@openInMaps": {
+    "description": "Label overlay on the map image prompting to open full maps"
+  },
+  "followUsOnX": "Follow us on X",
+  "@followUsOnX": {
+    "description": "Button text to follow on X (formerly Twitter)"
+  },
+  
+
+
+  "unknownStop": "Unknown Stop",
+  "errorLabel": "Error",
+  "retryButton": "Retry",
+  "driverTitle": "Driver",
+  "callInitiationFailed": "Call initiation failed",
+  "deliveryCanceled": "Delivery canceled",
+  "totalPrice": "Total: {price} TND",
+  "@totalPrice": {
+    "placeholders": {
+    }
+  },
+  "totalPriceEmpty": "Total: - TND",
+  "cancellationFeeWarning": "Cancellation fee: 10% ({amount} TND)",
+  "@cancellationFeeWarning": {
+    "placeholders": {
+    }
+  },
+  "lessThanOneMin": "< 1 min",
+  "minutesShort": "{count} min",
+  "@minutesShort": {
+    "placeholders": {
+    }
+  },
+  "pickupIn": "Pickup in {time}",
+  "@pickupIn": {
+    "placeholders": {
+    }
+  },
+  "inTransit": "In Transit",
+
+
+
+  
+  "vehicleDetailsTitle": "Vehicle Details",
+  "typeLabel": "Type",
+  "maxWeightLabel": "Max Weight",
+  "volumeLabel": "Volume",
+  "yourOfferLabel": "Your Offer",
+  "scheduleLabel": "Schedule",
+  "requiredLabel": "Required",
+  "selectTimeLabel": "Select Time",
+  "adjustOfferTitle": "Adjust Your Offer",
+  "suggestedPrice": "Suggested: {price} DT",
+  "tooLow": "Too low",
+  "tooHigh": "Too high",
+  "looksGood": "Looks good!",
+  "minLabel": "Min",
+  "maxLabel": "Max",
+  "setPriceButton": "SET PRICE",
+  "confirmBookingButton": "CONFIRM BOOKING FOR {price} DT",
+  "enterAmountError": "Enter amount",
+  "validPriceError": "Please enter a valid price",
+  "scheduleError": "Please schedule a delivery time",
+  "bookingSuccess": "Booking confirmed successfully!",
+  "bookingFail": "Failed to book. Please try again.",
+
+
+
+  
+  "unsupportedAreaTitle": "Unsupported Area",
+  "serviceTunisiaOnly": "Service is only available in Tunisia.",
+  "pickupRestrictedError": "Pickup is currently restricted to Greater Tunis (Tunis, Ariana, Ben Arous, Manouba).",
+  "expansionMessagePickup": "We are expanding soon! Currently operating in Greater Tunis.",
+  "expansionMessageDropoff": "Drop-offs are available across all of Tunisia.",
+  "selectDifferentLocation": "Select Different Location",
+  "zoneValidationFailed": "Could not verify service area. Check connection.",
+  "locationSelectedOnMap": "Location selected on map"
+
+
+
+
+
 
 }

@@ -32,18 +32,20 @@
   "childrenPrivacyHeading": "9. Privacy dei bambini",
   "childrenPrivacyBody": "L'App non è destinata agli utenti di età inferiore ai 18 anni. Non raccogliamo consapevolmente informazioni personali da bambini di età inferiore ai 18 anni.\n\n**9.1 Limiti di età**\n\n- Gli utenti devono avere almeno 18 anni per creare un account o utilizzare i nostri servizi.\n- Gli Autisti devono soddisfare i requisiti aggiuntivi di età e licenza specificati nei nostri Termini di utilizzo (ad esempio, età minima di 21 anni per determinati tipi di veicoli).\n\n**9.2 Consenso dei genitori**\n\n- Se veniamo a conoscenza che un utente di età inferiore ai 18 anni ha fornito informazioni personali senza un consenso verificabile dei genitori, elimineremo tempestivamente le informazioni.\n- I genitori o i tutori che ritengono che il proprio figlio abbia inviato dati all'App devono contattare immediatamente support@shnell.com.\n\n**9.3 Conformità al COPPA**\n\n- Per gli utenti statunitensi, rispettiamo il Children’s Online Privacy Protection Act (COPPA). Non raccogliamo, utilizziamo o condividiamo dati di bambini di età inferiore ai 13 anni senza il consenso dei genitori.",
   "commissionHeading": "10. Struttura delle commissioni",
-  "commissionBody": "shnell Logistics opera con un modello trasparente basato su commissioni per garantire una retribuzione equa per gli Autisti e operazioni sostenibili per la piattaforma.\n\n**10.1 Tasso di commissione**\n\n- **Commissione standard**: shnell detrae una **commissione del 9%** dalla tariffa totale di ogni consegna o servizio completato. Questa commissione copre la manutenzione della piattaforma, il supporto clienti e i costi operativi.\n- **Esempio**: Se la tariffa di una consegna è di 100 TND (dinaro tunisino), shnell detrae 9 TND come commissione e l'Autista riceve 91 TND.\n- **Trasparenza**: La commissione viene visualizzata chiaramente agli Autisti prima di accettare una richiesta di consegna e nella cronologia delle transazioni all'interno dell'App.\n\n**10.2 Commissioni aggiuntive**\n\n- **Costi di servizio**: I Clienti possono incorrere in costi aggiuntivi per servizi premium, come la consegna espressa o il trasporto sicuro. Questi costi vengono divulgati durante il processo di prenotazione e non influiscono sulla commissione dell'Autista.\n- **Tasse**: Le tasse applicabili (ad esempio, IVA, imposta sulle vendite) vengono calcolate e aggiunte alla tariffa in base alle normative locali. Le tasse sono separate dalla commissione e sono chiaramente dettagliate nelle ricevute.\n- **Prezzi dinamici**: Durante i periodi di forte domanda, le tariffe possono aumentare a causa dei prezzi dinamici. La commissione del 9% si applica alla tariffa maggiorata, aumentando proporzionalmente i guadagni dell'Autista.\n\n**10.3 Elaborazione dei pagamenti**\n\n- I pagamenti dei Clienti vengono elaborati tramite pagamenti in contanti in ufficio o pagamenti tramite mandato per le ricariche dell'account, poiché i pagamenti online non sono attualmente supportati.\n- I pagamenti agli Autisti vengono elaborati settimanalmente (ogni lunedì) sul conto bancario o sul portafoglio digitale registrato dell'Autista, dopo aver detratto la commissione del 9% e le tasse applicabili.\n- Gli Autisti possono visualizzare i loro guadagni, le detrazioni di commissioni e i programmi di pagamento nella sezione \"Guadagni\" dell'App.\n\n**10.4 Controversie**\n\n- Se un Cliente contesta un addebito, shnell indagherà e potrà trattenere temporaneamente il pagamento dell'Autista fino alla risoluzione della controversia.\n- Gli Autisti verranno avvisati di eventuali controversie tramite e-mail o notifiche in-app e potranno fornire prove (ad esempio, conferma di consegna, foto) a sostegno del loro caso.\n- Le controversie risolte a favore dell'Autista comporteranno un pagamento immediato, meno la commissione standard del 9%.",
-  "cancellationHeading": "11. Politica di cancellazione",
-  "cancellationBody": "shnell Logistics ha una chiara politica di cancellazione per garantire l'equità per i Clienti, gli Autisti e la piattaforma. Le cancellazioni vengono gestite in modo diverso a seconda della parte che le avvia e del momento.\n\n**11.1 Cancellazioni del cliente**\n\n- **Prima dell'accettazione dell'autista**: I Clienti possono annullare una richiesta di servizio in qualsiasi momento prima che un Autista l'accetti, senza penalità o costi.\n- **Dopo l'accettazione dell'autista**: Se un Cliente annulla dopo che un Autista ha accettato la richiesta ma prima del ritiro, potrebbe essere applicata una commissione di cancellazione del 20% della tariffa stimata (minimo 5 TND) per risarcire l'Autista per il tempo e il carburante.\n- **Dopo il ritiro**: Le cancellazioni dopo che l'Autista ha ritirato il pacco non sono consentite a meno che l'Autista non sia d'accordo o ci sia un motivo valido (ad esempio, condizioni non sicure). Potrebbe essere addebitata una tariffa completa.\n- **Processo**: I Clienti possono annullare tramite il pulsante \"Annulla ordine\" dell'App o contattando support@shnell.com. I rimborsi per le commissioni di cancellazione vengono elaborati entro 7 giorni lavorativi.\n- **Cancellazioni frequenti**: I Clienti che annullano frequentemente le loro spedizioni rischiano restrizioni temporanee o la sospensione dell'account.",
-  "suspensionHeading": "12. Sospensione e chiusura dell'account",
-  "suspensionBody": "shnell Logistics si riserva il diritto di sospendere o chiudere gli account per garantire l'integrità della piattaforma, la sicurezza e la conformità ai nostri Termini di utilizzo.\n\n**12.1 Sospensione dell'account**\n\n- **Motivi di sospensione**: Violazioni dei nostri Termini di utilizzo, come la fornitura di informazioni false, il coinvolgimento in molestie o il trasporto di articoli proibiti. Rilevamento di frodi, accesso non autorizzato o tentativi di manipolare le valutazioni o i guadagni. Richieste da parte delle forze dell'ordine o degli organismi di regolamentazione di sospendere un account in attesa di indagini. Gli autisti con valutazioni costantemente basse (inferiori a 3,0 su 5,0 per 10 consegne consecutive) o cancellazioni frequenti possono essere sospesi. I Clienti che annullano frequentemente le loro spedizioni rischiano restrizioni temporanee o la sospensione dell'account.\n- **Processo**: Gli utenti sospesi ricevono un'e-mail e una notifica in-app che descrivono in dettaglio il motivo, la durata (ad esempio, 7 giorni, 30 giorni) e le istruzioni per il ricorso. Durante la sospensione, gli utenti non possono prenotare o accettare nuovi servizi, ma possono accedere al proprio account per visualizzare la cronologia o inviare ricorsi. Le sospensioni vengono esaminate regolarmente e gli account possono essere ripristinati alla risoluzione del problema (ad esempio, liquidazione del pagamento, conformità alla politica).\n\n**12.2 Chiusura dell'account**\n\n- **Motivi di chiusura**: Coinvolgimento in frodi deliberate, come la falsificazione delle conferme di consegna o dei dettagli di pagamento. Molestie, discriminazione o violenza nei confronti di altri utenti, del personale di shnell o di terze parti. Trasporto di merci illegali, violazione delle leggi sui trasporti o coinvolgimento in condotte criminali. Molteplici sospensioni senza azioni correttive.\n- **Processo**: Gli utenti con account chiusi ricevono un avviso dettagliato via e-mail e notifica in-app, a meno che non sia vietato dalla legge (ad esempio, indagini in corso). Alla chiusura, tutte le consegne programmate vengono annullate e i rimborsi ai Clienti vengono elaborati entro 7 giorni lavorativi. I saldi di credito rimanenti degli Autisti (dopo le detrazioni delle commissioni) vengono pagati entro 30 giorni, previa verifica. Gli account chiusi non possono essere riattivati, ma gli utenti possono presentare ricorso per un riesame.\n\n**12.3 Processo di ricorso**\n\n- Gli utenti possono presentare ricorso contro sospensioni o chiusure entro **14 giorni** dalla notifica inviando un'e-mail a support@shnell.com o utilizzando la funzione \"Ricorso contro la decisione\" dell'App. I ricorsi devono includere il nome dell'utente, i dettagli dell'account e qualsiasi prova a sostegno (ad esempio, registri di consegna, log di comunicazione). shnell esaminerà i ricorsi entro 10 giorni lavorativi e fornirà una risposta scritta. Le decisioni sono definitive ma possono essere escalate a un mediatore indipendente per i Partner commerciali.\n\n**12.4 Monitoraggio delle prestazioni**\n\n- Monitoriamo le prestazioni degli utenti per garantire qualità e sicurezza. I Clienti e gli Autisti ricevono valutazioni basate sul feedback reciproco. Le prestazioni scarse (ad esempio, cancellazioni frequenti, scarsa comunicazione) possono innescare avvisi prima della sospensione o della chiusura. Gli utenti vengono avvisati dei problemi di prestazioni tramite e-mail o avvisi in-app e hanno 7 giorni per migliorare prima che vengano intraprese ulteriori azioni.",
-  "driverPerformanceHeading": "13. Visualizzazione delle prestazioni dell'autista e accettazione delle offerte",
-  "driverPerformanceBody": "shnell Logistics consente agli Autisti di prendere decisioni informate sull'accettazione delle richieste di consegna, supportate da dati di prestazione trasparenti.",
-  "pickupLocation": "Luogo di ritiro",
+  "commissionBody": "shnell Logistics opera con un modello trasparente basato su commissioni per garantire una retribuzione equa per gli Autisti e operazioni sostenibili per la piattaforma.\n\n**10.1 Tasso di commissione**\n\n- **Commissione standard**: shnell detrae una **commissione del 7%** dalla tariffa totale di ogni consegna o servizio completato. Questa commissione copre la manutenzione della piattaforma, il supporto clienti e i costi operativi.\n- **Esempio**: Se la tariffa di una consegna è di 100 TND (dinaro tunisino), shnell detrae 7 TND come commissione e l'Autista riceve 93 TND.\n- **Trasparenza**: La commissione viene visualizzata chiaramente agli Autisti prima di accettare una richiesta di consegna e nella cronologia delle transazioni all'interno dell'App.\n\n**10.2 Commissioni aggiuntive**\n\n- **Costi di servizio**: I Clienti possono incorrere in costi aggiuntivi per servizi premium, come la consegna espressa o il trasporto sicuro. Questi costi vengono divulgati durante il processo di prenotazione e non influiscono sulla commissione dell'Autista.\n- **Tasse**: Le tasse applicabili (ad esempio, IVA, imposta sulle vendite) vengono calcolate e aggiunte alla tariffa in base alle normative locali. Le tasse sono separate dalla commissione e sono chiaramente dettagliate nelle ricevute.\n- **Prezzi dinamici**: Durante i periodi di forte domanda, le tariffe possono aumentare a causa dei prezzi dinamici. La commissione del 7% si applica alla tariffa maggiorata, aumentando proporzionalmente i guadagni dell'Autista.\n\n**10.3 Elaborazione dei pagamenti**\n\n- I pagamenti dei Clienti vengono elaborati tramite pagamenti in contanti in ufficio o pagamenti tramite mandato per le ricariche dell'account, poiché i pagamenti online non sono attualmente supportati.\n- I pagamenti agli Autisti vengono elaborati settimanalmente (ogni lunedì) sul conto bancario o sul portafoglio digitale registrato dell'Autista, dopo aver detratto la commissione del 7% e le tasse applicabili.\n- Gli Autisti possono visualizzare i loro guadagni, le detrazioni di commissioni e i programmi di pagamento nella sezione \"Guadagni\" dell'App.\n\n**10.4 Controversie**\n\n- Se un Cliente contesta un addebito, shnell indagherà e potrà trattenere temporaneamente il pagamento dell'Autista fino alla risoluzione della controversia.\n- Gli Autisti verranno avvisati di eventuali controversie tramite e-mail o notifiche in-app e potranno fornire prove (ad esempio, conferma di consegna, foto) a sostegno del loro caso.\n- Le controversie risolte a favore dell'Autista comporteranno un pagamento immediato, meno la commissione standard del 7%.",
+  
 
-"whereDoYouWantToGo": "Dove vuoi traslocare?",
-"notSuitable": "Non adatto",
-"retry": "Riprova",
+  "cancellationHeading": "11. Politica e Sistema Disciplinare 2ⁿ",
+  "cancellationBody": "**11.1 Scenari Cliente**\n- **Gratis**: Prima dell'accettazione.\n- **Penale 10%**: Dopo l'accettazione ma *prima* del carico.\n- **Tariffa Intera (100%)**: Dopo il carico, cancellazione bloccata. Richiede Admin. Se il conducente non ha colpa, si paga tutto.\n\n**11.2 Disciplina Conducente (Sistema 2ⁿ)**\nSospensioni temporali esponenziali:\n- **Cancellazione Gratis**: Solo se il cliente non si presenta dopo 12 minuti.\n- **Scala Sanzioni**:\n  1. **1ª**: Avviso (0 giorni).\n  2. **2ª**: **1 Giorno**.\n  3. **3ª**: **2 Giorni**.\n  4. **4ª**: **4 Giorni**.\n  5. **5ª**: **8 Giorni**.\n  6. **Successive**: 16, 32, fino a **64 Giorni**.\n\n**11.3 Accordo Reciproco**: L'Admin può annullare le penali se entrambi concordano."
+,"suspensionHeading": "12. Sospensione Account",
+  "suspensionBody": "**12.1 Sospensione Automatica**: Basata sul sistema 2ⁿ.\n**12.2 Terminazione**: Per frode, evasione commissioni o abusi.",
+  "driverPerformanceHeading": "13. Autonomia del Conducente",
+  "driverPerformanceBody": "I conducenti decidono liberamente. Una volta accettato, l'affidabilità è obbligatoria.",
+  "pickupLocation": "Punto di ritiro",
+  "whereDoYouWantToGo": "Dove vuoi traslocare?",
+  "notSuitable": "Non adatto",
+  "retry": "Riprova",
+
 "selectLocationTitle": "Seleziona luogo di {type}",
 "searchForALocation": "Cerca una posizione",
 "useCurrentLocation": "Usa la posizione attuale",
@@ -574,7 +576,82 @@
   "ongoing": "In corso",
   "enRoute": "In viaggio",
   "destinations": "Fermate",
-  "noActivityYet": "Nessuna attività ancora"
+  "noActivityYet": "Nessuna attività ancora",
+
+  
+  "personalInformation": "Informazioni personali",
+  "userDataNotFound": "Profilo non trovato",
+  "accountInfo": "Account",
+  "name": "Nome",
+  "security": "Sicurezza",
+  "changePassword": "Cambia password",
+  "passwordResetSent": "Email inviata",
+  "updateNameHelper": "Il tuo nome verrà aggiornato nel tuo profilo e in Firebase Authentication",
+  "changePasswordHelper": "Un link per reimpostare la password verrà inviato alla tua email",
+  "contactUs": "Contattaci",
+  "emergencyAndSupport": "Emergenza e Assistenza",
+  "sendUsAnEmail": "Inviaci un'email",
+  "ourLocation": "La nostra posizione",
+  "addressLine1": "15 Rue de Sfax, Boumhal Basatine",
+  "addressLine2": "Tunisi, Tunisia",
+  "openInMaps": "Apri in Maps",
+  "followUsOnX": "Seguici su X",
+
+  
+  "pickupTitle": "Ritiro: {name}",
+  "unknownStop": "Fermata sconosciuta",
+  "errorLabel": "Errore",
+  "retryButton": "Riprova",
+  "driverTitle": "Autista",
+  "callInitiationFailed": "Chiamata fallita",
+  "deliveryCanceled": "Consegna annullata",
+  "totalPrice": "Totale: {price} TND",
+  "totalPriceEmpty": "Totale: - TND",
+  "cancellationFeeWarning": "Penale cancellazione: 10% ({amount} TND)",
+  "lessThanOneMin": "< 1 min",
+  "minutesShort": "{count} min",
+  "pickupIn": "Ritiro tra {time}",
+  "inTransit": "In transito",
+
+
+  
+  "vehicleDetailsTitle": "Dettagli Veicolo",
+  "typeLabel": "Tipo",
+  "maxWeightLabel": "Peso Max",
+  "volumeLabel": "Volume",
+  "yourOfferLabel": "La tua offerta",
+  "scheduleLabel": "Orario",
+  "requiredLabel": "Richiesto",
+  "selectTimeLabel": "Seleziona ora",
+  "adjustOfferTitle": "Modifica offerta",
+  "suggestedPrice": "Suggerito: {price} DT",
+  "tooLow": "Troppo basso",
+  "tooHigh": "Troppo alto",
+  "looksGood": "Va bene!",
+  "minLabel": "Min",
+  "maxLabel": "Max",
+  "setPriceButton": "IMPOSTA PREZZO",
+  "confirmBookingButton": "CONFERMA PER {price} DT",
+  "enterAmountError": "Inserisci importo",
+  "validPriceError": "Inserisci un prezzo valido",
+  "scheduleError": "Seleziona un orario di consegna",
+  "bookingSuccess": "Prenotazione confermata!",
+  "bookingFail": "Prenotazione fallita. Riprova.",
+
+  
+  "unsupportedAreaTitle": "Area non supportata",
+  "serviceTunisiaOnly": "Il servizio è disponibile solo in Tunisia.",
+  "pickupRestrictedError": "Il ritiro è attualmente limitato alla Grande Tunisi (Tunisi, Ariana, Ben Arous, Manouba).",
+  "expansionMessagePickup": "Ci stiamo espandendo! Attualmente operativi nella Grande Tunisi.",
+  "expansionMessageDropoff": "Le consegne sono disponibili in tutta la Tunisia.",
+  "selectDifferentLocation": "Seleziona altra posizione",
+  "zoneValidationFailed": "Impossibile verificare l'area di servizio. Controlla la connessione.",
+  "locationSelectedOnMap": "Posizione selezionata sulla mappa"
+
+
+
+
+
 
 
 

@@ -3,25 +3,19 @@ import 'package:latlong2/latlong.dart' as latlong;
 
 // DropOffData model with toFirestore and fromFirestore
 class DropOffData {
-  final String? customerName;
-  final String? customerPhoneNumber;
   final latlong.LatLng destination;
   final String destinationName;
-  final bool? isDelivered;
+  final bool isDelivered;
 
   DropOffData({
-    this.customerName,
-    this.customerPhoneNumber,
     required this.destination,
     required this.destinationName,
-    this.isDelivered,
+    this.isDelivered = false,
   });
 
   // Convert DropOffData to Firestore document format
   Map<String, dynamic> toFirestore() {
     return {
-      'name': customerName,
-      'phoneNumber': customerPhoneNumber,
       'destination': {
         'latitude': destination.latitude,
         'longitude': destination.longitude,
@@ -35,14 +29,12 @@ class DropOffData {
   factory DropOffData.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return DropOffData(
-      customerName: data['name'] as String?,
-      customerPhoneNumber: data['phoneNumber'] as String?,
       destination: latlong.LatLng(
         (data['destination']['latitude'] as num).toDouble(),
         (data['destination']['longitude'] as num).toDouble(),
       ),
       destinationName: data['destinationName'] as String,
-      isDelivered: data['isdelivered'] as bool?,
+      isDelivered: data['isdelivered'] as bool,
     );
   }
 }

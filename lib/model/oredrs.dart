@@ -10,9 +10,9 @@ class Orders {
   List<String> stops; // List of stop IDs
   String vehicleType;
   String userId;
-  Map<String, dynamic>? additionalInfo;
   bool isAcepted;
   String id;
+  Timestamp? scheduleAt;
 
   Orders({
     required this.price,
@@ -23,8 +23,8 @@ class Orders {
     required this.id,
     required this.vehicleType,
     required this.userId,
-    this.additionalInfo,
     this.isAcepted = false,
+    this.scheduleAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -39,6 +39,7 @@ class Orders {
       'timestamp': Timestamp.now(),
       'vehicleType': vehicleType,
       'isAcepted': isAcepted,
+      'scheduleAt': scheduleAt,
     };
   }
 
@@ -62,6 +63,7 @@ class Orders {
       stops: List<String>.from(data['stops'] ?? []),
       vehicleType: data['vehicleType'],
       isAcepted: data['isAcepted'] ?? false,
+      scheduleAt: data['scheduleAt']
     );
   }
 }

@@ -113,6 +113,9 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
     // final l10n = AppLocalizations.of(context); 
 
     return Scaffold(
+       appBar: AppBar(
+        elevation: 0,
+      ),
       backgroundColor: colorScheme.surface,
      body: currentUser == null
           ? const Center(child: RotatingDotsIndicator())

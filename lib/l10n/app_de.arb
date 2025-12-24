@@ -32,18 +32,22 @@
   "childrenPrivacyHeading": "9. Datenschutz von Kindern",
   "childrenPrivacyBody": "Die App ist nicht für Nutzer unter 18 Jahren gedacht. Wir sammeln nicht wissentlich persönliche Informationen von Kindern unter 18 Jahren.\n\n**9.1 Altersbeschränkungen**\n\n- Nutzer müssen mindestens 18 Jahre alt sein, um ein Konto zu erstellen oder unsere Dienste zu nutzen.\n- Fahrer müssen zusätzliche Alters- und Lizenzanforderungen erfüllen, die in unseren Nutzungsbedingungen festgelegt sind (z. B. Mindestalter von 21 Jahren für bestimmte Fahrzeugtypen).\n\n**9.2 Elterliche Zustimmung**\n\n- Wenn wir feststellen, dass ein Nutzer unter 18 Jahren persönliche Informationen ohne nachweisbare elterliche Zustimmung bereitgestellt hat, werden wir die Informationen umgehend löschen.\n- Eltern oder Erziehungsberechtigte, die glauben, dass ihr Kind Daten an die App übermittelt hat, sollten sich sofort an support@shnell.com wenden.\n\n**9.3 COPPA-Konformität**\n\n- Für US-Nutzer halten wir uns an den Children’s Online Privacy Protection Act (COPPA). Wir sammeln, verwenden oder teilen keine Daten von Kindern unter 13 Jahren ohne elterliche Zustimmung.",
   "commissionHeading": "10. Provisionsstruktur",
-  "commissionBody": "shnell Logistics arbeitet mit einem transparenten, provisionsbasierten Modell, um eine faire Vergütung für Fahrer und nachhaltige Abläufe für die Plattform zu gewährleisten.\n\n**10.1 Provisionssatz**\n\n- **Standardprovision**: shnell zieht eine **9%ige Provision** vom Gesamtpreis jeder abgeschlossenen Lieferung oder Dienstleistung ab. Diese Provision deckt die Wartung der Plattform, den Kundensupport und die Betriebskosten.\n- **Beispiel**: Wenn der Preis einer Lieferung 100 TND (tunesischer Dinar) beträgt, zieht shnell 9 TND als Provision ab und der Fahrer erhält 91 TND.\n- **Transparenz**: Die Provision wird den Fahrern klar angezeigt, bevor sie eine Lieferanfrage annehmen, und im Transaktionsverlauf in der App.\n\n**10.2 Zusätzliche Gebühren**\n\n- **Servicegebühren**: Kunden können zusätzliche Gebühren für Premium-Dienste wie Expresslieferungen oder sichere Transporte erheben. Diese Gebühren werden während des Buchungsvorgangs offengelegt und beeinflussen nicht die Provision des Fahrers.\n- **Steuern**: Anfallende Steuern (z. B. Mehrwertsteuer, Umsatzsteuer) werden gemäß den örtlichen Vorschriften berechnet und zum Preis hinzugefügt. Steuern sind von der Provision getrennt und werden in den Belegen klar aufgeführt.\n- **Dynamische Preise**: In Zeiten hoher Nachfrage können die Preise aufgrund dynamischer Preise steigen. Die 9%ige Provision gilt für den erhöhten Preis, was die Einnahmen des Fahrers proportional erhöht.\n\n**10.3 Zahlungsabwicklung**\n\n- Kundenzahlungen werden über Bareinzahlungen im Büro oder Mandatszahlungen für Kontoguthaben abgewickelt, da Online-Zahlungen derzeit nicht unterstützt werden.\n- Fahrerauszahlungen werden wöchentlich (jeden Montag) auf das registrierte Bankkonto oder die digitale Geldbörse des Fahrers überwiesen, nach Abzug der 9%igen Provision und aller anfallenden Steuern.\n- Fahrer können ihre Einnahmen, Provisionsabzüge und Auszahlungspläne im Abschnitt „Einnahmen“ der App einsehen.\n\n**10.4 Streitigkeiten**\n\n- Wenn ein Kunde eine Gebühr anficht, wird shnell dies untersuchen und die Auszahlung des Fahrers vorübergehend einbehalten, bis der Streit beigelegt ist.\n- Fahrer werden über Streitigkeiten per E-Mail oder In-App-Benachrichtigungen informiert und können Beweise (z. B. Lieferbestätigung, Fotos) zur Unterstützung ihres Falles vorlegen.\n- Gelöste Streitigkeiten zugunsten des Fahrers führen zu einer sofortigen Auszahlung, abzüglich der standardmäßigen 9%igen Provision.",
-  "cancellationHeading": "11. Stornierungsrichtlinie",
-  "cancellationBody": "shnell Logistics hat eine klare Stornierungsrichtlinie, um Fairness für Kunden, Fahrer und die Plattform zu gewährleisten. Stornierungen werden je nach der Partei, die die Stornierung initiiert, und dem Zeitpunkt unterschiedlich behandelt.\n\n**11.1 Stornierungen durch den Kunden**\n\n- **Vor der Annahme durch den Fahrer**: Kunden können eine Dienstanfrage jederzeit stornieren, bevor ein Fahrer sie annimmt, ohne Strafe oder Gebühr.\n- **Nach der Annahme durch den Fahrer**: Wenn ein Kunde nach der Annahme der Anfrage durch einen Fahrer, aber vor der Abholung storniert, kann eine Stornogebühr von 20 % des geschätzten Preises (mindestens 5 TND) anfallen, um den Fahrer für Zeit und Kraftstoff zu entschädigen.\n- **Nach der Abholung**: Stornierungen nach der Abholung des Pakets durch den Fahrer sind nicht gestattet, es sei denn, der Fahrer stimmt zu oder es gibt einen triftigen Grund (z. B. unsichere Bedingungen). Der volle Preis kann in Rechnung gestellt werden.\n- **Prozess**: Kunden können über die Schaltfläche „Bestellung stornieren“ in der App oder durch Kontaktaufnahme mit support@shnell.com stornieren. Rückerstattungen für Stornogebühren werden innerhalb von 7 Werktagen bearbeitet.\n- **Häufige Stornierungen**: Kunden, die ihre Sendungen häufig stornieren, riskieren vorübergehende Einschränkungen oder eine Kontosperrung.",
-  "suspensionHeading": "12. Kontosperrung und Kündigung",
-  "suspensionBody": "shnell Logistics behält sich das Recht vor, Konten zu sperren oder zu kündigen, um die Integrität der Plattform, die Sicherheit und die Einhaltung unserer Nutzungsbedingungen zu gewährleisten.\n\n**12.1 Kontosperrung**\n\n- **Gründe für die Sperrung**: Verstöße gegen unsere Nutzungsbedingungen, wie z. B. die Bereitstellung falscher Informationen, die Beteiligung an Belästigungen oder der Transport verbotener Gegenstände. Erkannter Betrug, unbefugter Zugriff oder Versuche, Bewertungen oder Einnahmen zu manipulieren. Anforderungen von Strafverfolgungs- oder Aufsichtsbehörden, ein Konto während laufender Ermittlungen zu sperren. Fahrer mit konstant niedrigen Bewertungen (unter 3,0 von 5,0 für 10 aufeinanderfolgende Lieferungen) oder häufigen Stornierungen können gesperrt werden. Kunden, die ihre Sendungen häufig stornieren, riskieren vorübergehende Einschränkungen oder eine Kontosperrung.\n- **Prozess**: Gesperrte Nutzer erhalten eine E-Mail und eine In-App-Benachrichtigung, die den Grund, die Dauer (z. B. 7 Tage, 30 Tage) und Anweisungen für den Einspruch detailliert beschreiben. Während der Sperrung können Nutzer keine neuen Dienste buchen oder annehmen, aber auf ihr Konto zugreifen, um den Verlauf einzusehen oder Einsprüche einzureichen. Sperrungen werden regelmäßig überprüft und Konten können nach Behebung des Problems (z. B. Zahlungsfreigabe, Einhaltung der Richtlinien) wiederhergestellt werden.\n\n**12.2 Kündigung des Kontos**\n\n- **Gründe für die Kündigung**: Beteiligung an vorsätzlichem Betrug, wie z. B. der Fälschung von Lieferbestätigungen oder Zahlungsdetails. Belästigung, Diskriminierung oder Gewalt gegenüber anderen Nutzern, shnell-Mitarbeitern oder Dritten. Transport von illegalen Gütern, Verstoß gegen Transportgesetze oder Beteiligung an kriminellen Handlungen. Mehrere Sperrungen ohne Korrekturmaßnahmen.\n- **Prozess**: Nutzer mit gekündigten Konten erhalten eine detaillierte Benachrichtigung per E-Mail und In-App-Benachrichtigung, es sei denn, dies ist gesetzlich verboten (z. B. laufende Ermittlungen). Bei der Kündigung werden alle geplanten Lieferungen storniert und die Rückerstattungen an die Kunden innerhalb von 7 Werktagen bearbeitet. Restguthaben der Fahrer (nach Abzug von Provisionen) werden innerhalb von 30 Tagen ausgezahlt, vorbehaltlich der Überprüfung. Gekündigte Konten können nicht reaktiviert werden, aber Nutzer können einen Einspruch zur erneuten Prüfung einlegen.\n\n**12.3 Einspruchsverfahren**\n\n- Nutzer können innerhalb von **14 Tagen** nach der Benachrichtigung gegen Sperrungen oder Kündigungen Einspruch einlegen, indem sie eine E-Mail an support@shnell.com senden oder die Funktion „Entscheidung anfechten“ in der App verwenden. Einsprüche müssen den Namen des Nutzers, die Kontodaten und alle unterstützenden Beweise (z. B. Lieferprotokolle, Kommunikationsprotokolle) enthalten. shnell wird Einsprüche innerhalb von 10 Werktagen prüfen und eine schriftliche Antwort geben. Die Entscheidungen sind endgültig, können aber für Geschäftspartner an einen unabhängigen Mediator weitergeleitet werden.\n\n**12.4 Leistungsüberwachung**\n\n- Wir überwachen die Leistung der Nutzer, um Qualität und Sicherheit zu gewährleisten. Kunden und Fahrer erhalten Bewertungen, die auf Rückmeldungen voneinander basieren. Eine schlechte Leistung (z. B. häufige Stornierungen, schlechte Kommunikation) kann zu Warnungen vor einer Sperrung oder Kündigung führen. Nutzer werden per E-Mail oder In-App-Benachrichtigungen über Leistungsprobleme informiert und erhalten 7 Tage Zeit, sich zu verbessern, bevor weitere Maßnahmen ergriffen werden.",
-  "driverPerformanceHeading": "13. Anzeige der Fahrerleistung und Angebotsannahme",
-  "driverPerformanceBody": "shnell Logistics befähigt Fahrer, fundierte Entscheidungen über die Annahme von Lieferanfragen zu treffen, unterstützt durch transparente Leistungsdaten.",
-  "pickupLocation": "Abholort",
+  "commissionBody": "shnell Logistics arbeitet mit einem transparenten, provisionsbasierten Modell, um eine faire Vergütung für Fahrer und nachhaltige Abläufe für die Plattform zu gewährleisten.\n\n**10.1 Provisionssatz**\n\n- **Standardprovision**: shnell zieht eine **7%ige Provision** vom Gesamtpreis jeder abgeschlossenen Lieferung oder Dienstleistung ab. Diese Provision deckt die Wartung der Plattform, den Kundensupport und die Betriebskosten.\n- **Beispiel**: Wenn der Preis einer Lieferung 100 TND (tunesischer Dinar) beträgt, zieht shnell 7 TND als Provision ab und der Fahrer erhält 93 TND.\n- **Transparenz**: Die Provision wird den Fahrern klar angezeigt, bevor sie eine Lieferanfrage annehmen, und im Transaktionsverlauf in der App.\n\n**10.2 Zusätzliche Gebühren**\n\n- **Servicegebühren**: Kunden können zusätzliche Gebühren für Premium-Dienste wie Expresslieferungen oder sichere Transporte erheben. Diese Gebühren werden während des Buchungsvorgangs offengelegt und beeinflussen nicht die Provision des Fahrers.\n- **Steuern**: Anfallende Steuern (z. B. Mehrwertsteuer, Umsatzsteuer) werden gemäß den örtlichen Vorschriften berechnet und zum Preis hinzugefügt. Steuern sind von der Provision getrennt und werden in den Belegen klar aufgeführt.\n- **Dynamische Preise**: In Zeiten hoher Nachfrage können die Preise aufgrund dynamischer Preise steigen. Die 7%ige Provision gilt für den erhöhten Preis, was die Einnahmen des Fahrers proportional erhöht.\n\n**10.3 Zahlungsabwicklung**\n\n- Kundenzahlungen werden über Bareinzahlungen im Büro oder Mandatszahlungen für Kontoguthaben abgewickelt, da Online-Zahlungen derzeit nicht unterstützt werden.\n- Fahrerauszahlungen werden wöchentlich (jeden Montag) auf das registrierte Bankkonto oder die digitale Geldbörse des Fahrers überwiesen, nach Abzug der 7%igen Provision und aller anfallenden Steuern.\n- Fahrer können ihre Einnahmen, Provisionsabzüge und Auszahlungspläne im Abschnitt „Einnahmen“ der App einsehen.\n\n**10.4 Streitigkeiten**\n\n- Wenn ein Kunde eine Gebühr anficht, wird shnell dies untersuchen und die Auszahlung des Fahrers vorübergehend einbehalten, bis der Streit beigelegt ist.\n- Fahrer werden über Streitigkeiten per E-Mail oder In-App-Benachrichtigungen informiert und können Beweise (z. B. Lieferbestätigung, Fotos) zur Unterstützung ihres Falles vorlegen.\n- Gelöste Streitigkeiten zugunsten des Fahrers führen zu einer sofortigen Auszahlung, abzüglich der standardmäßigen 7%igen Provision.",
+ 
 
-"whereDoYouWantToGo": "Wohin möchten Sie umziehen?",
-"notSuitable": "Nicht geeignet",
-"retry": "Wiederholen",
+  "cancellationHeading": "11. Stornierungsrichtlinie & 2ⁿ Disziplinarsystem",
+  "cancellationBody": "**11.1 Kundenszenarien**\n- **Kostenlos**: Vor Annahme durch den Fahrer.\n- **10% Gebühr**: Nach Annahme, aber *vor* der Verladung (Kraftstoffkompensation).\n- **Volle Gebühr (100%)**: Nach der Verladung ist die Stornierung per App gesperrt. Erfordert Admin-Eingriff. Ohne Fahrerverschulden wird der volle Preis berechnet.\n\n**11.2 Fahrerdisziplin (Exponentielles 2ⁿ System)**\nWir nutzen Zeitsperren statt Geldstrafen. Die Strafen steigen exponentiell:\n- **Kostenlose Stornierung**: Nur erlaubt, wenn der Kunde nach 12 Minuten Wartezeit nicht erscheint.\n- **Strafleiter**:\n  1. **1. Verstoß**: Warnung (0 Tage).\n  2. **2. Verstoß**: **1 Tag** Sperre.\n  3. **3. Verstoß**: **2 Tage** Sperre.\n  4. **4. Verstoß**: **4 Tage**.\n  5. **5. Verstoß**: **8 Tage**.\n  6. **Folgende**: 16, 32, bis zu **64 Tage**.\n\n**11.3 Gegenseitige Einigung**: Bei Einigung beider Parteien kann der Admin Gebühren erlassen."
+,
+  
+  "suspensionHeading": "12. Kontosperrung",
+  "suspensionBody": "**12.1 Automatische Sperre**: Basierend auf dem 2ⁿ-System. Nicht manuell aufhebbar.\n**12.2 Kündigung**: Bei Betrug, Umgehung der Provision oder missbräuchlichem Verhalten.",
+  "driverPerformanceHeading": "13. Fahrerautonomie",
+  "driverPerformanceBody": "Fahrer entscheiden frei über die Annahme. Nach Annahme ist Zuverlässigkeit Pflicht.",
+  "pickupLocation": "Abholort",
+  "whereDoYouWantToGo": "Wohin möchten Sie umziehen?",
+  "notSuitable": "Nicht geeignet",
+  "retry": "Wiederholen",
+
 "selectLocationTitle": "Standort für {type} auswählen",
 "searchForALocation": "Standort suchen",
 "useCurrentLocation": "Aktuellen Standort verwenden",
@@ -589,7 +593,83 @@
   "ongoing": "Laufend",
   "enRoute": "Unterwegs",
   "destinations": "Stopps",
-  "noActivityYet": "Noch keine Aktivität"
+  "noActivityYet": "Noch keine Aktivität",
+
+
+  
+  "personalInformation": "Persönliche Informationen",
+  "userDataNotFound": "Profil nicht gefunden",
+  "accountInfo": "Konto",
+  "name": "Name",
+  "security": "Sicherheit",
+  "changePassword": "Passwort ändern",
+  "passwordResetSent": "E-Mail zum Zurücksetzen gesendet",
+  "updateNameHelper": "Ihr Name wird in Ihrem Profil und in Firebase Authentication aktualisiert",
+  "changePasswordHelper": "Ein Link zum Zurücksetzen des Passworts wird an Ihre E-Mail gesendet",
+  
+  "contactUs": "Kontaktieren Sie uns",
+  "emergencyAndSupport": "Notfall & Support",
+  "sendUsAnEmail": "Schicken Sie uns eine E-Mail",
+  "ourLocation": "Unser Standort",
+  "addressLine1": "15 Rue de Sfax, Boumhal Basatine",
+  "addressLine2": "Tunis, Tunesien",
+  "openInMaps": "In Karten öffnen",
+  "followUsOnX": "Folgen Sie uns auf X",
+
+  "pickupTitle": "Abholung: {name}",
+  "unknownStop": "Unbekannter Stopp",
+  "errorLabel": "Fehler",
+  "retryButton": "Wiederholen",
+  "driverTitle": "Fahrer",
+  "callInitiationFailed": "Anruf fehlgeschlagen",
+  "deliveryCanceled": "Lieferung storniert",
+  "totalPrice": "Gesamt: {price} TND",
+  "totalPriceEmpty": "Gesamt: - TND",
+  "cancellationFeeWarning": "Stornogebühr: 10% ({amount} TND)",
+  "lessThanOneMin": "< 1 Min",
+  "minutesShort": "{count} Min",
+  "pickupIn": "Abholung in {time}",
+  "inTransit": "Unterwegs",
+
+  
+  "vehicleDetailsTitle": "Fahrzeugdetails",
+  "typeLabel": "Typ",
+  "maxWeightLabel": "Max. Gewicht",
+  "volumeLabel": "Volumen",
+  "yourOfferLabel": "Ihr Angebot",
+  "scheduleLabel": "Zeitplan",
+  "requiredLabel": "Erforderlich",
+  "selectTimeLabel": "Zeit wählen",
+  "adjustOfferTitle": "Angebot anpassen",
+  "suggestedPrice": "Vorschlag: {price} DT",
+  "tooLow": "Zu niedrig",
+  "tooHigh": "Zu hoch",
+  "looksGood": "Sieht gut aus!",
+  "minLabel": "Min",
+  "maxLabel": "Max",
+  "setPriceButton": "PREIS FESTLEGEN",
+  "confirmBookingButton": "BUCHUNG FÜR {price} DT BESTÄTIGEN",
+  "enterAmountError": "Betrag eingeben",
+  "validPriceError": "Bitte geben Sie einen gültigen Preis ein",
+  "scheduleError": "Bitte wählen Sie eine Lieferzeit",
+  "bookingSuccess": "Buchung erfolgreich bestätigt!",
+  "bookingFail": "Buchung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+
+
+  
+  "unsupportedAreaTitle": "Nicht unterstütztes Gebiet",
+  "serviceTunisiaOnly": "Der Service ist nur in Tunesien verfügbar.",
+  "pickupRestrictedError": "Die Abholung ist derzeit auf den Großraum Tunis beschränkt (Tunis, Ariana, Ben Arous, Manouba).",
+  "expansionMessagePickup": "Wir expandieren bald! Derzeit nur im Großraum Tunis tätig.",
+  "expansionMessageDropoff": "Lieferungen sind in ganz Tunesien möglich.",
+  "selectDifferentLocation": "Anderen Standort wählen",
+  "zoneValidationFailed": "Servicegebiet konnte nicht überprüft werden. Verbindung prüfen.",
+  "locationSelectedOnMap": "Standort auf der Karte ausgewählt"
+
+
+
+
+
 
 
 }

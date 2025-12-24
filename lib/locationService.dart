@@ -1,19 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:shnell/dots.dart';
+import 'package:shnell/dots.dart'; // Ensure this exists in your project
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart' as lt;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart';
-import 'package:shnell/location_utils.dart';
-import 'package:shnell/googlePlaces.dart';
+import 'package:shnell/location_utils.dart'; // Ensure this contains the updated logic
+import 'package:shnell/googlePlaces.dart'; // Ensure this model exists
 import 'dart:ui' show TextDirection;
 
 class SearchLocationScreen extends StatefulWidget {
   final String hintText;
-  const SearchLocationScreen({super.key, this.hintText = "Search for a location"});
+  final bool isPickup; 
+
+  const SearchLocationScreen({
+    super.key, 
+    this.hintText = "Search for a location",
+    this.isPickup = true, 
+  });
 
   @override
   State<SearchLocationScreen> createState() => _SearchLocationScreenState();
@@ -27,9 +33,9 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   String? _errorMessage;
   Timer? _debounce;
   
-  // API Config
-  
-  // Map State
+  static const String _hereApiKey = "b2zG0dap6jOlqXTOvF2HWrHRq-QFvkcoGjogNxUr-EE"; 
+  static const String _googleApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w"; 
+
   bool _isMapView = false;
   final Completer<GoogleMapController> _mapController = Completer();
   lt.LatLng _currentPinLocation = const lt.LatLng(36.8065, 10.1815);
@@ -54,38 +60,18 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   }
 
   void _initAnimations() {
-    // 1. Pin Drop Animation
-    _pinDropController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-    _pinDropAnimation = Tween<double>(begin: -100.0, end: 0.0).animate(
-      CurvedAnimation(parent: _pinDropController, curve: Curves.bounceOut),
-    );
-
-    // 2. Pulse Animation (Ring effect under pin)
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-    _pulseScaleAnimation = Tween<double>(begin: 1.0, end: 3.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
-    );
-    _pulseOpacityAnimation = Tween<double>(begin: 0.5, end: 0.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
-    );
-
-    // 3. Selection Animation (Jump on confirm)
-    _selectController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
+    _pinDropController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
+    _pinDropAnimation = Tween<double>(begin: -100.0, end: 0.0).animate(CurvedAnimation(parent: _pinDropController, curve: Curves.bounceOut));
+    
+    _pulseController = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
+    _pulseScaleAnimation = Tween<double>(begin: 1.0, end: 3.0).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeOut));
+    _pulseOpacityAnimation = Tween<double>(begin: 0.5, end: 0.0).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeOut));
+    
+    _selectController = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
     _selectAnimation = TweenSequence<double>([
       TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: -30.0), weight: 40),
       TweenSequenceItem(tween: Tween<double>(begin: -30.0, end: 0.0), weight: 60),
-    ]).animate(
-      CurvedAnimation(parent: _selectController, curve: Curves.easeInOut),
-    );
+    ]).animate(CurvedAnimation(parent: _selectController, curve: Curves.easeInOut));
   }
 
   @override
@@ -105,11 +91,8 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
     return localeName != null && rtlLanguages.contains(localeName);
   }
 
-  // --- SEARCH LOGIC ---
-
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    
     _debounce = Timer(const Duration(milliseconds: 400), () {
       if (!mounted) return;
       if (_searchController.text.length > 2) {
@@ -119,228 +102,180 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
       }
     });
   }
-/*
-this is expensive aproach we prefer the worker one cheap for up to 250 k requests per month free 
+
+  // --- 1. HERE API SEARCH ---
   Future<void> _performAutocompleteSearch(String query) async {
-    final l10n = AppLocalizations.of(context);
-    if (!mounted || l10n == null) return;
-    
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     final url = Uri.parse(
-      'https://maps.googleapis.com/maps/api/place/autocomplete/json?'
-      'input=${Uri.encodeComponent(query)}&components=country:tn&language=${l10n.localeName}&sessiontoken=$_sessionToken&key=$_googleApiKey',
+      'https://autosuggest.search.hereapi.com/v1/autosuggest?'
+      'at=36.8065,10.1815&' 
+      'q=${Uri.encodeComponent(query)}&'
+      'limit=5&'
+      'apiKey=$_hereApiKey'
     );
 
     try {
       final response = await http.get(url);
-      if (!mounted) return;
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['status'] == 'OK') {
-          setState(() {
-            _searchResults = (data['predictions'] as List)
-                .map((item) => GooglePlacePrediction.fromJson(item))
-                .toList();
-            _errorMessage = null;
-          });
-        } else {
-          setState(() => _errorMessage = l10n.googleDirectionsError(data['status']));
-        }
+        final items = data['items'] as List;
+
+        setState(() {
+          _searchResults = items.map((item) {
+            return GooglePlacePrediction(
+              placeId: item['id'], 
+              description: item['title'] + ", " + (item['address']['label'] ?? ""),
+              lat: item['position'] != null ? item['position']['lat'] : 0.0,
+              lng: item['position'] != null ? item['position']['lng'] : 0.0,
+            );
+          }).toList();
+          _errorMessage = null;
+        });
       } else {
-        setState(() => _errorMessage = l10n.googleHttpError(response.statusCode.toString()));
+        setState(() => _errorMessage = "Error: ${response.statusCode}");
       }
     } catch (e) {
-      if (mounted) setState(() => _errorMessage = l10n.googleNetworkError(e.toString()));
+      if (mounted) setState(() => _errorMessage = "Network Error");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-*/
 
-// 1. Add your HERE API Key at the top of the class
-
-// 2. Replace the Google Autocomplete function with this:
-// 1. Add your HERE API Key at the top of the class
-static const String _hereApiKey = "b2zG0dap6jOlqXTOvF2HWrHRq-QFvkcoGjogNxUr-EE"; 
-
-// 2. Replace the Google Autocomplete function with this:
-Future<void> _performAutocompleteSearch(String query) async {
-  if (!mounted) return;
-  setState(() => _isLoading = true);
-
-  // We prioritize search around Tunisia (Lat 34, Lng 9) for better relevance
-  // q = query text
-  // at = focus coordinates
-  // limit = number of results
-  final url = Uri.parse(
-    'https://autosuggest.search.hereapi.com/v1/autosuggest?'
-    'at=36.8065,10.1815&' // Focus on Tunis
-    'q=${Uri.encodeComponent(query)}&'
-    'limit=5&'
-    'apiKey=$_hereApiKey'
-  );
-
-  try {
-    final response = await http.get(url);
+  // --- 2. VALIDATION LOGIC (Localized) ---
+  
+  Future<String?> _checkZoneValidity(BuildContext context, lt.LatLng location) async {
+    final l10n = AppLocalizations.of(context)!;
     
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final items = data['items'] as List;
+    // Get Address Components from Google Geocoding
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=$_googleApiKey',
+    );
 
-      setState(() {
-        // Map HERE data to your existing GooglePlacePrediction object
-        // So the rest of your app doesn't break!
-        _searchResults = items.map((item) {
-          return GooglePlacePrediction(
-            // HERE uses 'id', Google uses 'place_id'
-            placeId: item['id'], 
-            // HERE uses 'title' + 'address', Google uses 'description'
-            description: item['title'] + ", " + (item['address']['label'] ?? ""),
-            // HERE gives coordinates immediately! Google requires a second call.
-            // This saves you even more complexity.
-            lat: item['position'] != null ? item['position']['lat'] : 0.0,
-            lng: item['position'] != null ? item['position']['lng'] : 0.0,
-          );
-        }).toList();
-        _errorMessage = null;
-      });
-    } else {
-      // Handle HERE API specific errors
-      setState(() => _errorMessage = "Error: ${response.statusCode}");
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK' && data['results'].isNotEmpty) {
+          final components = data['results'][0]['address_components'] as List;
+          
+          String countryCode = '';
+          String adminArea = ''; // Governorate
+
+          for (var c in components) {
+            final types = c['types'] as List;
+            if (types.contains('country')) countryCode = c['short_name']; 
+            if (types.contains('administrative_area_level_1')) adminArea = c['long_name'];
+          }
+
+          // Rule 1: Must be in Tunisia
+          if (countryCode != 'TN') {
+            return l10n.serviceTunisiaOnly; 
+          }
+
+          // Rule 2: If Pickup, must be Greater Tunis
+          if (widget.isPickup) {
+             final lowerGov = adminArea.toLowerCase();
+             final isGreaterTunis = 
+               lowerGov.contains('tunis') || 
+               lowerGov.contains('ariana') || 
+               lowerGov.contains('ben arous') || 
+               lowerGov.contains('manouba');
+             
+             if (!isGreaterTunis) {
+               return l10n.pickupRestrictedError;
+             }
+          }
+
+          return null; // Valid
+        }
+      }
+    } catch (e) {
+      debugPrint("Validation check failed: $e");
+      return l10n.zoneValidationFailed;
     }
-  } catch (e) {
-    if (mounted) setState(() => _errorMessage = "Network Error");
-  } finally {
-    if (mounted) setState(() => _isLoading = false);
+    return l10n.zoneValidationFailed;
   }
-}
- 
- 
-// REMPLACEZ VOTRE FONCTION _onPlaceSelected ACTUELLE PAR CELLE-CI
-  void _onPlaceSelected(GooglePlacePrediction place) {
-    // 1. Vérification : Est-ce qu'on a déjà les coordonnées ?
-    // (L'API HERE les fournit directement dans la recherche, donc c'est oui)
-    if (place.lat != 0.0 && place.lng != 0.0) {
-      
-      // 2. Feedback Tactile (Optionnel mais agréable)
-      HapticFeedback.lightImpact();
 
-      // 3. Retour immédiat
-      // On n'appelle PAS Google. On renvoie juste l'objet qu'on a déjà.
-      if (mounted) {
+  // --- 3. SELECTION HANDLERS ---
+
+  void _onPlaceSelected(GooglePlacePrediction place) async {
+    if (place.lat != 0.0 && place.lng != 0.0) {
+      setState(() => _isLoading = true);
+      
+      final errorMsg = await _checkZoneValidity(context, lt.LatLng(place.lat!, place.lng!));
+      
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (errorMsg != null) {
+        _showUnsupportedAreaDialog(errorMsg);
+      } else {
+        HapticFeedback.lightImpact();
         Navigator.pop(context, place);
-        
-        // On régénère le token session pour la prochaine fois
       }
     } else {
-      // Cas rare où l'API de recherche n'a pas donné de coordonnées
       if (mounted) {
-        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.locationCoordinatesError ?? "Coordonnées introuvables"),
+            content: Text("Coordinates not found"),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
     }
   }
-  // --- MAP LOGIC ---
 
-  void _toggleMapView() {
-    setState(() {
-      _isMapView = !_isMapView;
-      if (_isMapView) {
-        // Start animations only when entering map view
-        _pinDropController.reset();
-        _pinDropController.forward().whenComplete(() {
-          _pulseController.repeat();
-        });
-        _searchController.clear();
-        _searchResults = [];
-        _updatePinAddress();
-      } else {
-        _pulseController.stop();
+  Future<void> _confirmMapSelection() async {
+    setState(() => _isLoading = true);
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      final errorMsg = await _checkZoneValidity(context, _currentPinLocation);
+
+      if (errorMsg != null) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        _showUnsupportedAreaDialog(errorMsg);
+        return;
       }
-    });
-  }
 
-// Remplacez votre fonction _onMapCameraMove actuelle par celle-ci
-void _onMapCameraMove(CameraPosition position) {
-  // On met juste à jour les coordonnées locales (Gratuit)
-  _currentPinLocation = lt.LatLng(position.target.latitude, position.target.longitude);
-  
-  // Optionnel : On peut mettre un texte générique pour dire que ça a bougé
-  if (_currentPinAddress != null) {
-     setState(() {
-       _currentPinAddress = null; // Cela affichera "Position sur la carte" dans l'UI
-     });
-  }
-}
-
-  Future<void> _updatePinAddress() async {
-    if (_reverseGeocodeDebounce?.isActive ?? false) _reverseGeocodeDebounce!.cancel();
-    
-    _reverseGeocodeDebounce = Timer(const Duration(milliseconds: 500), () async {
-      final address = await LocationUtils.reverseGeocode(_currentPinLocation, context, _geocodeCache);
-      if (mounted) {
-        setState(() => _currentPinAddress = address);
-      }
-    });
-  }
-
-// Remplacez votre fonction _confirmMapSelection par celle-ci
-Future<void> _confirmMapSelection() async {
-  final l10n = AppLocalizations.of(context);
-  if (l10n == null) return;
-
-  // 1. Démarrer le chargement (Feedback visuel important)
-  setState(() => _isLoading = true);
-
-  try {
-    // 2. C'est ICI qu'on paie l'appel API (Une seule fois !)
-    // On utilise votre utilitaire existant
-    String? finalAddress = await LocationUtils.reverseGeocode(
-      _currentPinLocation, 
-      context, 
-      _geocodeCache
-    );
-
-    // Fallback si l'API échoue ou ne trouve rien
-    finalAddress ??= "${_currentPinLocation.latitude.toStringAsFixed(5)}, ${_currentPinLocation.longitude.toStringAsFixed(5)}";
-
-    if (!mounted) return;
-
-    // 3. Animation de confirmation
-    HapticFeedback.mediumImpact();
-    await _selectController.forward(); // Attendre la fin de l'animation
-
-    // 4. Renvoyer le résultat
-    final resultPlace = GooglePlacePrediction(
-      placeId: null, // Pas de placeId pour une coordonnée manuelle
-      description: finalAddress,
-      lat: _currentPinLocation.latitude,
-      lng: _currentPinLocation.longitude,
-    );
-    
-    Navigator.pop(context, resultPlace);
-    // On renouvelle le token pour la prochaine fois
-
-  } catch (e) {
-    // Gestion d'erreur basique
-    if (mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur de connexion: $e")),
+      String? finalAddress = await LocationUtils.reverseGeocode(
+        _currentPinLocation, 
+        context, 
+        _geocodeCache
       );
-    }
-  } finally {
-    if (mounted) {
-      setState(() => _isLoading = false);
+
+      finalAddress ??= "${_currentPinLocation.latitude.toStringAsFixed(5)}, ${_currentPinLocation.longitude.toStringAsFixed(5)}";
+
+      if (!mounted) return;
+
+      HapticFeedback.mediumImpact();
+      await _selectController.forward();
+
+      final resultPlace = GooglePlacePrediction(
+        placeId: null,
+        description: finalAddress,
+        lat: _currentPinLocation.latitude,
+        lng: _currentPinLocation.longitude,
+      );
+      
+      Navigator.pop(context, resultPlace);
+
+    } catch (e) {
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${l10n.zoneValidationFailed} ($e)")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-}
+
   Future<void> _useCurrentLocation() async {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
@@ -353,6 +288,16 @@ Future<void> _confirmMapSelection() async {
     try {
       final position = await LocationUtils.getCurrentLocation();
       final latLng = lt.LatLng(position.latitude, position.longitude);
+      
+      final errorMsg = await _checkZoneValidity(context, latLng);
+      
+      if (errorMsg != null) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        _showUnsupportedAreaDialog(errorMsg);
+        return;
+      }
+
       final address = await LocationUtils.reverseGeocode(latLng, context, {});
       
       if (mounted) {
@@ -377,7 +322,106 @@ Future<void> _confirmMapSelection() async {
     }
   }
 
-  // --- UI CONSTRUCTION ---
+  // --- 4. UNSUPPORTED AREA DIALOG (Localized) ---
+
+  void _showUnsupportedAreaDialog(String message) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.map_outlined, color: Colors.orange, size: 28),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l10n.unsupportedAreaTitle,
+                style: const TextStyle(fontSize: 18),
+              )
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.blue.withOpacity(0.3))
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, size: 20, color: Colors.blue),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.isPickup 
+                        ? l10n.expansionMessagePickup
+                        : l10n.expansionMessageDropoff,
+                      style: TextStyle(fontSize: 13, color: Colors.blue[800]),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.selectDifferentLocation),
+          )
+        ],
+      ),
+    );
+  }
+
+  // --- MAP & UI HELPERS ---
+
+  void _toggleMapView() {
+    setState(() {
+      _isMapView = !_isMapView;
+      if (_isMapView) {
+        _pinDropController.reset();
+        _pinDropController.forward().whenComplete(() {
+          _pulseController.repeat();
+        });
+        _searchController.clear();
+        _searchResults = [];
+        _updatePinAddress();
+      } else {
+        _pulseController.stop();
+      }
+    });
+  }
+
+  void _onMapCameraMove(CameraPosition position) {
+    _currentPinLocation = lt.LatLng(position.target.latitude, position.target.longitude);
+    if (_currentPinAddress != null) {
+       setState(() {
+         _currentPinAddress = null; 
+       });
+    }
+  }
+
+  Future<void> _updatePinAddress() async {
+    if (_reverseGeocodeDebounce?.isActive ?? false) _reverseGeocodeDebounce!.cancel();
+    _reverseGeocodeDebounce = Timer(const Duration(milliseconds: 500), () async {
+      final address = await LocationUtils.reverseGeocode(_currentPinLocation, context, _geocodeCache);
+      if (mounted) {
+        setState(() => _currentPinAddress = address);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -408,7 +452,6 @@ Future<void> _confirmMapSelection() async {
         elevation: 0,
         iconTheme: IconThemeData(
           color: _isMapView ? colorScheme.onSurface : colorScheme.onSurface,
-          // Add shadow to back button in map view so it's visible over map
           shadows: _isMapView ? [const Shadow(color: Colors.black45, blurRadius: 3)] : null
         ),
       ),
@@ -435,7 +478,7 @@ Future<void> _confirmMapSelection() async {
         Divider(color: colorScheme.outlineVariant),
         Expanded(
           child: _isLoading
-              ? RotatingDotsIndicator()
+              ? const RotatingDotsIndicator()
               : _errorMessage != null
                   ? Center(child: Text(_errorMessage!, style: TextStyle(fontSize: 16, color: colorScheme.error)))
                   : _searchController.text.isNotEmpty && _searchResults.isEmpty
@@ -464,160 +507,73 @@ Future<void> _confirmMapSelection() async {
     );
   }
 
-Widget _buildMapView(ColorScheme colorScheme, AppLocalizations l10n) {
-  return Stack(
-    children: [
-      // 1. Map Layer
-      GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(_currentPinLocation.latitude, _currentPinLocation.longitude),
-          zoom: 15.0,
-        ),
-        onMapCreated: (GoogleMapController controller) {
-          if (!_mapController.isCompleted) {
-            _mapController.complete(controller);
-          }
-        },
-        onCameraMove: _onMapCameraMove, // Ne coûte plus rien maintenant
-        myLocationEnabled: true,
-        myLocationButtonEnabled: false,
-        compassEnabled: true,
-        zoomControlsEnabled: false,
-      ),
-
-      // 2. Animated Pin Layer
-      Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Pulse Ring (Animation)
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _pulseScaleAnimation.value,
-                  child: Opacity(
-                    opacity: _pulseOpacityAnimation.value,
-                    child: Container(
-                      width: 20, height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // Pin Icon + Shadow
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedBuilder(
-                  animation: Listenable.merge([_pinDropController, _selectController]),
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, _pinDropAnimation.value + _selectAnimation.value),
-                      child: child,
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0),
-                    child: Icon(Icons.location_on, color: colorScheme.primary, size: 48.0),
-                  ),
-                ),
-                Container(
-                  width: 20, height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-
-      // 3. Bottom Control Panel (Interface corrigée)
-      Positioned(
-        bottom: 0, left: 0, right: 0,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 2)
-            ]
+  Widget _buildMapView(ColorScheme colorScheme, AppLocalizations l10n) {
+    return Stack(
+      children: [
+        GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: LatLng(_currentPinLocation.latitude, _currentPinLocation.longitude),
+            zoom: 15.0,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Important pour éviter l'overflow
-            crossAxisAlignment: CrossAxisAlignment.start,
+          onMapCreated: (GoogleMapController controller) {
+            if (!_mapController.isCompleted) {
+              _mapController.complete(controller);
+            }
+          },
+          onCameraMove: _onMapCameraMove, 
+          myLocationEnabled: true,
+          myLocationButtonEnabled: false,
+          compassEnabled: true,
+          zoomControlsEnabled: false,
+        ),
+
+        Center(
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Text(
-                l10n.chooseLoadingPosition, // "Choisir le point de prise en charge"
-                style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 8),
-              
-              // Affichage de l'adresse (ou texte générique)
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        // Affiche "Position sur la carte" tant qu'on n'a pas confirmé
-                        _currentPinAddress ?? "Position sélectionnée sur la carte",
-                        style: TextStyle(
-                          fontSize: 16, 
-                          color: _currentPinAddress == null 
-                              ? colorScheme.onSurface.withOpacity(0.6) 
-                              : colorScheme.onSurface
+              AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _pulseScaleAnimation.value,
+                    child: Opacity(
+                      opacity: _pulseOpacityAnimation.value,
+                      child: Container(
+                        width: 20, height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorScheme.primary,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  ),
-                  if (_isLoading)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: SizedBox(width: 24, height: 24, child: RotatingDotsIndicator()),
-                    ),
-                ],
+                  );
+                },
               ),
-              const SizedBox(height: 24),
-              
-              // Boutons d'action (Retour / Confirmer)
-              Row(
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _toggleMapView,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  AnimatedBuilder(
+                    animation: Listenable.merge([_pinDropController, _selectController]),
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, _pinDropAnimation.value + _selectAnimation.value),
+                        child: child,
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Image.asset(
+                        'assets/pin.png', 
+                        width: 48.0,
+                        height: 48.0,
                       ),
-                      child: Text(l10n.back, style: const TextStyle(fontSize: 16)),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FilledButton(
-                      // Si c'est en chargement, on désactive le bouton
-                      onPressed: _isLoading ? null : _confirmMapSelection,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(l10n.confirmPosition, style: const TextStyle(fontSize: 16)),
+                  Container(
+                    width: 20, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ],
@@ -625,7 +581,90 @@ Widget _buildMapView(ColorScheme colorScheme, AppLocalizations l10n) {
             ],
           ),
         ),
-      ),
-    ],
-  );
-}}
+
+        Positioned(
+          bottom: 0, left: 0, right: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 2)
+              ]
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, 
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.chooseLoadingPosition, 
+                  style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 8),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _currentPinAddress ?? l10n.locationSelectedOnMap, // Use localized fallback
+                          style: TextStyle(
+                            fontSize: 16, 
+                            color: _currentPinAddress == null 
+                                ? colorScheme.onSurface.withOpacity(0.6) 
+                                : colorScheme.onSurface
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: SizedBox(width: 24, height: 24, child: RotatingDotsIndicator()),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _toggleMapView,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(l10n.back, style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: _isLoading ? null : _confirmMapSelection,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(l10n.confirmPosition, style: const TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

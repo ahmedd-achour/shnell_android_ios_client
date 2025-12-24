@@ -6,20 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as lt;
-import 'package:shnell/dots.dart'; 
+import 'package:shnell/dots.dart';
+// Adjust these imports based on your actual project structure
 import 'package:shnell/mainUsers.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/orderService.dart';
+// --- Localization Import ---
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-// --- SERVICE TYPE MODEL (From your instruction) ---
+// --- SERVICE TYPE MODEL (Unchanged) ---
 class ServiceType {
   final String id;
   final String title;
   final String subtitle;
   final String iconAsset;
-  final double priceMultiplier; 
+  final double priceMultiplier;
   final List<String> allowedVehicles;
 
   ServiceType({
@@ -28,14 +30,14 @@ class ServiceType {
     required this.subtitle,
     required this.iconAsset,
     required this.allowedVehicles,
-    required this.priceMultiplier
+    required this.priceMultiplier,
   });
 
   factory ServiceType.fromMap(Map<String, dynamic> map) {
     return ServiceType(
       id: map['id'] ?? '',
       title: map['title'] ?? '',
-      priceMultiplier: (map['price_multiplier'] ?? 1.0).toDouble(), // Critical: Parse Multiplier
+      priceMultiplier: (map['price_multiplier'] ?? 1.0).toDouble(),
       subtitle: map['subtitle'] ?? '',
       iconAsset: map['icon_asset'] ?? 'assets/box.png',
       allowedVehicles: List<String>.from(map['allowed_vehicles'] ?? []),
@@ -43,7 +45,7 @@ class ServiceType {
   }
 }
 
-// --- VEHICLE SETTINGS MODEL ---
+// --- VEHICLE SETTINGS MODEL (Unchanged) ---
 class VehicleSettings {
   final String name;
   final double maxWeight;
@@ -85,7 +87,7 @@ class VehicleDetailScreen extends StatefulWidget {
   final lt.LatLng pickupLocation;
   final List<DropOffData> dropOffDestination;
   final String pickup_name;
-  final String? serviceTypeId; // Passed from Service Selection
+  final String? serviceTypeId;
 
   const VehicleDetailScreen({
     Key? key,
@@ -102,20 +104,21 @@ class VehicleDetailScreen extends StatefulWidget {
 }
 
 class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
-  // State
   bool _isLoading = true;
   double _calculatedDistanceKm = 0.0;
   double _calculatedEstimatedPrice = 0.0;
-  
-  // Cloud Data
+
   VehicleSettings? _vehicleSettings;
   double _stopFee = 0.4;
-  double _serviceMultiplier = 1.0; // Defaults to 1.0 if not set
+  double _serviceMultiplier = 1.0;
 
-  // Manual Offer Logic
   late TextEditingController _offerController;
-  String? _offerErrorText;
-  Color _priceStatusColor = Colors.grey; 
+  // We store the error *code* or simple state, 
+  // but to keep it simple with existing logic, we will check validity on the fly 
+  // or update a boolean state. Here we stick to a helper method that returns strings via context.
+
+  DateTime? _selectedScheduleDate;
+  bool _hasChosenSchedule = false;
 
   static const String _googleMapsApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w";
 
@@ -132,8 +135,6 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     super.dispose();
   }
 
-  // --- LOGIC SECTION ---
-
   Future<void> _initializeAppLogic() async {
     await _calculateRouteDistance();
     await _fetchCloudSettingsAndCalculate();
@@ -141,10 +142,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
   Future<void> _calculateRouteDistance() async {
     if (widget.dropOffDestination.isEmpty) return;
-
-    final List<lt.LatLng> destinations = widget.dropOffDestination.map((dropOff) => dropOff.destination).toList();
-    final distance = await getGoogleRoadDistance(widget.pickupLocation, destinations, _googleMapsApiKey);
-
+    final List<lt.LatLng> destinations =
+        widget.dropOffDestination.map((dropOff) => dropOff.destination).toList();
+    final distance =
+        await getGoogleRoadDistance(widget.pickupLocation, destinations, _googleMapsApiKey);
     if (mounted && distance != null) {
       setState(() => _calculatedDistanceKm = distance);
     }
@@ -152,11 +153,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
   Future<void> _fetchCloudSettingsAndCalculate() async {
     try {
-      // 1. Fetch all settings in parallel
       final results = await Future.wait([
-        FirebaseFirestore.instance.collection('settings').doc('config').get(),        // Index 0
-        FirebaseFirestore.instance.collection('settings').doc('vehicles').get(),      // Index 1
-        FirebaseFirestore.instance.collection('settings').doc('service_types').get(), // Index 2
+        FirebaseFirestore.instance.collection('settings').doc('config').get(),
+        FirebaseFirestore.instance.collection('settings').doc('vehicles').get(),
+        FirebaseFirestore.instance.collection('settings').doc('service_types').get(),
       ]);
 
       final configDoc = results[0];
@@ -164,49 +164,39 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       final servicesDoc = results[2];
 
       if (mounted) {
-        // A. Parse Global Config
         if (configDoc.exists && configDoc.data() != null) {
           _stopFee = (configDoc['stop_fee'] ?? 0.4).toDouble();
         }
 
-        // B. Parse Service Type to get Multiplier
         if (widget.serviceTypeId != null && servicesDoc.exists && servicesDoc.data() != null) {
           final data = servicesDoc.data() as Map<String, dynamic>;
           if (data['types'] is List) {
-            final List<dynamic> rawTypes = data['types'];
-            // Find the specific service the user selected
+            final rawTypes = data['types'] as List<dynamic>;
             final selectedServiceData = rawTypes.firstWhere(
               (item) => item['id'] == widget.serviceTypeId,
               orElse: () => null,
             );
-
             if (selectedServiceData != null) {
-              // Create Object using the class you provided
-              final serviceObj = ServiceType.fromMap(selectedServiceData as Map<String, dynamic>);
-              _serviceMultiplier = serviceObj.priceMultiplier; // Apply the multiplier (e.g. 1.5)
+              final serviceObj =
+                  ServiceType.fromMap(selectedServiceData as Map<String, dynamic>);
+              _serviceMultiplier = serviceObj.priceMultiplier;
             }
           }
         }
 
-        // C. Parse Vehicle Data & Calculate Final Price
         if (vehiclesDoc.exists && vehiclesDoc.data() != null) {
           final data = vehiclesDoc.data() as Map<String, dynamic>;
           if (data.containsKey(widget.type)) {
             _vehicleSettings = VehicleSettings.fromMap(data[widget.type]);
-            
-            // Calculate
             _calculatedEstimatedPrice = _calculateDynamicPrice(
-              _calculatedDistanceKm, 
+              _calculatedDistanceKm,
               _vehicleSettings!,
-              widget.dropOffDestination.length
+              widget.dropOffDestination.length,
             );
-            
-            // Set UI values
             _offerController.text = _calculatedEstimatedPrice.toStringAsFixed(0);
             _validateOffer(_offerController.text);
           }
         }
-        
         setState(() => _isLoading = false);
       }
     } catch (e) {
@@ -215,30 +205,23 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     }
   }
 
-  // CORE PRICING LOGIC
   double _calculateDynamicPrice(double distance, VehicleSettings v, int stops) {
     double pricePerKm;
-    
-    // 1. Base Distance Rate
     if (distance < v.shortDistThreshold) {
       double factor = (1 - (distance / 1000)) * v.shortDistMult;
       pricePerKm = max(v.shortDistMin, factor);
     } else {
       pricePerKm = v.longDistRate;
     }
-
-    // 2. Base Calculation
     double baseCalculation = v.basePrice + (distance * pricePerKm) + (stops * _stopFee);
-    
-    // 3. APPLY SERVICE MULTIPLIER (The Job Type Factor)
-    // Moving Service (1.5x) costs more than Simple Transport (1.0x) for the same truck/distance
     return baseCalculation * _serviceMultiplier;
   }
 
-  Future<double?> getGoogleRoadDistance(lt.LatLng origin, List<lt.LatLng> destinations, String apiKey) async {
-    // ... (Keep existing Google Distance implementation)
+  Future<double?> getGoogleRoadDistance(
+      lt.LatLng origin, List<lt.LatLng> destinations, String apiKey) async {
     String originStr = '${origin.latitude},${origin.longitude}';
-    String destinationStr = '${destinations.last.latitude},${destinations.last.longitude}';
+    String destinationStr =
+        '${destinations.last.latitude},${destinations.last.longitude}';
     String waypointsStr = '';
     if (destinations.length > 1) {
       waypointsStr = destinations
@@ -246,10 +229,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           .map((d) => '${d.latitude},${d.longitude}')
           .join('|');
     }
-
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=$originStr&destination=$destinationStr&mode=driving&waypoints=$waypointsStr&key=$apiKey';
-
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -259,7 +240,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           for (var leg in data['routes'][0]['legs']) {
             totalDistance += leg['distance']['value'];
           }
-          return totalDistance / 1000; 
+          return totalDistance / 1000;
         }
       }
     } catch (e) {
@@ -268,49 +249,81 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return null;
   }
 
-  // --- VALIDATION LOGIC ---
-
-  // Min/Max also scales with multiplier automatically since they use _calculatedEstimatedPrice
-  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.75;
-  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.50;
+  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.8;
+  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.40;
 
   void _validateOffer(String value) {
-    double? val = double.tryParse(value);
-
+    // We update the state to trigger rebuild, 
+    // the actual error string is generated in build method using Context for localization
+    setState(() {
+      // Just triggering update, logic moved to build or helper that has context
+    });
+  }
+  
+  // Helper to get error string based on current value
+  String? _getLocalizedError(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    double? val = double.tryParse(_offerController.text);
     if (val == null || val <= 0) {
-      setState(() {
-        _offerErrorText = "Enter amount";
-        _priceStatusColor = Colors.grey;
-      });
-      return;
+      return loc.enterAmountError;
     }
-
     if (val < _minAllowedPrice) {
-      setState(() {
-        _offerErrorText = "Too low";
-        _priceStatusColor = Colors.orange; 
-      });
+      return loc.tooLow;
     } else if (val > _maxAllowedPrice) {
-      setState(() {
-        _offerErrorText = "Too high";
-        _priceStatusColor = Colors.red; 
-      });
-    } else {
-      setState(() {
-        _offerErrorText = null; 
-        _priceStatusColor = Colors.green; 
-      });
+      return loc.tooHigh;
+    }
+    return null; // Valid
+  }
+
+  Future<void> _selectScheduleDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = _selectedScheduleDate ?? now.add(const Duration(minutes: 30));
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 90)),
+    );
+
+    if (pickedDate != null) {
+      final TimeOfDay initialTime = TimeOfDay.fromDateTime(initialDate);
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: initialTime,
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          _selectedScheduleDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          _hasChosenSchedule = true;
+        });
+      }
     }
   }
 
   Future<void> _passAnOrder() async {
+    final loc = AppLocalizations.of(context)!;
     double currentOffer = double.tryParse(_offerController.text) ?? 0;
-    
-    // Strict Validation
-    if (currentOffer < _minAllowedPrice || currentOffer > _maxAllowedPrice) {
+    String? error = _getLocalizedError(context);
+
+    if (error != null || currentOffer <= 0) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.validPriceError)),
+      );
+      return;
+    }
+
+    if (!_hasChosenSchedule || _selectedScheduleDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Price must be between ${_minAllowedPrice.toStringAsFixed(0)} and ${_maxAllowedPrice.toStringAsFixed(0)} DT"),
+          content: Text(loc.scheduleError),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -337,13 +350,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         pickUpLocation: widget.pickupLocation,
         stops: stopIds,
         vehicleType: widget.type,
-        id: '',
+        id: '', 
         userId: user.uid,
-        additionalInfo: {
-          'serviceType': widget.serviceTypeId ?? 'transport', 
-          'appliedMultiplier': _serviceMultiplier, // Save the multiplier used for audit
-        },
         isAcepted: false,
+        scheduleAt: Timestamp.fromDate(_selectedScheduleDate!),
       );
 
       final orderService = OrderService();
@@ -351,7 +361,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Booking confirmed!")),
+           SnackBar(content: Text(loc.bookingSuccess)),
         );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const MainUsersScreen()),
@@ -359,16 +369,18 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         );
       }
     } catch (e) {
+      debugPrint("Error passing order: $e");
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${e.toString()}"), backgroundColor: Theme.of(context).colorScheme.error),
+          SnackBar(
+            content: Text(loc.bookingFail),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
         );
       }
     }
   }
-
-  // --- UI BUILDING ---
 
   @override
   Widget build(BuildContext context) {
@@ -377,26 +389,35 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     final vehicleName = _vehicleSettings?.name ?? "Transport";
     final vehicleMaxWeight = _vehicleSettings?.maxWeight ?? 0;
     final vehicleVolume = _vehicleSettings?.volume ?? 0;
-
-    final l10n = AppLocalizations.of(context);
+    
+    // --- LOCALIZATION ---
+    final loc = AppLocalizations.of(context)!;
+    
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
+    final size = MediaQuery.of(context).size;
+    final bool isSmallScreen = size.width < 380;
+    final double headerHeight = size.height * 0.35;
+    final double cardHeight = size.height * 0.28;
+    final double bottomPadding = isSmallScreen ? 90 : 110;
+
+    String? currentError = _getLocalizedError(context);
+    bool canBook = _hasChosenSchedule && currentError == null;
+    String currentPriceDisplay = _offerController.text.isEmpty ? "0" : _offerController.text;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // 1. TOP GRADIENT BACKGROUND
           Container(
-            height: 320,
+            height: headerHeight,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  colorScheme.primary,
-                  colorScheme.primaryContainer,
-                ],
+                colors: [colorScheme.primary, colorScheme.primaryContainer],
               ),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(40),
@@ -405,34 +426,44 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
             ),
           ),
 
-          // 2. SCROLLABLE CONTENT
           SingleChildScrollView(
-            padding: const EdgeInsets.only(top: 100, bottom: 100),
+            padding: EdgeInsets.only(top: headerHeight * 0.35, bottom: bottomPadding),
             child: Column(
               children: [
-                // A. FLOATING VEHICLE CARD
-                _buildFloatingVehicleCard(colorScheme, textTheme),
-
-                const SizedBox(height: 25),
-
-                // B. PRICE CARD (MANUAL ENTRY)
+                _buildFloatingVehicleCard(colorScheme, textTheme, cardHeight, isSmallScreen),
+                SizedBox(height: size.height * 0.03),
+                
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildPriceNegotiationCard(l10n, colorScheme, textTheme),
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: Column(
+                    children: [
+                       Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: _buildMainScreenPriceCard(colorScheme, textTheme, isSmallScreen, loc),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 4,
+                            child: _buildMainScreenScheduleCard(colorScheme, textTheme, isSmallScreen, loc),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 20),
-
-                // C. TRIP DETAILS
+                SizedBox(height: size.height * 0.02),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildDetailsCard(vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme),
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: _buildDetailsCard(
+                      vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
                 ),
               ],
             ),
           ),
 
-          // 3. HEADER
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -444,7 +475,6 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => Navigator.pop(context),
-                      tooltip: 'Back',
                     ),
                   ),
                   Expanded(
@@ -453,6 +483,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                       textAlign: TextAlign.center,
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        fontSize: isSmallScreen ? 20 : 24,
                         color: colorScheme.onPrimary,
                       ),
                     ),
@@ -464,23 +495,26 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           ),
         ],
       ),
-
-      // 4. BIG CONFIRM BUTTON
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
         child: SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: _passAnOrder,
+            onPressed: canBook ? _passAnOrder : null,
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 20),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              backgroundColor: _offerErrorText == null ? colorScheme.primary : Colors.grey, // Grise le bouton si erreur
+              backgroundColor: colorScheme.primary,
+              disabledBackgroundColor: Colors.grey.shade400,
             ),
             child: Text(
-              l10n?.confirmBooking.toUpperCase() ?? "CONFIRM NOW",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+              loc.confirmBookingButton(currentPriceDisplay),
+              style: TextStyle(
+                fontSize: isSmallScreen ? 16 : 18, 
+                fontWeight: FontWeight.w900, 
+                letterSpacing: 1.1
+              ),
             ),
           ),
         ),
@@ -488,33 +522,268 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
-  // --- SUB-WIDGETS ---
+  // --- NEW WIDGETS FOR MAIN SCREEN ---
 
-  Widget _buildFloatingVehicleCard(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildMainScreenPriceCard(ColorScheme colorScheme, TextTheme textTheme, bool isSmall, AppLocalizations loc) {
+    return GestureDetector(
+      onTap: () => _showPriceOnlyDialog(colorScheme, textTheme),
+      child: Container(
+         padding: EdgeInsets.all(isSmall ? 12 : 16),
+         decoration: BoxDecoration(
+           color: colorScheme.primaryContainer.withOpacity(0.5),
+           borderRadius: BorderRadius.circular(24),
+           border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
+         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             Row(
+               children: [
+                 Icon(Icons.edit, size: 16, color: colorScheme.primary),
+                 const SizedBox(width: 4),
+                 // LOCALIZED
+                 Text(loc.yourOfferLabel, style: textTheme.labelLarge?.copyWith(color: colorScheme.primary)),
+               ],
+             ),
+            const SizedBox(height: 8),
+            RichText(
+              text: TextSpan(
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: colorScheme.onSurface),
+                children: [
+                   TextSpan(text: _offerController.text.isEmpty ? "0" : _offerController.text, 
+                    style: TextStyle(fontSize: isSmall ? 24 : 28)),
+                   TextSpan(text: " DT", style: textTheme.titleMedium?.copyWith(color: colorScheme.primary)),
+                ]
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainScreenScheduleCard(ColorScheme colorScheme, TextTheme textTheme, bool isSmall, AppLocalizations loc) {
+    // LOCALIZED
+    String scheduleText = loc.selectTimeLabel;
+    IconData scheduleIcon = Icons.calendar_today_rounded;
+    Color bgColor = colorScheme.surfaceContainerHighest;
+    Color textColor = colorScheme.onSurfaceVariant;
+
+    if (_hasChosenSchedule && _selectedScheduleDate != null) {
+      scheduleText = "${_selectedScheduleDate!.day}/${_selectedScheduleDate!.month} @ ${_selectedScheduleDate!.hour.toString().padLeft(2,'0')}:${_selectedScheduleDate!.minute.toString().padLeft(2,'0')}";
+      scheduleIcon = Icons.check_circle_rounded;
+      bgColor = colorScheme.secondaryContainer;
+      textColor = colorScheme.onSecondaryContainer;
+    }
+
+    return GestureDetector(
+      onTap: () => _selectScheduleDate(context),
+      child: Container(
+         padding: EdgeInsets.all(isSmall ? 12 : 16),
+         decoration: BoxDecoration(
+           color: bgColor,
+           borderRadius: BorderRadius.circular(24),
+           border: Border.all(color: _hasChosenSchedule ? colorScheme.secondary : Colors.transparent),
+         ),
+        child: Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+               children: [
+                 Icon(scheduleIcon, size: 16, color: textColor),
+                 const SizedBox(width: 4),
+                 // LOCALIZED
+                 Text(loc.scheduleLabel, style: textTheme.labelLarge?.copyWith(color: textColor)),
+               ],
+             ),
+             const SizedBox(height: 8),
+             Text(
+              scheduleText,
+              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: textColor, fontSize: isSmall? 15 : 16),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+               if (!_hasChosenSchedule) 
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                // LOCALIZED
+                child: Text(loc.requiredLabel, style: textTheme.bodySmall?.copyWith(color: colorScheme.error)),
+              )
+
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  // --- MODAL DIALOG ---
+
+  Future<void> _showPriceOnlyDialog(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) async {
+    final loc = AppLocalizations.of(context)!;
+    double tempOffer = double.tryParse(_offerController.text) ?? _calculatedEstimatedPrice;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final minPrice = _minAllowedPrice;
+          final maxPrice = _maxAllowedPrice;
+          final bottomInset = MediaQuery.of(context).viewInsets.bottom; 
+          final size = MediaQuery.of(context).size;
+          final isSmallScreen = size.width < 380;
+
+          Color statusColor;
+          String statusText;
+
+          if (tempOffer < minPrice) {
+            statusColor = Colors.orange;
+            statusText = loc.tooLow;
+          } else if (tempOffer > maxPrice) {
+            statusColor = Colors.red;
+            statusText = loc.tooHigh;
+          } else {
+            statusColor = Colors.green;
+            statusText = loc.looksGood;
+          }
+
+          return Container(
+            padding: EdgeInsets.only(bottom: bottomInset + 20, top: 10, left: 20, right: 20),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(color: colorScheme.outlineVariant, borderRadius: BorderRadius.circular(10)),
+                  ),
+                  // LOCALIZED
+                  Text(loc.adjustOfferTitle, style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  // LOCALIZED
+                  Text(loc.suggestedPrice(_calculatedEstimatedPrice.toStringAsFixed(0)), style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary)),
+                  
+                  const SizedBox(height: 24),
+
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                        Opacity(
+                          opacity: 0,
+                          child: TextField(
+                            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                            autofocus: true,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(5)],
+                            onChanged: (value) {
+                              if(value.isNotEmpty) {
+                                setDialogState(() {
+                                  tempOffer = double.tryParse(value) ?? tempOffer;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                         Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: statusColor, width: 3),
+                             boxShadow: [BoxShadow(color: statusColor.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 5))],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                tempOffer.toStringAsFixed(0),
+                                style: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.w900, color: statusColor, fontSize: isSmallScreen ? 40 : 48),
+                              ),
+                              const SizedBox(width: 8),
+                              Text("DT", style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.outline)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                 
+                  const SizedBox(height: 16),
+                  Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                  
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // LOCALIZED
+                      _buildRangeBadge(loc.minLabel, minPrice, statusColor == Colors.orange, colorScheme, textTheme),
+                       Container(height: 30, width: 1, color: colorScheme.outlineVariant),
+                      _buildRangeBadge(loc.maxLabel, maxPrice, statusColor == Colors.red, colorScheme, textTheme),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: (statusColor == Colors.green)
+                          ? () {
+                              setState(() {
+                                _offerController.text = tempOffer.toStringAsFixed(0);
+                                _validateOffer(_offerController.text);
+                              });
+                              Navigator.pop(context);
+                            }
+                          : null, 
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        backgroundColor: statusColor == Colors.green ? colorScheme.primary : Colors.grey,
+                      ),
+                      child: Text(
+                        // LOCALIZED
+                        loc.setPriceButton,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFloatingVehicleCard(ColorScheme colorScheme, TextTheme textTheme, double height, bool isSmall) {
     return Container(
-      height: 240,
-      margin: const EdgeInsets.symmetric(horizontal: 30),
+      height: height,
+      margin: EdgeInsets.symmetric(horizontal: isSmall ? 20 : 30),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
-            top: -30,
-            right: -30,
+            top: -30, right: -30,
             child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                color: colorScheme.onPrimary.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
+              width: height * 0.75, height: height * 0.75,
+              decoration: BoxDecoration(color: colorScheme.onPrimary.withOpacity(0.2), shape: BoxShape.circle),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Image.asset(
-              widget.image,
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset(widget.image, fit: BoxFit.contain),
           ),
           Positioned(
             bottom: 20,
@@ -523,20 +792,16 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               decoration: BoxDecoration(
                 color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(color: colorScheme.shadow.withOpacity(0.1), blurRadius: 8),
-                ]
+                boxShadow: [BoxShadow(color: colorScheme.shadow.withOpacity(0.1), blurRadius: 8)],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                   Icon(Icons.route, size: 18, color: colorScheme.outline),
+                  Icon(Icons.route, size: 18, color: colorScheme.outline),
                   const SizedBox(width: 6),
                   Text(
                     "${_calculatedDistanceKm.toStringAsFixed(1)} km",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
-                    ),
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800, fontSize: isSmall ? 14 : 16, color: colorScheme.onSurface),
                   ),
                 ],
               ),
@@ -547,133 +812,24 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     );
   }
 
-  Widget _buildPriceNegotiationCard(AppLocalizations? l10n, ColorScheme colorScheme, TextTheme textTheme) {
-    return Card(
-      elevation: 4,
-      shadowColor: colorScheme.shadow.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      child: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          children: [
-            // 1. Label
-            Text(
-              "SET YOUR PRICE",
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.outline,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // 2. The Big Manual Input Field
-            Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _priceStatusColor, 
-                  width: 2,
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   IntrinsicWidth(
-                    child: TextField(
-                      controller: _offerController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      style: textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "0",
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                        LengthLimitingTextInputFormatter(6),
-                      ],
-                      onChanged: _validateOffer,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "DT",
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.outline,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 15),
-
-            // 3. Min / Max Visual Guide
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildPriceLimitBadge("Min", _minAllowedPrice, colorScheme, textTheme),
-                
-                if (_offerErrorText != null)
-                   Text(
-                    _offerErrorText!,
-                    style: TextStyle(
-                      color: _priceStatusColor, 
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12
-                    ),
-                  )
-                else
-                   const Text("Fair Price", style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
-
-                _buildPriceLimitBadge("Max", _maxAllowedPrice, colorScheme, textTheme),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPriceLimitBadge(String label, double price, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildRangeBadge(String label, double value, bool isActive, ColorScheme colorScheme, TextTheme textTheme) {
     return Column(
-      crossAxisAlignment: label == "Min" ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
+        Text(label.toUpperCase(), style: textTheme.labelMedium?.copyWith(color: colorScheme.outline)),
+        const SizedBox(height: 4),
         Text(
-          label.toUpperCase(),
-          style: textTheme.labelSmall?.copyWith(color: colorScheme.outline),
-        ),
-        const SizedBox(height: 2),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            "${price.toStringAsFixed(0)} DT",
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurfaceVariant,
-            ),
+          "${value.toStringAsFixed(0)} DT",
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: isActive ? colorScheme.error : colorScheme.onSurface,
+             fontSize: 18
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDetailsCard(String name, double weight, double vol, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildDetailsCard(String name, double weight, double vol, ColorScheme colorScheme, TextTheme textTheme, bool isSmall, AppLocalizations loc) {
     return Card(
       elevation: 0,
       color: colorScheme.surfaceContainerLow,
@@ -683,76 +839,28 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow(Icons.my_location, widget.pickup_name, colorScheme, textTheme, isStart: true),
-            ...widget.dropOffDestination.map((d) => _buildDetailRow(Icons.location_on, d.destinationName, colorScheme, textTheme)).toList(),
-
-            const SizedBox(height: 25),
-
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildTechSpec(Icons.scale, "${weight.toStringAsFixed(0)} kg", "Max Load", colorScheme, textTheme),
-                  Container(height: 30, width: 1, color: colorScheme.outlineVariant),
-                  _buildTechSpec(Icons.view_in_ar, "${vol.toStringAsFixed(1)} m³", "Volume", colorScheme, textTheme),
-                ],
-              ),
-            )
+            // LOCALIZED
+            Text(loc.vehicleDetailsTitle, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: isSmall ? 18 : 22)),
+            const SizedBox(height: 16),
+            _buildDetailRow(Icons.local_shipping_outlined, loc.typeLabel, name, colorScheme, textTheme),
+            const Divider(height: 24),
+            _buildDetailRow(Icons.scale_outlined, loc.maxWeightLabel, "$weight Kg", colorScheme, textTheme),
+            const Divider(height: 24),
+            _buildDetailRow(Icons.aspect_ratio_outlined, loc.volumeLabel, "$vol m³", colorScheme, textTheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String text, ColorScheme colorScheme, TextTheme textTheme, {bool isStart = false}) {
+  Widget _buildDetailRow(IconData icon, String label, String value, ColorScheme colorScheme, TextTheme textTheme) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          children: [
-            Icon(icon, color: colorScheme.primary, size: 24),
-            if (isStart)
-              Container(height: 24, width: 2, color: colorScheme.outlineVariant, margin: const EdgeInsets.symmetric(vertical: 2)),
-          ],
-        ),
+        Icon(icon, color: colorScheme.primary, size: 24),
         const SizedBox(width: 12),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                height: 1.3,
-                color: colorScheme.onSurface
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTechSpec(IconData icon, String value, String label, ColorScheme colorScheme, TextTheme textTheme) {
-    return Column(
-      children: [
-        Icon(icon, color: colorScheme.secondary, size: 22),
-        const SizedBox(height: 4),
-        Text(
-          value, 
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface)
-        ),
-        Text(
-          label, 
-          style: textTheme.bodySmall?.copyWith(color: colorScheme.outline)
-        ),
+        Text(label, style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
+        const Spacer(),
+        Text(value, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
       ],
     );
   }

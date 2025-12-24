@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:shnell/Account.dart';
 import 'package:shnell/History.dart';
 import 'package:shnell/drawer.dart';
 import 'package:shnell/tabsControlerMultipleAsignements.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MainUsersScreen extends StatefulWidget {
   final int? initialIndex;
@@ -13,16 +13,13 @@ class MainUsersScreen extends StatefulWidget {
   @override
   State<MainUsersScreen> createState() => _MainUsersScreenState();
 }
-
 class _MainUsersScreenState extends State<MainUsersScreen> {
   late int _currentIndex;
   final List<Widget> _tabs = [
-    const MultipleTrackingScreen(),
+    const SingleBookingScreen(),
     const UserActivityDashboard(),
     const SettingsScreen(),
   ];
-
-  // This will be set when an incoming call is active
 
   @override
   void initState() {
@@ -30,38 +27,39 @@ class _MainUsersScreenState extends State<MainUsersScreen> {
     _currentIndex = widget.initialIndex ?? 0;
   }
 
+@override
+Widget build(BuildContext context) {
+  // Get the localization instance.
+  final l10n = AppLocalizations.of(context)!;
 
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      drawer: ShnellDrawer(initialIndex: _currentIndex),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
-    /*  bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            label: l10n.home,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.history_edu_outlined, size: 26),
-            label: l10n.history,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outlined),
-            label: l10n.account,
-          ),
-        ],
-        selectedItemColor: const Color.fromARGB(255, 187, 152, 48),
-        unselectedItemColor: const Color.fromARGB(255, 197, 197, 195),
-        type: BottomNavigationBarType.fixed,
-      ),*/
-    );
-  }
-
+  return Scaffold(
+    drawer: ShnellDrawer(),
+    extendBodyBehindAppBar: true,
+    body: IndexedStack(
+      index: _currentIndex,
+      children: _tabs,
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (index) => setState(() => _currentIndex = index),
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          label: l10n.home, // Use the 'home' key
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history_edu_outlined , size: 26,),
+          label: l10n.history, // Use the 'history' key
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outlined),
+          label: l10n.account, // Use the 'account' key
+        ),
+      ],
+      selectedItemColor: const Color.fromARGB(255, 187, 152, 48),
+      unselectedItemColor: const Color.fromARGB(255, 197, 197, 195),
+      type: BottomNavigationBarType.fixed,
+    ),
+  );
+}
 }

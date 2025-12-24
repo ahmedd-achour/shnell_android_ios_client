@@ -61,6 +61,9 @@ dependencies:
   agora_rtc_engine: ^6.5.3
   flutter_ringtone_player: ^4.0.0+4
   cloud_functions: ^6.0.4
+  provider: ^6.1.5+1
+  maps_launcher: ^3.0.0+1
+  webview_flutter: ^4.13.0
   
 
 dev_dependencies:

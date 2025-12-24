@@ -13,7 +13,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:convert';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'dart:ui' show TextDirection;
+import 'dart:ui' show ImageByteFormat, TextDirection, instantiateImageCodec;
 
 class ShnellMAp extends StatefulWidget {
   const ShnellMAp({super.key});
@@ -86,14 +86,14 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
       final newPolylines = <Polyline>{};
 
       if (_pickupLocation != null) {
-        newMarkers.add(
-          Marker(
-            markerId: const MarkerId('pickup'),
-            position: LatLng(_pickupLocation!.latitude, _pickupLocation!.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-            infoWindow: InfoWindow(title: _pickupAddress ?? l10n.pickupLocation),
-          ),
-        );
+newMarkers.add(
+  Marker(
+    markerId: const MarkerId('pickup'),
+    position: LatLng(_pickupLocation!.latitude, _pickupLocation!.longitude),
+    icon: await _loadCustomMarker(),
+    infoWindow: InfoWindow(title: _pickupAddress ?? l10n.pickupLocation),
+  ),
+);
       }
       for (int i = 0; i < _dropOffData.length; i++) {
         final dropOff = _dropOffData[i];
@@ -102,7 +102,7 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
             Marker(
               markerId: MarkerId('dropoff_$i'),
               position: LatLng(dropOff.destination.latitude, dropOff.destination.longitude),
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+              icon: await _loadCustomMarker(),//BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
               infoWindow: InfoWindow(
                 title: dropOff.destinationName.isNotEmpty
                     ? dropOff.destinationName
@@ -259,6 +259,15 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     }
   }
 
+  Future<BitmapDescriptor> _loadCustomMarker() async {
+    final imageBytes = (await rootBundle.load('assets/pin.png')).buffer.asUint8List();
+    final codec = await instantiateImageCodec(imageBytes, targetWidth: 85);
+    final frameInfo = await codec.getNextFrame();
+    final imageData = await frameInfo.image.toByteData(format: ImageByteFormat.png);
+    return BitmapDescriptor.fromBytes(imageData!.buffer.asUint8List());
+  }
+
+
   num _calculateHaversineDistance(lt.LatLng point1, lt.LatLng point2) {
     const earthRadius = 6371;
     final lat1 = point1.latitude * pi / 180;
@@ -330,8 +339,6 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
             _dropOffData[index] = DropOffData(
               destination: selectedLocation,
               destinationName: selectedAddress,
-              customerName: _dropOffData[index].customerName,
-              customerPhoneNumber: _dropOffData[index].customerPhoneNumber,
             );
             _dropOffControllersNotifier.value[index].text = selectedAddress;
           } else {
@@ -505,12 +512,12 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
                       initialCameraPosition: const CameraPosition(target: LatLng(36.8065, 10.1815), zoom: 11.0),
                       mapType: MapType.normal,
                       onMapCreated: (GoogleMapController controller) {
+                        
                         if (!_mapController.isCompleted) {
                           _mapController.complete(controller);
                           _updateMapElements();
                         }
-                      },
-                      
+                      },                      
                       markers: markers,
                       polylines: polylines,
                       myLocationEnabled: true,
@@ -546,7 +553,6 @@ Widget _buildDropOffFieldSliver({
       index: index,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-        // Suppression de l'ombre ici pour la performance (on la mettra au drag)
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
@@ -652,10 +658,10 @@ Widget _buildDraggableSheet() {
             key: _bottomSheetKey,
             initialChildSize: canContinue ? 0.55 : minChildSize + 0.05, // Slightly larger than min when small
             minChildSize: minChildSize,
-            maxChildSize: 0.8,
+            maxChildSize: 0.88,
             expand: false,
             snap: true,
-            snapSizes: [minChildSize, 0.55, 0.8],
+            snapSizes: [minChildSize, 0.88],
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
                 decoration: BoxDecoration(

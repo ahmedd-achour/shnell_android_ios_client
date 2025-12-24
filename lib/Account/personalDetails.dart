@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shnell/AuthHandler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shnell/dots.dart';
 import 'package:shnell/model/users.dart';
 
 class PersonalInfoPage extends StatefulWidget {
@@ -12,266 +13,186 @@ class PersonalInfoPage extends StatefulWidget {
 }
 
 class _PersonalInfoPageState extends State<PersonalInfoPage> {
-  late final CollectionReference usersCollection;
-
-  @override
-  void initState() {
-    super.initState();
-    usersCollection = FirebaseFirestore.instance.collection('users');
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    // Access theme once to reuse
+    if (_currentUser == null) {
+      return const Scaffold(body: Center(child: Text("Erreur d'authentification")));
+    }
+
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-     body: StreamBuilder<DocumentSnapshot>(
-        stream: usersCollection
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          l10n?.personalInformation ?? "Informations Personnelles", 
+          style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)
+        ),
+        centerTitle: true,
+      ),
+      // 1. STREAM UTILISATEUR
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: _firestore.collection('users').doc(_currentUser!.uid).snapshots(),
+        builder: (context, userSnapshot) {
+          
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: RotatingDotsIndicator());
           }
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text('User data not found.', style: theme.textTheme.bodyLarge),
-                ],
-              ),
-            );
+          
+          if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+            return Center(child: Text(l10n?.userDataNotFound ?? "Profil introuvable"));
           }
 
-          final userData = shnellUsers.fromJson(
-              snapshot.data!.data() as Map<String, dynamic>);
+          shnellUsers? userData;
+          try {
+            userData = shnellUsers.fromJson(userSnapshot.data!.data() as Map<String, dynamic>);
+          } catch (e) {
+            return Center(child: Text("Erreur lecture profil: $e"));
+          }
 
-          // Responsive Wrapper: Centers content and limits width on large screens
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle("Account Info"),
-                      _buildSettingsCard(
-                        context,
-                        children: [
-                          // Editable Name
-                          // Key ensures widget rebuilds if DB updates remotely
-                          EditableInfoTile(
-                            key: ValueKey(userData.name), 
-                            icon: Icons.person_outline,
-                            label: "Name",
-                            initialValue: userData.name,
-                            onSave: (val) => AuthMethods.updateName(val),
-                            helperMessage:
-                                "Update your display name. This helps couriers and clients recognize you.",
-                          ),
-                          _buildSeparator(context),
-                          // Read-only Email
-                          _buildReadOnlyTile(
-                            context: context,
-                            icon: Icons.email_outlined,
-                            label: "Email",
-                            value: userData.email,
-                          ),
-                          _buildSeparator(context),
-                          // Read-only Phone
-                          _buildReadOnlyTile(
-                            context: context,
-                            icon: Icons.phone_outlined,
-                            label: "Phone",
-                            value: userData.phone,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      _buildSectionTitle("Security"),
-                      _buildSettingsCard(
-                        context,
-                        children: [
-                          _buildSettingsTile(
-                            context,
-                            Icons.lock_outline,
-                            "Change Password",
-                            () {
-                              AuthMethods.sendPasswordResetEmail();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                      'Password reset email has been sent.'),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                ),
-                              );
-                            },
-                            helperMessage:
-                                "You will receive a password reset email to update your password securely.",
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
+          // Vérifier si l'utilisateur a un véhicule lié
+       
+          
+          return _buildContent(context, userData);
         },
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+  Widget _buildContent(BuildContext context, shnellUsers user) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- INFO COMPTE ---
+            _buildSectionTitle(l10n?.accountInfo ?? "Compte", theme),
+            _buildSettingsCard(
+              children: [
+                EditableInfoTile(
+                  icon: Icons.person_outline,
+                  label: l10n?.name ?? "Nom",
+                  initialValue: user.name,
+                  onSave: (val) async {
+                    await _firestore.collection('users').doc(_currentUser!.uid).update({'name': val});
+                    await _currentUser!.updateDisplayName(val);
+                  },
+                  helperMessage: l10n?.updateNameHelper,
+                ),
+                _buildSeparator(),
+                _buildReadOnlyTile(icon: Icons.email_outlined, label: l10n!.emailLabel, value: user.email),
+                _buildSeparator(),
+                _buildReadOnlyTile(icon: Icons.phone_outlined, label: l10n.mobilePhoneLabel, value: user.phone),
+              ],
             ),
+
+            const SizedBox(height: 32),
+
+            // --- SÉCURITÉ ---
+            _buildSectionTitle(l10n.security, theme),
+            _buildSettingsCard(
+              children: [
+                _buildSettingsTile(
+                  icon: Icons.lock_outline,
+                  title: l10n.changePassword,
+                  onTap: () async {
+                    try {
+                      await FirebaseAuth.instance.sendPasswordResetEmail(email: user.email);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.passwordResetSent), backgroundColor: Colors.green));
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red));
+                      }
+                    }
+                  },
+                  helperMessage: l10n.changePasswordHelper,
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSettingsCard(BuildContext context,
-      {required List<Widget> children}) {
+
+  Widget _buildSectionTitle(String title, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
+      child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+    );
+  }
+
+  Widget _buildSettingsCard({required List<Widget> children}) {
     return Card(
-      elevation: 2, // Slightly reduced elevation for a cleaner look
-      clipBehavior: Clip.antiAlias, // Ensures InkWell ripples are clipped
-      color: Theme.of(context).colorScheme.surfaceContainerLow, // M3 Card color
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(children: children),
     );
   }
 
-  Widget _buildSeparator(BuildContext context) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: Theme.of(context).dividerColor.withOpacity(0.5),
-    );
-  }
+  Widget _buildSeparator() => const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16);
 
-  Widget _buildSettingsTile(
-      BuildContext context, IconData icon, String title, VoidCallback onTap,
-      {String? helperMessage}) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-            child: Row(
-              children: [
-                Icon(icon, color: theme.colorScheme.primary, size: 24),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant),
-              ],
-            ),
-          ),
-        ),
-        if (helperMessage != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 56.0, right: 16.0, bottom: 16.0),
-            child: Text(
-              helperMessage,
-              style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildReadOnlyTile({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
+  Widget _buildReadOnlyTile({required IconData icon, required String label, required String value}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      child: Row(
-        children: [
-          Icon(icon, color: theme.colorScheme.primary, size: 24),
+      padding: const EdgeInsets.all(16.0),
+      child: Row(children: [
+        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
+        const SizedBox(width: 16),
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
+          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _buildSettingsTile({required IconData icon, required String title, required VoidCallback onTap, String? helperMessage}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(children: [
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
           const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value.isEmpty ? "Not provided" : value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Optional: Add a lock icon to visually indicate read-only
-          Icon(Icons.lock_outline, size: 16, color: theme.colorScheme.outline.withOpacity(0.5)),
-        ],
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            if (helperMessage != null) Text(helperMessage, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline)),
+          ])),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        ]),
       ),
     );
   }
 }
 
-/// Editable field with pen icon
+// --- WIDGET EDITABLE (Réutilisé) ---
 class EditableInfoTile extends StatefulWidget {
   final IconData icon;
   final String label;
   final String initialValue;
-  final Function(String) onSave;
+  final Future<void> Function(String) onSave;
   final String? helperMessage;
 
-  const EditableInfoTile({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.initialValue,
-    required this.onSave,
-    this.helperMessage,
-  });
+  const EditableInfoTile({super.key, required this.icon, required this.label, required this.initialValue, required this.onSave, this.helperMessage});
 
   @override
   State<EditableInfoTile> createState() => _EditableInfoTileState();
@@ -280,131 +201,47 @@ class EditableInfoTile extends StatefulWidget {
 class _EditableInfoTileState extends State<EditableInfoTile> {
   late TextEditingController _controller;
   bool _isEditing = false;
-  bool _isLoading = false; // Add loading state for save action
+  bool _isSaving = false;
 
   @override
   void initState() {
-    _controller = TextEditingController(text: widget.initialValue);
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    _controller = TextEditingController(text: widget.initialValue);
   }
 
   Future<void> _handleSave() async {
-    final value = _controller.text.trim();
-    
-    // Don't save if value hasn't changed
-    if (value == widget.initialValue) {
-       setState(() => _isEditing = false);
-       return;
-    }
-
-    if (value.isNotEmpty) {
-      setState(() => _isLoading = true);
-      try {
-        await widget.onSave(value);
-        if (mounted) {
-           setState(() {
-             _isEditing = false;
-             _isLoading = false;
-           });
-           if (widget.helperMessage != null) {
-              // Optional: Show success snackbar
-           }
-        }
-      } catch (e) {
-        if(mounted) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red)
-          );
-        }
-      }
+    if (_controller.text.trim().isEmpty) return;
+    setState(() => _isSaving = true);
+    try {
+      await widget.onSave(_controller.text.trim());
+      if (mounted) setState(() { _isEditing = false; _isSaving = false; });
+    } catch (e) {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(widget.icon, color: theme.colorScheme.primary, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _isEditing
-                ? TextField(
-                    controller: _controller,
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                    decoration: InputDecoration(
-                      labelText: widget.label,
-                      isDense: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                      ),
-                    ),
-                    autofocus: true,
-                    onSubmitted: (_) => _handleSave(),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.label,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _controller.text,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-          const SizedBox(width: 8),
-          _isLoading 
-            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-            : IconButton(
-                icon: Icon(
-                  _isEditing ? Icons.check_circle : Icons.edit,
-                  color: _isEditing
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurfaceVariant,
-                  size: _isEditing ? 28 : 24,
-                ),
-                onPressed: () {
-                  if (_isEditing) {
-                    _handleSave();
-                  } else {
-                    setState(() => _isEditing = true);
-                  }
-                },
-              ),
-        ],
-      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Row(children: [
+        Icon(widget.icon, color: theme.colorScheme.primary, size: 24),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _isEditing
+              ? TextField(controller: _controller, autofocus: true, onSubmitted: (_) => _handleSave(), decoration: InputDecoration(labelText: widget.label, isDense: true, border: const OutlineInputBorder()))
+              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(widget.label, style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
+                  Text(_controller.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ]),
+        ),
+        if (_isSaving) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+        else IconButton(
+          icon: Icon(_isEditing ? Icons.check : Icons.edit, color: _isEditing ? Colors.green : theme.colorScheme.primary),
+          onPressed: () => _isEditing ? _handleSave() : setState(() => _isEditing = true),
+        )
+      ]),
     );
   }
 }

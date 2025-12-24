@@ -30,6 +30,9 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   bool _isMicMuted = false;
   bool _isSpeakerOn = true;
   bool _isConnected = false;
+  
+  // 1. ADD THIS VARIABLE
+  bool _isEnding = false; 
 
   final String _appId = "392d2910e2f34b4a885212cd49edcffa";
   final FlutterRingtonePlayer _ringtonePlayer = FlutterRingtonePlayer();
@@ -89,7 +92,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
         });
       }
 
-      // Improved: Handle decline/cancel/missed/ended from ANY side
       if (status == 'declined' || status == 'canceled' || status == 'missed' || status == 'ended') {
         _endCall(reason: status ?? 'ended');
       }
@@ -114,16 +116,13 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
           _engine.setEnableSpeakerphone(true);
           setState(() => _isSpeakerOn = true);
         },
-
         onUserJoined: (connection, remoteUid, elapsed) {
           if (!mounted) return;
           setState(() => _remoteUid = remoteUid);
         },
-
         onUserOffline: (connection, remoteUid, reason) async {
           _endCall(reason: 'ended');
         },
-
         onConnectionStateChanged: (connection, state, reason) {
           if (state == ConnectionStateType.connectionStateFailed ||
               state == ConnectionStateType.connectionStateDisconnected) {
@@ -158,67 +157,63 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     }
   }
 
-Future<void> _endCall({String reason = 'ended'}) async {
-  if (!mounted) return; // ← PREVENT CRASH IF WIDGET ALREADY DISPOSED
+  Future<void> _endCall({String reason = 'ended'}) async {
+    // 2. CHECK _isEnding TO PREVENT DOUBLE TAPS AND SET STATE IMMEDIATELY
+    if (!mounted || _isEnding) return;
+    
+    setState(() => _isEnding = true); // Visual update happens here instantly
 
-  _ringtonePlayer.stop();
-  _durationTimer?.cancel();
-  _callStatusSubscription?.cancel();
+    _ringtonePlayer.stop();
+    _durationTimer?.cancel();
+    _callStatusSubscription?.cancel();
 
-  // Safely get FCM token — NO CRASH if null
-  String? receiverFcmToken;
-  try {
-    final receiverId = widget.isCaller ? widget.call.receiverId : widget.call.driverId;
-    if (receiverId.isNotEmpty) {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(receiverId)
-          .get();
-      receiverFcmToken = doc.data()?['fcmToken'] as String?;
+    String? receiverFcmToken;
+    try {
+      final receiverId = widget.isCaller ? widget.call.receiverId : widget.call.driverId;
+      if (receiverId.isNotEmpty) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(receiverId)
+            .get();
+        receiverFcmToken = doc.data()?['fcmToken'] as String?;
+      }
+    } catch (e) {
+      debugPrint("Failed to get FCM token for terminateCall: $e");
     }
-  } catch (e) {
-    debugPrint("Failed to get FCM token for terminateCall: $e");
-    // Continue anyway — not critical
-  }
 
-  // Call terminateCall — safe even if token is null
-  try {
-    await http.post(
-      Uri.parse('https://us-central1-shnell-393a6.cloudfunctions.net/terminateCall'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'dealId': widget.call.dealId,
-        'status': reason,
-        if (receiverFcmToken != null) 'receiverFCMToken': receiverFcmToken,
-      }),
+    try {
+      await http.post(
+        Uri.parse('https://us-central1-shnell-393a6.cloudfunctions.net/terminateCall'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'dealId': widget.call.dealId,
+          'status': reason,
+          if (receiverFcmToken != null) 'receiverFCMToken': receiverFcmToken,
+        }),
+      );
+    } catch (e) {
+      debugPrint("terminateCall HTTP failed (non-critical): $e");
+    }
+
+    try {
+      await _engine.leaveChannel();
+    } catch (_) {}
+
+    try {
+      _engine.release();
+    } catch (_) {}
+
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainUsersScreen()),
     );
-  } catch (e) {
-    debugPrint("terminateCall HTTP failed (non-critical): $e");
-    // Don't let this crash the app
   }
-
-  // Leave Agora channel safely
-  try {
-    await _engine.leaveChannel();
-  } catch (_) {}
-
-  try {
-    _engine.release();
-  } catch (_) {}
-
-  // Kill CallKit
-  try {
-    await FlutterCallkitIncoming.endAllCalls();
-  } catch (_) {}
-
-  // Navigate only if still mounted
-  if (!mounted) return;
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (_) => const MainUsersScreen()),
-  );
-}
 
   void _toggleMute() {
     setState(() => _isMicMuted = !_isMicMuted);
@@ -234,7 +229,9 @@ Future<void> _endCall({String reason = 'ended'}) async {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _callStatusSubscription?.cancel();
-    _endCall(reason: 'ended');
+    // No need to call _endCall here if we are navigating away, 
+    // but good practice to ensure cleanup if disposed otherwise.
+    // However, calling _endCall here might be redundant if the navigation triggered dispose.
     super.dispose();
   }
 
@@ -319,10 +316,13 @@ Future<void> _endCall({String reason = 'ended'}) async {
                       icon: _isMicMuted ? Icons.mic_off : Icons.mic,
                       active: _isMicMuted,
                       onTap: _toggleMute,
+                      // Disable other buttons while ending
+                      enabled: !_isEnding, 
                     ),
 
                     GestureDetector(
-                      onTap: () => _endCall(reason: 'ended'),
+                      // Disable tap if already ending
+                      onTap: _isEnding ? null : () => _endCall(reason: 'ended'),
                       child: Container(
                         padding: const EdgeInsets.all(28),
                         decoration: const BoxDecoration(
@@ -336,7 +336,17 @@ Future<void> _endCall({String reason = 'ended'}) async {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.call_end, color: Colors.white, size: 40),
+                        // 3. SHOW LOADER IF ENDING
+                        child: _isEnding 
+                          ? const SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : const Icon(Icons.call_end, color: Colors.white, size: 40),
                       ),
                     ),
 
@@ -344,6 +354,8 @@ Future<void> _endCall({String reason = 'ended'}) async {
                       icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
                       active: _isSpeakerOn,
                       onTap: _toggleSpeaker,
+                      // Disable other buttons while ending
+                      enabled: !_isEnding,
                     ),
                   ],
                 ),
@@ -365,19 +377,23 @@ Future<void> _endCall({String reason = 'ended'}) async {
     required IconData icon,
     required bool active,
     required VoidCallback onTap,
+    bool enabled = true, // Added enabled flag
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.white.withOpacity(0.15),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: active ? Colors.black : Colors.white,
-          size: 32,
+      onTap: enabled ? onTap : null,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.5, // Dim button if disabled
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.white.withOpacity(0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: active ? Colors.black : Colors.white,
+            size: 32,
+          ),
         ),
       ),
     );

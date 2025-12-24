@@ -310,8 +310,6 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                           icon: isLast ? Icons.flag_rounded : Icons.stop_circle_outlined,
                           title: isLast ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
                           address: dropOffData.destinationName,
-                          customerName: dropOffData.customerName,
-                          customerPhone: dropOffData.customerPhoneNumber,
                           scheme: scheme,
                         ),
                         if (!isLast) _buildConnectorLine(scheme),

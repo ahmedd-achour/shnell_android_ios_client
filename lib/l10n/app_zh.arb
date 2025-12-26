@@ -659,7 +659,9 @@
   "expansionMessageDropoff": "可在突尼斯全境送货。",
   "selectDifferentLocation": "选择其他位置",
   "zoneValidationFailed": "无法验证服务区域。请检查连接。",
-  "locationSelectedOnMap": "已在地图上选择位置"
+  "locationSelectedOnMap": "已在地图上选择位置",
+    "service_note": "注意：此费用仅涵盖基本运输服务。额外服务可能根据每个情况的需求和要求而有所不同，如有需要可直接与运营商协调。"
+
 
 
 

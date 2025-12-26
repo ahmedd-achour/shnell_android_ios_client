@@ -42,8 +42,8 @@ android {
         applicationId = "com.shnell.app"
         minSdk = 23
         targetSdk = 35 
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 3
+        versionName = "2.0.0"
     }
 buildTypes {
     getByName("release") {

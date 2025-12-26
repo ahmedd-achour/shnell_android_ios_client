@@ -235,7 +235,6 @@ Widget _buildServiceCard(
 ) {
   final title = _getLocalizedTitle(data.id, l10n, data.title);
   final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
-
   return GestureDetector(
     onTap: () {
       HapticFeedback.lightImpact();
@@ -269,78 +268,148 @@ Widget _buildServiceCard(
                 ),
               ],
       ),
-      padding: const EdgeInsets.all(20),
-      child: Row(
+      padding: const EdgeInsets.all(16),
+      child: Column(
         children: [
-          // === ICON CONTAINER – FULL COVERAGE ===
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18), // Slightly rounded for elegance
-            child: Container(
-              width: 80,
-              height: 80,
-              color: isSelected
-                  ? colorScheme.primary.withOpacity(0.18)
-                  : colorScheme.primaryContainer.withOpacity(0.35),
-              child: Image.asset(
-                data.iconAsset,
-                fit: BoxFit.cover, // ← Critical: covers entire space, including edges
-                width: 80,
-                height: 80,
-                // Optional: slight tint when selected, but keeps image clear
-                color: isSelected
-                    ? colorScheme.primary.withOpacity(0.25)
-                    : null,
-                colorBlendMode: isSelected ? BlendMode.srcATop : null,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // === 1. MAIN SERVICE IMAGE ===
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  color: isSelected
+                      ? colorScheme.primary.withOpacity(0.18)
+                      : colorScheme.primaryContainer.withOpacity(0.35),
+                  child: Image.asset(
+                    data.iconAsset,
+                    fit: BoxFit.cover,
+                    width: 72,
+                    height: 72,
+                    // Subtle tint blending for cohesion
+                    color: isSelected ? colorScheme.primary.withOpacity(0.25) : null,
+                    colorBlendMode: isSelected ? BlendMode.srcATop : null,
+                  ),
+                ),
               ),
-            ),
-          ),
 
-          const SizedBox(width: 20),
+              const SizedBox(width: 16),
 
-          // === TEXT CONTENT ===
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18.5,
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
+              // === 2. TITLE & SUBTITLE ===
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    color: colorScheme.onSurfaceVariant,
-                    height: 1.45,
-                  ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // === 3. SELECTION CHECKMARK ===
+              AnimatedScale(
+                scale: isSelected ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  color: colorScheme.primary,
+                  size: 28,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(height: 16),
 
-          // === SELECTION CHECKMARK ===
-          AnimatedScale(
-            scale: isSelected ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.elasticOut,
-            child: Icon(
-              Icons.check_circle_rounded,
-              color: colorScheme.primary,
-              size: 34,
-            ),
-          ),
+          // === 4. BOTTOM ROW: PRICE & PREMIUM ASSETS ===
+          Row(
+            children: [
+              // -- Avg Price Pill -
+
+              // -- 3 Premium Detail Icons --
+              ..._getDetailIcons(data.id).map((assetPath) => Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Image.asset(
+                  assetPath,
+                  width: 20,
+                  height: 20,
+                  // Optional: Tint them to match text color for a clean look, 
+                  // or remove 'color' to keep original icon colors.
+                ),
+              )),
+            ],
+          )
         ],
       ),
     ),
   );
 }
+
+// === HELPER: MAPPING IDs TO ASSETS ===
+// This keeps your build method clean.
+List<String> _getDetailIcons(String serviceId) {
+  switch (serviceId) {
+    case 'simple_transport': // Small / Express / Store Pickup
+    case 'store_pickup':
+      return [
+        'assets/icons/smart-tv.png',       // Electronics (Fragile)
+        'assets/icons/vegetables.png', // Legumes/Market (Heavy/Commercial)
+        'assets/icons/oven.png',           // Mouton/Aid (Cultural/Live Animal)
+        'assets/icons/shopping-bag.png',    // Fashion/Retail
+        'assets/icons/bicycle.png',         // Small Appliances
+      ];
+      
+    case 'small_move': // Medium (Household Heavy)
+      return [
+        'assets/icons/fridge.png',          // #1 Heavy Item
+        'assets/icons/laundry-machine.png', // Standard Appliance
+        'assets/icons/double-bed.png',      // Bulky Furniture
+        'assets/icons/seater-sofa.png',     // Long Furniture
+        'assets/icons/motorcycle.png',         // <--- SUGGESTION: Fits in a medium van, very common transport need!
+      ];
+      
+    case 'full_move': // Big (Spaces & Pro)
+      return [
+        'assets/icons/moving-home.png',     // Full House
+        'assets/icons/office.png',          // B2B / Desk moves
+        'assets/icons/furniture.png',           // Specialty / Heavy
+        'assets/icons/treadmill.png',   // Complex Assembly
+        'assets/icons/closet.png',            // Labor (3+ People)
+      ];
+      
+    default:
+      return [];
+  }
+}
+// === Helper Widget for the small icons ===
+
+
+
 Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
   final bool isEnabled = _selectedTypeId != null;
 

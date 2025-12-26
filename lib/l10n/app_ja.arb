@@ -661,7 +661,9 @@
   "expansionMessageDropoff": "配達はチュニジア全土で利用可能です。",
   "selectDifferentLocation": "別の場所を選択",
   "zoneValidationFailed": "サービスエリアを確認できませんでした。接続を確認してください。",
-  "locationSelectedOnMap": "地図上で選択された場所"
+  "locationSelectedOnMap": "地図上で選択された場所",
+    "service_note": "注意：この料金は基本的な輸送サービスのみをカバーします。追加サービスは各ケースの必要性や条件によって異なる場合があり、必要に応じて運営者と直接調整できます。"
+
 
 
 

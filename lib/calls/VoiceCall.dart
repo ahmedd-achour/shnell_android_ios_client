@@ -25,14 +25,12 @@ class VoiceCallScreen extends StatefulWidget {
 }
 
 class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingObserver {
-  late RtcEngine _engine;
+  late final RtcEngine _engine;
   int? _remoteUid;
   bool _isMicMuted = false;
   bool _isSpeakerOn = true;
   bool _isConnected = false;
-  
-  // 1. ADD THIS VARIABLE
-  bool _isEnding = false; 
+  bool _isEnding = false; // Prevents double execution
 
   final String _appId = "392d2910e2f34b4a885212cd49edcffa";
   final FlutterRingtonePlayer _ringtonePlayer = FlutterRingtonePlayer();
@@ -46,19 +44,10 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _startRingingIfOutgoing();
-    _initializeAgora();
-    _listenToCallStatus();
+    _initializeCall();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _endCall(reason: 'ended');
-    }
-  }
-
-  void _startRingingIfOutgoing() {
+  Future<void> _initializeCall() async {
     if (widget.isCaller) {
       _ringtonePlayer.play(
         android: AndroidSounds.ringtone,
@@ -67,6 +56,14 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
         volume: 1.0,
       );
     }
+
+    await _requestPermissions();
+    await _initializeAgora();
+    _listenToCallStatus();
+  }
+
+  Future<void> _requestPermissions() async {
+    await [Permission.microphone].request();
   }
 
   void _listenToCallStatus() {
@@ -74,60 +71,56 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
         .collection('calls')
         .doc(widget.call.dealId)
         .snapshots()
-        .listen((snapshot) {
-      if (!mounted) return;
+        .listen((snapshot) async {
+      if (!mounted || _isEnding) return;
+
       if (!snapshot.exists) {
-        _endCall(reason: 'canceled');
+        await _endCall(reason: 'canceled');
         return;
       }
 
-      final data = snapshot.data()!;
-      final status = data['callStatus'] as String?;
+      final status = snapshot.data()?['callStatus'] as String?;
 
-      if (status == 'connected') {
+      if (status == 'connected' && !_isConnected) {
         setState(() => _isConnected = true);
         _ringtonePlayer.stop();
-        _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-          if (mounted) setState(() => _callDurationSeconds++);
-        });
+        _startDurationTimer();
       }
 
-      if (status == 'declined' || status == 'canceled' || status == 'missed' || status == 'ended') {
-        _endCall(reason: status ?? 'ended');
+      if (['declined', 'canceled', 'missed', 'ended'].contains(status)) {
+        await _endCall(reason: status ?? 'ended');
       }
     });
   }
 
-  Future<void> _initializeAgora() async {
-    await [Permission.microphone].request();
+  void _startDurationTimer() {
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _callDurationSeconds++);
+    });
+  }
 
+  Future<void> _initializeAgora() async {
     _engine = createAgoraRtcEngine();
-    await _engine.initialize(
-      RtcEngineContext(
-        appId: _appId,
-        channelProfile: ChannelProfileType.channelProfileCommunication,
-      ),
-    );
+    await _engine.initialize(RtcEngineContext(appId: _appId));
 
     _engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (connection, elapsed) {
+        onJoinChannelSuccess: (_, __) {
           if (!mounted) return;
           _engine.setEnableSpeakerphone(true);
           setState(() => _isSpeakerOn = true);
         },
-        onUserJoined: (connection, remoteUid, elapsed) {
-          if (!mounted) return;
-          setState(() => _remoteUid = remoteUid);
+        onUserJoined: (_, remoteUid, __) {
+          if (mounted) setState(() => _remoteUid = remoteUid);
         },
-        onUserOffline: (connection, remoteUid, reason) async {
-          _endCall(reason: 'ended');
+        onUserOffline: (_, remoteUid, reason) async {
+          await _endCall(reason: 'ended');
         },
-        onConnectionStateChanged: (connection, state, reason) {
+        onConnectionStateChanged: (_, state, reason) {
           if (state == ConnectionStateType.connectionStateFailed ||
               state == ConnectionStateType.connectionStateDisconnected) {
             if (_remoteUid == null && widget.isCaller) {
-              _endCall(reason: 'canceled');
+              _endCall(reason: 'timeout');
             }
           }
         },
@@ -137,13 +130,13 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     await _engine.enableAudio();
     await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
 
-    String tokenToUse = widget.isCaller
+    final token = widget.isCaller
         ? (widget.call.callerToken ?? widget.call.agoraToken)
         : (widget.call.receiverToken ?? widget.call.agoraToken);
 
     try {
       await _engine.joinChannel(
-        token: tokenToUse,
+        token: token,
         channelId: widget.call.agoraChannel,
         uid: 0,
         options: const ChannelMediaOptions(
@@ -152,34 +145,61 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
         ),
       );
     } catch (e) {
-      debugPrint("Join channel failed: $e");
-      _endCall(reason: 'failed');
+      debugPrint("Agora join failed: $e");
+      if (mounted) await _endCall(reason: 'failed');
     }
   }
 
-  Future<void> _endCall({String reason = 'ended'}) async {
-    // 2. CHECK _isEnding TO PREVENT DOUBLE TAPS AND SET STATE IMMEDIATELY
-    if (!mounted || _isEnding) return;
-    
-    setState(() => _isEnding = true); // Visual update happens here instantly
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused && !_isEnding) {
+      _endCall(reason: 'backgrounded');
+    }
+  }
 
+  Future<void> _endCall({required String reason}) async {
+    if (!mounted || _isEnding) return;
+    _isEnding = true;
+
+    if (mounted) setState(() {});
+
+    // Stop everything immediately
     _ringtonePlayer.stop();
     _durationTimer?.cancel();
     _callStatusSubscription?.cancel();
 
+    // Notify backend
+    unawaited(_notifyTermination(reason));
+
+    // Leave Agora
+    try {
+      await _engine.leaveChannel();
+      await _engine.release();
+    } catch (_) {}
+
+    // End CallKit
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    // Navigate back safely
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const MainUsersScreen()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _notifyTermination(String reason) async {
     String? receiverFcmToken;
     try {
       final receiverId = widget.isCaller ? widget.call.receiverId : widget.call.driverId;
       if (receiverId.isNotEmpty) {
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(receiverId)
-            .get();
-        receiverFcmToken = doc.data()?['fcmToken'] as String?;
+        final doc = await FirebaseFirestore.instance.collection('users').doc(receiverId).get();
+        receiverFcmToken = doc.data()?['fcmToken'];
       }
-    } catch (e) {
-      debugPrint("Failed to get FCM token for terminateCall: $e");
-    }
+    } catch (_) {}
 
     try {
       await http.post(
@@ -192,35 +212,18 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
         }),
       );
     } catch (e) {
-      debugPrint("terminateCall HTTP failed (non-critical): $e");
+      debugPrint("terminateCall failed (non-critical): $e");
     }
-
-    try {
-      await _engine.leaveChannel();
-    } catch (_) {}
-
-    try {
-      _engine.release();
-    } catch (_) {}
-
-    try {
-      await FlutterCallkitIncoming.endAllCalls();
-    } catch (_) {}
-
-    if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MainUsersScreen()),
-    );
   }
 
   void _toggleMute() {
+    if (_isEnding) return;
     setState(() => _isMicMuted = !_isMicMuted);
     _engine.muteLocalAudioStream(_isMicMuted);
   }
 
   void _toggleSpeaker() {
+    if (_isEnding) return;
     setState(() => _isSpeakerOn = !_isSpeakerOn);
     _engine.setEnableSpeakerphone(_isSpeakerOn);
   }
@@ -229,9 +232,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _callStatusSubscription?.cancel();
-    // No need to call _endCall here if we are navigating away, 
-    // but good practice to ensure cleanup if disposed otherwise.
-    // However, calling _endCall here might be redundant if the navigation triggered dispose.
+    _durationTimer?.cancel();
+    _ringtonePlayer.stop();
     super.dispose();
   }
 
@@ -240,7 +242,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (!didPop) _endCall();
+        if (!didPop) _endCall(reason: 'ended');
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF1C1C1E),
@@ -249,64 +251,61 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
             children: [
               const Spacer(flex: 2),
 
+              // Avatar
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
                   color: Colors.grey[800],
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: const Icon(Icons.person, size: 90, color: Colors.white),
               ),
 
               const SizedBox(height: 32),
 
+              // Name
               Text(
                 widget.isCaller ? "Appel en cours…" : "Client Shnell",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
               ),
 
               const SizedBox(height: 12),
 
+              // Status & Duration
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 child: _isConnected
                     ? Column(
                         key: const ValueKey('connected'),
                         children: [
-                          Text(
+                          const Text(
                             "Connecté",
-                            style: const TextStyle(
-                              color: Colors.greenAccent,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(color: Colors.greenAccent, fontSize: 28, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _formatDuration(_callDurationSeconds),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 20,
-                            ),
+                            style: const TextStyle(color: Colors.white70, fontSize: 20),
                           ),
                         ],
                       )
                     : Text(
                         widget.isCaller ? "Sonnerie en cours…" : "Connexion…",
                         key: const ValueKey('ringing'),
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 18,
-                        ),
+                        style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 18),
                       ),
               ),
 
               const Spacer(flex: 3),
 
+              // Controls
               Padding(
                 padding: const EdgeInsets.only(bottom: 80),
                 child: Row(
@@ -316,37 +315,38 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
                       icon: _isMicMuted ? Icons.mic_off : Icons.mic,
                       active: _isMicMuted,
                       onTap: _toggleMute,
-                      // Disable other buttons while ending
-                      enabled: !_isEnding, 
+                      enabled: !_isEnding,
                     ),
 
+                    // End Call Button
                     GestureDetector(
-                      // Disable tap if already ending
                       onTap: _isEnding ? null : () => _endCall(reason: 'ended'),
-                      child: Container(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.all(28),
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
+                        decoration: BoxDecoration(
+                          color: _isEnding ? Colors.grey[600] : Colors.redAccent,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.redAccent,
-                              blurRadius: 20,
-                              spreadRadius: 1,
-                            ),
-                          ],
+                          boxShadow: _isEnding
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.redAccent.withOpacity(0.6),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
                         ),
-                        // 3. SHOW LOADER IF ENDING
-                        child: _isEnding 
-                          ? const SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : const Icon(Icons.call_end, color: Colors.white, size: 40),
+                        child: _isEnding
+                            ? const SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                            : const Icon(Icons.call_end, color: Colors.white, size: 40),
                       ),
                     ),
 
@@ -354,7 +354,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
                       icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
                       active: _isSpeakerOn,
                       onTap: _toggleSpeaker,
-                      // Disable other buttons while ending
                       enabled: !_isEnding,
                     ),
                   ],
@@ -377,12 +376,13 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     required IconData icon,
     required bool active,
     required VoidCallback onTap,
-    bool enabled = true, // Added enabled flag
+    required bool enabled,
   }) {
     return GestureDetector(
       onTap: enabled ? onTap : null,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5, // Dim button if disabled
+      child: AnimatedOpacity(
+        opacity: enabled ? 1.0 : 0.4,
+        duration: const Duration(milliseconds: 200),
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(

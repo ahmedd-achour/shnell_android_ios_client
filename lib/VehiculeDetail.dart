@@ -249,8 +249,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return null;
   }
 
-  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.8;
-  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.40;
+  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.9;
+  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.2;
 
   void _validateOffer(String value) {
     // We update the state to trigger rebuild, 
@@ -460,6 +460,37 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                   child: _buildDetailsCard(
                       vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
                 ),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // Shrink to content width
+                    crossAxisAlignment: CrossAxisAlignment.start, // Align icon with first line of text
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2), // Slight vertical adjustment for icon alignment
+                        child: Icon(
+                          Icons.info_outline,
+                          color: colorScheme.onSurfaceVariant,
+                          size: isSmallScreen ? 16 : 18,
+                        ),
+                      ),
+                      const SizedBox(width: 4), // Small gap between icon and text
+                      Expanded(
+                        child: Text(
+                          loc.service_note,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.2, // Tighter line spacing for small screens
+                          ),
+                          maxLines: 3, // Prevent overflow on very small screens
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+
               ],
             ),
           ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as latlong;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/calls/CallService.dart';
 import 'package:shnell/dots.dart';
@@ -527,11 +528,35 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
 
   // --- ACTIONS ---
 
+Future<bool> _checkCallPermissions(BuildContext context) async {
+
+  final status = await Permission.microphone.status;
+
+  if (status.isGranted) {
+    return true;
+  }
+
+  final result = await Permission.microphone.request();
+
+  if (result.isGranted) {
+    return true;
+  }
+
+  if (result.isPermanentlyDenied) {
+    if (context.mounted) {
+      await openAppSettings();
+    }
+  }
+
+  return false;
+}
+
   Future<void> _initiateInAppCall() async {
     if (_driverID == null || _isCallLoading) return;
+    final hasPermission = await _checkCallPermissions(context);
+  if (!hasPermission) return;
     setState(() => _isCallLoading = true);
     
-    // Localization for Snackbar
     final loc = AppLocalizations.of(context)!;
 
     try {
@@ -784,7 +809,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
                           const SizedBox(width: 16),
                           if (_driverID != null)
                             FloatingActionButton(
-                              onPressed: _isCallLoading ? null : _initiateInAppCall,
+                              onPressed: _isCallLoading ? (){} : _initiateInAppCall,
                               backgroundColor: colorScheme.primary,
                               foregroundColor: colorScheme.onPrimary,
                               elevation: 6,

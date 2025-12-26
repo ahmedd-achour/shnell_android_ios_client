@@ -657,7 +657,9 @@
   "expansionMessageDropoff": "Les livraisons sont disponibles partout en Tunisie.",
   "selectDifferentLocation": "Choisir un autre lieu",
   "zoneValidationFailed": "Impossible de vérifier la zone. Vérifiez la connexion.",
-  "locationSelectedOnMap": "Position sélectionnée sur la carte"
+  "locationSelectedOnMap": "Position sélectionnée sur la carte",
+    "service_note": "Remarque : Ce tarif couvre uniquement le service de transport de base. Les services supplémentaires peuvent varier selon les besoins et les exigences de chaque cas et peuvent être arrangés directement avec l’opérateur si nécessaire."
+
 
 
 

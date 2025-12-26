@@ -664,7 +664,9 @@
   "expansionMessageDropoff": "Lieferungen sind in ganz Tunesien möglich.",
   "selectDifferentLocation": "Anderen Standort wählen",
   "zoneValidationFailed": "Servicegebiet konnte nicht überprüft werden. Verbindung prüfen.",
-  "locationSelectedOnMap": "Standort auf der Karte ausgewählt"
+  "locationSelectedOnMap": "Standort auf der Karte ausgewählt",
+  "service_note": "Hinweis: Diese Gebühr deckt nur den Basistransport ab. Zusätzliche Dienstleistungen können je nach Bedarf und Anforderungen variieren und können bei Bedarf direkt mit dem Betreiber vereinbart werden."
+
 
 
 

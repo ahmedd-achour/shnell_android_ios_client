@@ -187,7 +187,6 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
               theme,
               label: l10n.totalSpent,
               value: "${totalSpent.toStringAsFixed(0)}", // Removed currency symbol for cleanliness, or add small suffix
-              suffix: " TND",
               icon: Icons.account_balance_wallet_outlined,
               iconColor: theme.colorScheme.primary,
             ),

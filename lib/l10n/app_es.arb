@@ -664,7 +664,9 @@
   "expansionMessageDropoff": "Las entregas están disponibles en todo Túnez.",
   "selectDifferentLocation": "Seleccionar otra ubicación",
   "zoneValidationFailed": "No se pudo verificar el área de servicio. Verifique la conexión.",
-  "locationSelectedOnMap": "Ubicación seleccionada en el mapa"
+  "locationSelectedOnMap": "Ubicación seleccionada en el mapa",
+    "service_note": "Nota: Esta tarifa cubre solo el servicio de transporte básico. Los servicios adicionales pueden variar según las necesidades y los requisitos de cada caso, y se pueden coordinar directamente con el operador si es necesario."
+
 
 
 

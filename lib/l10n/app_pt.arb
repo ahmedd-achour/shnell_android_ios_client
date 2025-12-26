@@ -653,7 +653,9 @@
   "expansionMessageDropoff": "Entregas disponíveis em toda a Tunísia.",
   "selectDifferentLocation": "Selecionar outro local",
   "zoneValidationFailed": "Não foi possível verificar a área de serviço. Verifique a conexão.",
-  "locationSelectedOnMap": "Local selecionado no mapa"
+  "locationSelectedOnMap": "Local selecionado no mapa",
+    "service_note": "Nota: Esta taxa cobre apenas o serviço básico de transporte. Serviços adicionais podem variar de acordo com as necessidades e requisitos de cada caso e podem ser combinados diretamente com o operador, se necessário."
+
 
 
 

@@ -44,6 +44,7 @@ import 'package:shnell/firebase_options.dart';
 import 'package:shnell/mainUsers.dart';
 import 'package:shnell/model/calls.dart';
 import 'package:shnell/updateApp.dart';
+import 'package:shnell/verrifyInternet.dart';
 
 
 // Update FCM token when app starts or token refreshes
@@ -170,7 +171,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       final result = await _connectivity.checkConnectivity();
       if (mounted) _updateConnectionStatus(result);
     } on PlatformException catch (_) {}
-
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
@@ -319,10 +319,71 @@ void _setupForegroundMessaging() {
   Widget build(BuildContext context) {
     // No internet
     if (_connectionStatus.contains(ConnectivityResult.none)) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-      );
+      return  StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, authSnapshot) {
+            if (authSnapshot.connectionState == ConnectionState.waiting) {
+              return const MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+              );
+            }
+
+            if (!authSnapshot.hasData) {
+              return MaterialApp(
+                navigatorKey: navigatorKey,
+                debugShowCheckedModeBanner: false,
+                locale: _locale ?? const Locale('fr'),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                theme: getLightTheme(),
+                darkTheme: getDarkTheme(),
+                themeMode: ThemeMode.light,
+                home: const SignInScreen(),
+              );
+            }
+
+            final user = authSnapshot.data!;
+
+            return StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                  );
+                }
+
+                final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
+
+                if (userData == null) {
+                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+                    'email': user.email ?? '',
+                    'name': user.displayName ?? 'User',
+                    'language': 'fr',
+                    'darkMode': true,
+                  }, SetOptions(merge: true));
+                }
+
+                final bool darkMode = userData?['darkMode'] ?? true;
+                final String languageCode = userData?['language'] ?? 'fr';
+
+                return MaterialApp(
+                  navigatorKey: navigatorKey,
+                  debugShowCheckedModeBanner: false,
+                  locale: Locale(languageCode),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  theme: getLightTheme(),
+                  darkTheme: getDarkTheme(),
+                  themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+                  home: VerifyInternetScreen()
+                );
+              },
+            );
+          },
+        );
     }
 
     return StreamBuilder<DocumentSnapshot>(
@@ -346,13 +407,71 @@ void _setupForegroundMessaging() {
         final String requiredVersion = data['version_customer_app'] ?? '';
 
         if (requiredVersion != _currentAppVersion) {
-          return MaterialApp(
-            navigatorKey: navigatorKey,
-            debugShowCheckedModeBanner: false,
-            theme: getDarkTheme(),
-            themeMode: ThemeMode.dark,
-            home: const UpdateAppScreen(),
-          );
+          return  StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, authSnapshot) {
+            if (authSnapshot.connectionState == ConnectionState.waiting) {
+              return const MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+              );
+            }
+
+            if (!authSnapshot.hasData) {
+              return MaterialApp(
+                navigatorKey: navigatorKey,
+                debugShowCheckedModeBanner: false,
+                locale: _locale ?? const Locale('fr'),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                theme: getLightTheme(),
+                darkTheme: getDarkTheme(),
+                themeMode: ThemeMode.light,
+                home: const SignInScreen(),
+              );
+            }
+
+            final user = authSnapshot.data!;
+
+            return StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                  );
+                }
+
+                final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
+
+                if (userData == null) {
+                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+                    'email': user.email ?? '',
+                    'name': user.displayName ?? 'User',
+                    'language': 'fr',
+                    'darkMode': true,
+                  }, SetOptions(merge: true));
+                }
+
+                final bool darkMode = userData?['darkMode'] ?? true;
+                final String languageCode = userData?['language'] ?? 'fr';
+
+                return MaterialApp(
+                  navigatorKey: navigatorKey,
+                  debugShowCheckedModeBanner: false,
+                  locale: Locale(languageCode),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  theme: getLightTheme(),
+                  darkTheme: getDarkTheme(),
+                  themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+                  home: UpdateAppScreen()
+                );
+              },
+            );
+          },
+        );
         }
 
         return StreamBuilder<User?>(

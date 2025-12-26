@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:math' as math; // Import math for animation logic
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shnell/model/oredrs.dart';
-import 'package:shnell/dots.dart'; // Assuming this is your custom loading indicator
+import 'package:shnell/dots.dart';
+import 'package:shnell/model/oredrs.dart'; // Your custom loader if needed
 
 class PendingOrderWidget extends StatefulWidget {
   final String orderId;
@@ -25,10 +25,9 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
   @override
   void initState() {
     super.initState();
-    // Looping controller for the ripple effect
     _rippleController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 3000),
     )..repeat();
   }
 
@@ -38,8 +37,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     super.dispose();
   }
 
-  // --- FIRESTORE ACTIONS ---
-  Future<void> _cancelOrder() async {
+Future<void> _cancelOrder() async {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context).colorScheme;
 
@@ -121,7 +119,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     }
   }
 
-  // --- UI ---
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -131,7 +129,10 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     return Scaffold(
       backgroundColor: scheme.surface,
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('orders').doc(widget.orderId).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('orders')
+            .doc(widget.orderId)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: RotatingDotsIndicator());
@@ -140,65 +141,129 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return Center(
               child: Text(
-                l10n.orderNotFound, 
-                style: TextStyle(fontSize: 18, color: scheme.onSurfaceVariant)
+                l10n.orderNotFound,
+                style: TextStyle(fontSize: 18, color: scheme.onSurfaceVariant),
               ),
             );
           }
 
+          final orderDoc = snapshot.data!;
+          final order = Orders.fromFirestore(orderDoc);
+
           return Stack(
-            fit: StackFit.expand,
             children: [
-              // 1. Ripple Animation Background
+              // Subtle ripple background
               Positioned.fill(
                 child: CustomPaint(
                   painter: _RipplePainter(
                     _rippleController,
-                    color: scheme.primary,
+                    color: scheme.primary.withOpacity(0.3),
                   ),
                 ),
               ),
 
-              // 2. Central Icon (Visual anchor for the radar)
-         
-
-              // 3. Foreground Content (Text & Buttons)
+              // Main content
               SafeArea(
                 child: Column(
                   children: [
+                    const SizedBox(height: 60),
+
+                    // Title
                     Text(
                       l10n.searchingForDrivers,
-                      style: TextStyle(
-                        fontSize: 24,
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: scheme.onSurface,
-                        letterSpacing: 0.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    
+
+                    const SizedBox(height: 20),
+
+                    // Subtitle
+                    Text(
+                      l10n.searchingForDrivers ,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: scheme.onSurface.withOpacity(0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
                     const Spacer(),
-                    
-                    // Cancel Button
+
+                    // Central animated icon (car with radar feel)
+                    AnimatedBuilder(
+                      animation: _rippleController,
+                      builder: (_, __) {
+                        return Image.asset( 
+                          'assets/${order.vehicleType}.png',
+                          width: 150 + (_rippleController.value * 20),
+                          height: 150 + (_rippleController.value * 20),
+                        );
+                      },
+                    ),
+
+                    const Spacer(),
+
+                    // Order summary card at bottom
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Card(
+                        elevation: 8,
+                        shadowColor: scheme.primary.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        color: scheme.surface.withOpacity(0.85), // Translucent feel
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Pickup → Dropoff
+                              _buildTripRow(Icons.social_distance_rounded, order.distance),
+                              const Divider(height: 32),
+
+                              // Price & Payment
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    l10n.priceLabel,
+                                    style: theme.textTheme.titleMedium,
+                                  ),
+                                  Text(
+                                     '${l10n.tndPrice(order.price)}',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: scheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Cancel button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       child: SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: scheme.error, width: 1.5),
+                            side: BorderSide(color: scheme.error, width: 2),
                             foregroundColor: scheme.error,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)
-                            ),
-                            backgroundColor: scheme.surface.withOpacity(0.8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
                           onPressed: _cancelOrder,
                           icon: const Icon(Icons.close_rounded),
                           label: Text(
                             l10n.cancelSearch,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -212,9 +277,26 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
       ),
     );
   }
+
+  Widget _buildTripRow(IconData icon1, double text1) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Icon(icon1, color: scheme.primary, size: 28),
+        Text(
+          l10n.distanceKm(text1),
+          style: const TextStyle(fontWeight: FontWeight.w600),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
 }
 
-// --- IMPROVED PAINTER ---
+// Updated Ripple Painter – softer, more ripples, slower fade
 class _RipplePainter extends CustomPainter {
   final Animation<double> animation;
   final Color color;
@@ -223,25 +305,22 @@ class _RipplePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2); // Center of screen
-    final maxRadius = math.min(size.width, size.height) * 0.8;
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = math.sqrt(size.width * size.width + size.height * size.height) / 2;
 
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = 3;
 
-    // Draw 3 expanding circles based on the animation value
-    // We offset the phase of each circle so they ripple out continuously
-    for (int i = 0; i < 3; i++) {
-      final double phaseShift = i * 0.33; // 0.0, 0.33, 0.66
-      double progress = (animation.value + phaseShift) % 1.0;
-      
-      // Calculate radius and opacity based on progress
+    for (int i = 0; i < 4; i++) {
+      final double phase = i * 0.25;
+      double progress = (animation.value + phase) % 1.0;
+
       final double radius = progress * maxRadius;
-      final double opacity = 1.0 - progress; // Fade out as it expands
+      final double opacity = (1.0 - progress).clamp(0.0, 1.0);
 
-      paint.color = color.withOpacity(opacity * 0.5); // Max opacity 0.5
-      
+      paint.color = color.withOpacity(opacity * 0.4);
+
       canvas.drawCircle(center, radius, paint);
     }
   }
@@ -249,3 +328,15 @@ class _RipplePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
+
+
+
+
+
+
+
+
+
+
+

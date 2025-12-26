@@ -141,14 +141,11 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
   Widget _buildSummaryRow(List<HistoryItem> data, ThemeData theme, AppLocalizations l10n) {
     double totalSpent = 0.0;
     int completedCount = 0;
-    int canceledCount = 0;
 
     for (var item in data) {
       if (item.deal.status == 'terminated') {
         totalSpent += item.order.price;
         completedCount++;
-      } else if (item.deal.status == 'canceled') {
-        canceledCount++;
       }
     }
 
@@ -168,19 +165,6 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
             ),
           ),
           const SizedBox(width: 12),
-          
-          // Canceled
-          Expanded(
-            child: _buildInfoChip(
-              theme,
-              label: l10n.canceled,
-              value: "$canceledCount",
-              icon: Icons.cancel_outlined,
-              iconColor: theme.colorScheme.error,
-            ),
-          ),
-          const SizedBox(width: 12),
-
           // Spending (Small and blended in)
           Expanded(
             child: _buildInfoChip(

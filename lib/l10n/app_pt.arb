@@ -38,7 +38,7 @@
  
 
   "cancellationHeading": "11. Política e Sistema 2ⁿ",
-  "cancellationBody": "**11.1 Cenários do Cliente**\n- **Grátis**: Antes da aceitação.\n- **Taxa de 10%**: Após aceitação, mas *antes* do carregamento.\n- **Cobrança Total (100%)**: Após carregamento, cancelamento bloqueado no app. Requer Admin. Se o motorista não tiver culpa, cobra-se o valor total.\n\n**11.2 Disciplina do Motorista (Sistema 2ⁿ)**\nSuspensões temporais exponenciais:\n- **Cancelamento Grátis**: Apenas se o cliente não aparecer após 12 minutos.\n- **Escala de Punição**:\n  1. **1ª**: Aviso (0 dias).\n  2. **2ª**: **1 Dia**.\n  3. **3ª**: **2 Dias**.\n  4. **4ª**: **4 Dias**.\n  5. **5ª**: **8 Dias**.\n  6. **Seguintes**: 16, 32, até **64 Dias**.\n\n**11.3 Acordo Mútuo**: O Admin pode isentar taxas se ambas as partes concordarem."
+  "cancellationBody": "Para garantir justiça na logística de alto risco, Shnell Logistics aplica uma política rigorosa baseada no momento do cancelamento e na parte responsável.\n\n**11.1 Cenários do Cliente**\n- **Cancelamento gratuito**: Antes da aceitação do motorista.\n- **Taxa 10%**: Após aceitação mas antes da carga (compensação de combustível/tempo).\n- **Taxa total (100%) / Decisão do Admin**: Após a carga ou movimento do motorista, cancelamento bloqueado. Intervenção do admin necessária. Sem culpa do motorista, taxa total aplicada.\n\n**11.2 Disciplina do Motorista (Sistema Exponencial 2ⁿ)**\nSem multas monetárias. Usamos suspensões que crescem exponencialmente:\n- **Exceção de cancelamento gratuito**: Apenas se o cliente não aparecer após 12 min de espera.\n- **Escada de penalidades**:\n  1. **1ª infração**: Aviso (0 dias)\n  2. **2ª infração**: **1 dia** suspensão\n  3. **3ª infração**: **2 dias** suspensão\n  4. **4ª infração**: **4 dias** suspensão\n  5. **5ª infração**: **8 dias** suspensão\n  6. **Seguintes**: 16, 32, até **64 dias**\n- **Recuperação**: Cada **5 trabalhos concluídos com sucesso** remove **1 cancelamento**, permitindo recuperar confiabilidade gradualmente.\n- **Reset anual**: Histórico de cancelamentos é reiniciado anualmente.\n\n**11.3 Acordo mútuo**: Admin pode cancelar taxas se ambas as partes concordarem."
 ,"suspensionHeading": "12. Suspensão da Conta",
   "suspensionBody": "**12.1 Suspensão Automática**: Baseada no sistema 2ⁿ.\n**12.2 Encerramento**: Por fraude, evasão de comissão ou abuso.",
   "driverPerformanceHeading": "13. Autonomia do Motorista",
@@ -648,7 +648,7 @@
   
   "unsupportedAreaTitle": "Área não suportada",
   "serviceTunisiaOnly": "O serviço está disponível apenas na Tunísia.",
-  "pickupRestrictedError": "A coleta é restrita atualmente à Grande Tunes (Tunes, Ariana, Ben Arous, Manouba).",
+  "pickupRestrictedError": "Desculpe, o serviço ainda não está disponível na sua região. Estamos expandindo em breve!",
   "expansionMessagePickup": "Estamos expandindo em breve! Atualmente operando na Grande Tunes.",
   "expansionMessageDropoff": "Entregas disponíveis em toda a Tunísia.",
   "selectDifferentLocation": "Selecionar outro local",

@@ -36,13 +36,14 @@
   
 
   "cancellationHeading": "11. Política de Cancelación y Sistema 2ⁿ",
-  "cancellationBody": "**11.1 Escenarios del Cliente**\n- **Gratis**: Antes de la aceptación del conductor.\n- **Tarifa del 10%**: Después de aceptar pero *antes* de cargar (compensación de combustible).\n- **Tarifa Completa (100%)**: Una vez cargado, la cancelación está bloqueada. Requiere Admin. Si no es culpa del conductor, se cobra el total.\n\n**11.2 Disciplina del Conductor (Sistema Exponencial 2ⁿ)**\nUsamos suspensiones temporales que se duplican (2 elevado a n):\n- **Cancelación Gratis**: Solo si el cliente no aparece tras 12 minutos de espera.\n- **Escalera de Sanciones**:\n  1. **1ª**: Advertencia (0 días).\n  2. **2ª**: **1 Día** de suspensión.\n  3. **3ª**: **2 Días**.\n  4. **4ª**: **4 Días**.\n  5. **5ª**: **8 Días**.\n  6. **Siguientes**: 16, 32, hasta **64 Días**.\n\n**11.3 Acuerdo Mutuo**: El Admin puede anular cargos si ambas partes están de acuerdo.",
-"suspensionHeading": "12. Suspensión de Cuenta",
+  "cancellationBody": "Para garantizar la equidad en la logística de alto riesgo, Shnell Logistics aplica una política estricta basada en el momento de la cancelación y la parte responsable.\n\n**11.1 Escenarios de Cliente**\n- **Cancelación gratuita**: Permitida antes de que el conductor acepte el pedido.\n- **10% de cargo**: Si se cancela después de la aceptación pero antes de la carga (compensación de combustible/tiempo).\n- **Cargo completo (100%) / Decisión del Admin**: Una vez cargada la mercancía o el conductor en camino, la cancelación se bloquea. Intervención de admin requerida. Sin culpa del conductor, se aplica tarifa completa.\n\n**11.2 Disciplina del Conductor (Sistema Exponencial 2ⁿ)**\nNo hay multas monetarias. Usamos suspensiones temporales que crecen exponencialmente:\n- **Excepción de cancelación gratuita**: Solo si el cliente no aparece después de 12 min de espera en pickup.\n- **Escalera de sanciones**:\n  1. **1ª infracción**: Advertencia (0 días)\n  2. **2ª infracción**: **1 día** suspensión\n  3. **3ª infracción**: **2 días** suspensión\n  4. **4ª infracción**: **4 días** suspensión\n  5. **5ª infracción**: **8 días** suspensión\n  6. **Siguientes**: 16, 32, hasta **64 días**\n- **Recuperación**: Cada **5 trabajos exitosos** elimina **1 cancelación** del registro, permitiendo recuperar confiabilidad gradualmente.\n- **Reinicio anual**: El historial de cancelaciones se reinicia cada año.\n\n**11.3 Acuerdo mutuo**: El admin puede eximir cargos si ambas partes están de acuerdo.",
+  "suspensionHeading": "12. Suspensión de Cuenta",
   "suspensionBody": "**12.1 Suspensión Automática**: Basada en el sistema 2ⁿ. No se puede levantar manualmente.\n**12.2 Terminación**: Por fraude, evasión de comisión o comportamiento abusivo.",
   "driverPerformanceHeading": "13. Autonomía del Conductor",
   "driverPerformanceBody": "Los conductores deciden libremente aceptar pedidos. Una vez aceptados, la fiabilidad es obligatoria.",
   "pickupLocation": "Lugar de recogida",
   "whereDoYouWantToGo": "¿A dónde quieres mudarte?",
+  "cancelFeeNotice": "La cancelación tras la aceptación conlleva un cargo de {amount} DT (10%) por desplazamiento del camión.",
   "notSuitable": "No apto",
   "retry": "Reintentar",
 
@@ -659,7 +660,7 @@
   
   "unsupportedAreaTitle": "Área no soportada",
   "serviceTunisiaOnly": "El servicio solo está disponible en Túnez.",
-  "pickupRestrictedError": "La recogida está restringida actualmente al Gran Túnez (Túnez, Ariana, Ben Arous, Manouba).",
+  "pickupRestrictedError": "Lo sentimos, el servicio aún no está disponible en tu área. ¡Pronto estaremos expandiéndonos!",
   "expansionMessagePickup": "¡Nos expandiremos pronto! Actualmente operamos en el Gran Túnez.",
   "expansionMessageDropoff": "Las entregas están disponibles en todo Túnez.",
   "selectDifferentLocation": "Seleccionar otra ubicación",

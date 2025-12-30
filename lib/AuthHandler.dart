@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/model/users.dart';
 
 class AuthMethods {
@@ -13,7 +14,10 @@ class AuthMethods {
   User? getCurrentUser() {
     return _auth.currentUser;
   }
-
+  void _requestPermissions()  {
+     Permission.location.request();
+     Permission.audio.request();
+  }
   // Sign Up with Email and Password
   Future<String?> signUp({
     required String email,
@@ -75,6 +79,7 @@ class AuthMethods {
       );
       if (userCredential.user != null) {
         debugPrint('Sign-in successful for user: ${userCredential.user!.uid}');
+        _requestPermissions();
         return 'success';
       } else {
         return 'Failed to sign in';

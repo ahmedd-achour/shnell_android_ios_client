@@ -37,7 +37,7 @@
  
 
   "cancellationHeading": "11. Cancellation Policy & The 2ⁿ Discipline System",
-  "cancellationBody": "To ensure fairness in high-stakes logistics, shnell applies a strict policy based on the timing of the cancellation and the party at fault.\n\n**11.1 Customer Scenarios**\n- **Free Cancellation**: Allowed anytime *before* a driver accepts the request.\n- **10% Penalty**: If you cancel *after* a driver accepts but *before* the goods are loaded. This fee compensates the driver for fuel and approach time.\n- **Full Charge (100%) / Admin Decision**: Once the goods are loaded or the driver is in transit, cancellation via the app is locked. You must contact an Admin. If the cancellation is not due to a driver error or force majeure, the **Full Fare** is charged to cover the completed logistical effort.\n\n**11.2 Driver Discipline (The 2ⁿ Exponential System)**\nWe do not fine drivers financially. Instead, we use a reliability system based on time suspensions. Penalties escalate exponentially (2 to the power of n) for unjustified cancellations:\n- **Exceptions (Free Cancellation)**: Drivers may cancel without penalty ONLY if the Customer is a 'No-Show' after waiting 12 minutes at the pickup location.\n- **The Punishment Ladder**:\n  1. **1st Offense**: Warning + Admin Call (0 Days).\n  2. **2nd Offense**: **1 Day** Suspension.\n  3. **3rd Offense**: **2 Days** Suspension.\n  4. **4th Offense**: **4 Days** Suspension.\n  5. **5th Offense**: **8 Days** Suspension.\n  6. **Subsequent**: 16, 32, up to **64 Days**.\n- **Reset**: This record resets annually.\n\n**11.3 Mutual Agreement**: If both parties agree to cancel (e.g., item does not fit), the Admin can waive all penalties.",
+  "cancellationBody": "To ensure fairness in high-stakes logistics, Shnell Logistics applies a strict policy based on the timing of the cancellation and the party at fault.\n\n**11.1 Customer Scenarios**\n- **Free Cancellation**: Allowed anytime *before* a driver accepts the request.\n- **10% Penalty**: If you cancel *after* a driver accepts but *before* the goods are loaded. This fee compensates the driver for fuel and approach time.\n- **Full Charge (100%) / Admin Decision**: Once the goods are loaded or the driver is in transit, cancellation via the app is locked. You must contact an Admin. If the cancellation is not due to a driver error or force majeure, the **Full Fare** is charged to cover the completed logistical effort.\n\n**11.2 Driver Discipline (The 2ⁿ Exponential System)**\nWe do not fine drivers financially. Instead, we use a reliability system based on time suspensions. Penalties escalate exponentially (2 to the power of n) for unjustified cancellations:\n- **Exceptions (Free Cancellation)**: Drivers may cancel without penalty ONLY if the Customer is a 'No-Show' after waiting 12 minutes at the pickup location.\n- **The Punishment Ladder**:\n  1. **1st Offense**: Warning + Admin Call (0 Days).\n  2. **2nd Offense**: **1 Day** Suspension.\n  3. **3rd Offense**: **2 Days** Suspension.\n  4. **4th Offense**: **4 Days** Suspension.\n  5. **5th Offense**: **8 Days** Suspension.\n  6. **Subsequent**: 16, 32, up to **64 Days**\n- **Recovery Rule**: Every **5 successful jobs** removes **1 cancellation** from the driver’s record, allowing them to regain reliability gradually.\n- **Annual Reset**: This record resets annually.\n\n**11.3 Mutual Agreement**: If both parties agree to cancel (e.g., item does not fit), the Admin can waive all penalties.",
 
 "suspensionBody": "We maintain platform integrity through automated and manual protocols.\n\n**12.1 Automated Suspension (Discipline System)**\n\n- Driver accounts are automatically suspended according to the 2ⁿ system mentioned in Section 11.2. During suspension (1 to 64 days), drivers cannot receive new orders but can view history.\n- This automated ban cannot be lifted manually unless a technical error is proven.\n\n**12.2 Termination & Permanent Ban**\n\n- **Fraud**: Fake orders or price manipulation.\n- **Commission Evasion**: Attempting to complete deals off-platform.\n- **Behavior**: Harassment or unsafe conduct.\n- **User Abuse**: Customers who repeatedly cancel after driver arrival will be permanently banned.",
   "driverPerformanceHeading": "13. Driver Autonomy",
@@ -767,18 +767,13 @@
   
   "unsupportedAreaTitle": "Unsupported Area",
   "serviceTunisiaOnly": "Service is only available in Tunisia.",
-  "pickupRestrictedError": "Pickup is currently restricted to Greater Tunis (Tunis, Ariana, Ben Arous, Manouba).",
+  "pickupRestrictedError": "Sorry, service is not available in your area yet. We're expanding soon!",
   "expansionMessagePickup": "We are expanding soon! Currently operating in Greater Tunis.",
   "expansionMessageDropoff": "Drop-offs are available across all of Tunisia.",
   "selectDifferentLocation": "Select Different Location",
   "zoneValidationFailed": "Could not verify service area. Check connection.",
   "locationSelectedOnMap": "Location selected on map",
-    "service_note": "Note: This fee covers the basic transport service only. Additional services may vary depending on the needs and requirements of each case, and can be arranged directly with the operator if needed."
-
-
-
-
-
-
+    "service_note": "Note: This fee covers the basic transport service only. Additional services may vary depending on the needs and requirements of each case, and can be arranged directly with the operator if needed.",
+    "cancelFeeNotice": "Cancellation after driver acceptance requires a {amount} DT (10%) truck displacement fee."
 
 }

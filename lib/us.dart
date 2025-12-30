@@ -137,15 +137,7 @@ class ContactUsWidget extends StatelessWidget {
                   onTap: () => _launchUrl(googleMapsUrl),
                 ),
         
-                const SizedBox(height: 16),
-        
-                // Social Media Row
-                OutlinedButton.icon(
-                  onPressed: () async{await _launchUrl('https://x.com/shnell_service');},
-                  icon: const Icon(Icons.alternate_email, size: 18),
-                  label: Text(l10n.followUsOnX),
-                  style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 45)),
-                ),
+    
               ],
             ),
           ),

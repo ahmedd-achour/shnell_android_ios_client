@@ -64,6 +64,7 @@ dependencies:
   provider: ^6.1.5+1
   maps_launcher: ^3.0.0+1
   webview_flutter: ^4.13.0
+  shared_preferences: ^2.5.3
   
 
 dev_dependencies:

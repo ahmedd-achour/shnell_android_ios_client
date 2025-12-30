@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shnell/dots.dart'; // Ensure this exists in your project
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -166,7 +167,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
           for (var c in components) {
             final types = c['types'] as List;
             if (types.contains('country')) countryCode = c['short_name']; 
-            if (types.contains('administrative_area_level_1')) adminArea = c['long_name'];
+           // if (types.contains('administrative_area_level_1')) adminArea = c['long_name'];
           }
 
           // Rule 1: Must be in Tunisia
@@ -174,8 +175,12 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
             return l10n.serviceTunisiaOnly; 
           }
 
+          FirebaseFirestore firestore = FirebaseFirestore.instance;
+          final doc = await firestore.collection('settings').doc('service_areas').get();
+          bool isFullTunisia = doc.data()?['countries']['Tunisia']['active'] ?? false;
+
           // Rule 2: If Pickup, must be Greater Tunis
-          if (widget.isPickup) {
+          if (isFullTunisia == false) {
              final lowerGov = adminArea.toLowerCase();
              final isGreaterTunis = 
                lowerGov.contains('tunis') || 
@@ -186,7 +191,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
              if (!isGreaterTunis) {
                return l10n.pickupRestrictedError;
              }
-          }
+          } 
 
           return null; // Valid
         }

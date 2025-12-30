@@ -7,6 +7,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:shnell/dots.dart';
 import 'package:shnell/mainUsers.dart' show MainUsersScreen;
 import 'package:shnell/model/calls.dart';
 
@@ -47,16 +48,16 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     _initializeCall();
   }
 
+
   Future<void> _initializeCall() async {
-    if (widget.isCaller) {
+   /* if (widget.isCaller) {
       _ringtonePlayer.play(
         android: AndroidSounds.ringtone,
         ios: IosSounds.glass,
         looping: true,
         volume: 1.0,
       );
-    }
-
+    }*/
     await _requestPermissions();
     await _initializeAgora();
     _listenToCallStatus();
@@ -98,7 +99,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
       if (mounted) setState(() => _callDurationSeconds++);
     });
   }
-
   Future<void> _initializeAgora() async {
     _engine = createAgoraRtcEngine();
     await _engine.initialize(RtcEngineContext(appId: _appId));
@@ -169,8 +169,10 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     _callStatusSubscription?.cancel();
 
     // Notify backend
-    unawaited(_notifyTermination(reason));
-
+      await _notifyTermination(reason);
+      await FirebaseFirestore.instance.collection('calls').doc(widget.call.agoraChannel).update({
+      'callStatus': reason,
+    });
     // Leave Agora
     try {
       await _engine.leaveChannel();
@@ -216,17 +218,6 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     }
   }
 
-  void _toggleMute() {
-    if (_isEnding) return;
-    setState(() => _isMicMuted = !_isMicMuted);
-    _engine.muteLocalAudioStream(_isMicMuted);
-  }
-
-  void _toggleSpeaker() {
-    if (_isEnding) return;
-    setState(() => _isSpeakerOn = !_isSpeakerOn);
-    _engine.setEnableSpeakerphone(_isSpeakerOn);
-  }
 
   @override
   void dispose() {
@@ -237,130 +228,205 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) _endCall(reason: 'ended');
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF1C1C1E),
-        body: SafeArea(
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-
-              // Avatar
-              Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.person, size: 90, color: Colors.white),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Name
-              Text(
-                widget.isCaller ? "Appel en cours…" : "Client Shnell",
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w600),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Status & Duration
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: _isConnected
-                    ? Column(
-                        key: const ValueKey('connected'),
-                        children: [
-                          const Text(
-                            "Connecté",
-                            style: TextStyle(color: Colors.greenAccent, fontSize: 28, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _formatDuration(_callDurationSeconds),
-                            style: const TextStyle(color: Colors.white70, fontSize: 20),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        widget.isCaller ? "Sonnerie en cours…" : "Connexion…",
-                        key: const ValueKey('ringing'),
-                        style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 18),
-                      ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Controls
-              Padding(
-                padding: const EdgeInsets.only(bottom: 80),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _controlButton(
-                      icon: _isMicMuted ? Icons.mic_off : Icons.mic,
-                      active: _isMicMuted,
-                      onTap: _toggleMute,
-                      enabled: !_isEnding,
-                    ),
-
-                    // End Call Button
-                    GestureDetector(
-                      onTap: _isEnding ? null : () => _endCall(reason: 'ended'),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(28),
-                        decoration: BoxDecoration(
-                          color: _isEnding ? Colors.grey[600] : Colors.redAccent,
-                          shape: BoxShape.circle,
-                          boxShadow: _isEnding
-                              ? []
-                              : [
-                                  BoxShadow(
-                                    color: Colors.redAccent.withOpacity(0.6),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                        ),
-                        child: _isEnding
-                            ? const SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 3,
-                                ),
-                              )
-                            : const Icon(Icons.call_end, color: Colors.white, size: 40),
-                      ),
-                    ),
-
-                    _controlButton(
-                      icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
-                      active: _isSpeakerOn,
-                      onTap: _toggleSpeaker,
-                      enabled: !_isEnding,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        // Dynamic background that adjusts to theme brightness
+        backgroundColor: theme.colorScheme.surface,
+        body: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                theme.colorScheme.surface,
+                theme.colorScheme.primaryContainer.withOpacity(0.2),
+              ],
+            ),
           ),
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  children: [
+                    const Spacer(flex: 2),
+
+                    // Responsive Avatar
+                    _buildAvatar(theme, constraints),
+
+                    const SizedBox(height: 32),
+
+                    // Caller Info
+                    _buildCallInfo(theme),
+
+                    const Spacer(flex: 3),
+
+                    // Dynamic Controls
+                    _buildControlBar(theme, size),
+
+                    const SizedBox(height: 48),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme, BoxConstraints constraints) {
+    return Container(
+      padding: EdgeInsets.all(constraints.maxWidth * 0.08),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.person,
+        size: constraints.maxWidth * 0.25,
+        color: theme.colorScheme.onSecondaryContainer,
+      ),
+    );
+  }
+
+  Widget _buildCallInfo(ThemeData theme) {
+    return Column(
+      children: [
+        Text(
+          widget.isCaller ? "Appel en cours…" : "Client Shnell",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          child: _isConnected
+              ? Column(
+                  key: const ValueKey('connected'),
+                  children: [
+                    Text(
+                      _formatDuration(_callDurationSeconds),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontFeatures: [const FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    Text(
+                      "Connecté",
+                      style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                )
+              : Text(
+                  widget.isCaller ? "Sonnerie en cours…" : "Connexion…",
+                  key: const ValueKey('ringing'),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildControlBar(ThemeData theme, Size size) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _controlButton(
+            icon: _isMicMuted ? Icons.mic_off : Icons.mic,
+            active: _isMicMuted,
+            onTap: () {
+              setState(() => _isMicMuted = !_isMicMuted);
+              _engine.muteLocalAudioStream(_isMicMuted);
+            },
+            theme: theme,
+          ),
+          
+          // End Call
+          _endCallButton(theme),
+
+          _controlButton(
+            icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
+            active: _isSpeakerOn,
+            onTap: () {
+              setState(() => _isSpeakerOn = !_isSpeakerOn);
+              _engine.setEnableSpeakerphone(_isSpeakerOn);
+            },
+            theme: theme,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _endCallButton(ThemeData theme) {
+    return GestureDetector(
+      onTap: _isEnding ? null : () => _endCall(reason: 'ended'),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.error,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.error.withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: _isEnding
+            ? const SizedBox(width: 32, height: 32, child: RotatingDotsIndicator())
+            : const Icon(Icons.call_end, color: Colors.white, size: 36),
+      ),
+    );
+  }
+
+  Widget _controlButton({
+    required IconData icon,
+    required bool active,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    return InkWell(
+      onTap: _isEnding ? null : onTap,
+      borderRadius: BorderRadius.circular(50),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: active ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: active ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+          size: 28,
         ),
       ),
     );
@@ -372,30 +438,5 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     return "$minutes:$secs";
   }
 
-  Widget _controlButton({
-    required IconData icon,
-    required bool active,
-    required VoidCallback onTap,
-    required bool enabled,
-  }) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: AnimatedOpacity(
-        opacity: enabled ? 1.0 : 0.4,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: active ? Colors.white : Colors.white.withOpacity(0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: active ? Colors.black : Colors.white,
-            size: 32,
-          ),
-        ),
-      ),
-    );
-  }
+
 }

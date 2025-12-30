@@ -88,6 +88,7 @@ class VehicleDetailScreen extends StatefulWidget {
   final List<DropOffData> dropOffDestination;
   final String pickup_name;
   final String? serviceTypeId;
+  final int tripCount;
 
   const VehicleDetailScreen({
     Key? key,
@@ -97,6 +98,7 @@ class VehicleDetailScreen extends StatefulWidget {
     required this.dropOffDestination,
     required this.pickup_name,
     this.serviceTypeId,
+    required this.tripCount,
   }) : super(key: key);
 
   @override
@@ -193,6 +195,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               _vehicleSettings!,
               widget.dropOffDestination.length,
             );
+            _calculatedEstimatedPrice *= widget.tripCount;
+
             _offerController.text = _calculatedEstimatedPrice.toStringAsFixed(0);
             _validateOffer(_offerController.text);
           }
@@ -453,15 +457,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     ],
                   ),
                 ),
-
                 SizedBox(height: size.height * 0.02),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
-                  child: _buildDetailsCard(
-                      vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
-                ),
 
-                Padding(
+                  Padding(
                   padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
                   child: Row(
                     mainAxisSize: MainAxisSize.min, // Shrink to content width
@@ -489,8 +487,49 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                       ),
                     ],
                   ),
-                )
+                ),
+                              SizedBox(height: size.height * 0.01),
 
+                  Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // Shrink to content width
+                    crossAxisAlignment: CrossAxisAlignment.start, // Align icon with first line of text
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2), // Slight vertical adjustment for icon alignment
+                        child: Icon(
+                          Icons.info_outline,
+                          color: colorScheme.onSurfaceVariant,
+                          size: isSmallScreen ? 16 : 18,
+                        ),
+                      ),
+                      const SizedBox(width: 4), // Small gap between icon and text
+                      Expanded(
+                        child: Text(
+                          loc.cancelFeeNotice(( _calculatedEstimatedPrice * 0.1).toStringAsFixed(0)),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.error,
+                            
+                            height: 1.2, // Tighter line spacing for small screens
+                          ),
+                          maxLines: 3, // Prevent overflow on very small screens
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+,
+
+                SizedBox(height: size.height * 0.02),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: _buildDetailsCard(
+                      vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
+                ),
+
+              
               ],
             ),
           ),
@@ -571,9 +610,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
              Row(
                children: [
                  Icon(Icons.edit, size: 16, color: colorScheme.primary),
-                 const SizedBox(width: 4),
                  // LOCALIZED
-                 Text(loc.yourOfferLabel, style: textTheme.labelLarge?.copyWith(color: colorScheme.primary)),
+                 Text(loc.yourOfferLabel, style: textTheme.labelSmall?.copyWith(color: colorScheme.primary) , maxLines: 1,),
                ],
              ),
             const SizedBox(height: 8),
@@ -587,6 +625,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                 ]
               ),
             ),
+
+
+            
           ],
         ),
       ),
@@ -847,13 +888,13 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return Column(
       children: [
         Text(label.toUpperCase(), style: textTheme.labelMedium?.copyWith(color: colorScheme.outline)),
-        const SizedBox(height: 4),
         Text(
           "${value.toStringAsFixed(0)} DT",
+          maxLines: 1,
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: isActive ? colorScheme.error : colorScheme.onSurface,
-             fontSize: 18
+             fontSize: 14
           ),
         ),
       ],

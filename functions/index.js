@@ -31,14 +31,14 @@ exports.initiateCall = functions.https.onRequest(async (req, res) => {
 
     const callerToken = RtcTokenBuilder.buildTokenWithUid(AGORA_APP_ID, "", channel, 0, RtcRole.PUBLISHER, expire, expire);
     const receiverToken = RtcTokenBuilder.buildTokenWithUid(AGORA_APP_ID, "", channel, 1, RtcRole.PUBLISHER, expire, expire);
-
+/*
     await admin.firestore().collection("calls").doc(dealId).set({
       callStatus: "dialing",
       agoraChannel: channel,
       callerToken,
       receiverToken,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    });*/s
 
     await admin.messaging().send({
       token: receiverFCMToken,
@@ -75,10 +75,11 @@ exports.terminateCall = functions.https.onRequest(async (req, res) => {
     }
 
     // Update Firestore
+    /*
     await admin.firestore().collection("calls").doc(dealId).update({
       callStatus: status, // "ended", "declined", or "canceled"
       endedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    });*/
 
     // Send silent FCM to kill CallKit on BOTH devices
     const payload = {

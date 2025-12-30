@@ -36,8 +36,8 @@
  
 
   "cancellationHeading": "11. Stornierungsrichtlinie & 2ⁿ Disziplinarsystem",
-  "cancellationBody": "**11.1 Kundenszenarien**\n- **Kostenlos**: Vor Annahme durch den Fahrer.\n- **10% Gebühr**: Nach Annahme, aber *vor* der Verladung (Kraftstoffkompensation).\n- **Volle Gebühr (100%)**: Nach der Verladung ist die Stornierung per App gesperrt. Erfordert Admin-Eingriff. Ohne Fahrerverschulden wird der volle Preis berechnet.\n\n**11.2 Fahrerdisziplin (Exponentielles 2ⁿ System)**\nWir nutzen Zeitsperren statt Geldstrafen. Die Strafen steigen exponentiell:\n- **Kostenlose Stornierung**: Nur erlaubt, wenn der Kunde nach 12 Minuten Wartezeit nicht erscheint.\n- **Strafleiter**:\n  1. **1. Verstoß**: Warnung (0 Tage).\n  2. **2. Verstoß**: **1 Tag** Sperre.\n  3. **3. Verstoß**: **2 Tage** Sperre.\n  4. **4. Verstoß**: **4 Tage**.\n  5. **5. Verstoß**: **8 Tage**.\n  6. **Folgende**: 16, 32, bis zu **64 Tage**.\n\n**11.3 Gegenseitige Einigung**: Bei Einigung beider Parteien kann der Admin Gebühren erlassen."
-,
+  "cancellationBody": "Um Fairness in risikoreicher Logistik zu gewährleisten, wendet Shnell Logistics eine strikte Richtlinie basierend auf dem Zeitpunkt der Stornierung und der verantwortlichen Partei an.\n\n**11.1 Kundenszenarien**\n- **Kostenlos**: Vor Annahme durch den Fahrer.\n- **10% Gebühr**: Nach Annahme, aber *vor* der Verladung (Kraftstoffkompensation).\n- **Volle Gebühr (100%) / Admin-Entscheidung**: Nach der Verladung ist die Stornierung per App gesperrt. Admin-Eingriff erforderlich. Ohne Fahrerverschulden wird der volle Preis berechnet.\n\n**11.2 Fahrerdisziplin (Exponentielles 2ⁿ System)**\nKeine Geldstrafen. Wir verwenden Zeitsperren, die exponentiell steigen:\n- **Kostenlose Stornierung Ausnahme**: Nur wenn Kunde nach 12 Minuten Wartezeit nicht erscheint.\n- **Strafleiter**:\n  1. **1. Verstoß**: Warnung (0 Tage)\n  2. **2. Verstoß**: **1 Tag** Sperre\n  3. **3. Verstoß**: **2 Tage** Sperre\n  4. **4. Verstoß**: **4 Tage** Sperre\n  5. **5. Verstoß**: **8 Tage** Sperre\n  6. **Folgende**: 16, 32, bis zu **64 Tage**\n- **Erholung**: Jede **5 erfolgreiche Fahrten** entfernt **1 Stornierung** aus dem Verlauf, um die Zuverlässigkeit schrittweise wiederherzustellen.\n- **Jährlicher Reset**: Die Stornierungshistorie wird jährlich zurückgesetzt.\n\n**11.3 Gegenseitige Einigung**: Admin kann Gebühren erlassen, wenn beide Parteien zustimmen.",
+  "cancelFeeNotice": "Stornierung nach Annahme erfordert eine Lkw-Bereitstellungsgebühr von {amount} DT (10%).",
   
   "suspensionHeading": "12. Kontosperrung",
   "suspensionBody": "**12.1 Automatische Sperre**: Basierend auf dem 2ⁿ-System. Nicht manuell aufhebbar.\n**12.2 Kündigung**: Bei Betrug, Umgehung der Provision oder missbräuchlichem Verhalten.",
@@ -659,7 +659,7 @@
   
   "unsupportedAreaTitle": "Nicht unterstütztes Gebiet",
   "serviceTunisiaOnly": "Der Service ist nur in Tunesien verfügbar.",
-  "pickupRestrictedError": "Die Abholung ist derzeit auf den Großraum Tunis beschränkt (Tunis, Ariana, Ben Arous, Manouba).",
+  "pickupRestrictedError": "Entschuldigung, der Service ist in Ihrer Region noch nicht verfügbar. Wir erweitern unser Angebot bald!",
   "expansionMessagePickup": "Wir expandieren bald! Derzeit nur im Großraum Tunis tätig.",
   "expansionMessageDropoff": "Lieferungen sind in ganz Tunesien möglich.",
   "selectDifferentLocation": "Anderen Standort wählen",

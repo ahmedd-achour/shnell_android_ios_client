@@ -22,7 +22,6 @@ class ShnellMAp extends StatefulWidget {
   @override
   State<ShnellMAp> createState() => _MapViewState();
 }
-
 class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;

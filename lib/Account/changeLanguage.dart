@@ -75,10 +75,13 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
       _selectedLanguage = newLanguage;
     });
 
+
     try {
       await _firestore.collection('users').doc(currentUser!.uid).update({
         'language': newLanguage,
       });
+      Navigator.of(context).pop(); // Close the language selection screen
+
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

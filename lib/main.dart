@@ -1,25 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -35,9 +13,9 @@ import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shnell/FcmManagement.dart';
 import 'package:shnell/SignInScreen.dart';
-import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/calls/customIncommingCall.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/firebase_options.dart';
@@ -46,8 +24,12 @@ import 'package:shnell/model/calls.dart';
 import 'package:shnell/updateApp.dart';
 import 'package:shnell/verrifyInternet.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// Update FCM token when app starts or token refreshes
+StreamSubscription<CallEvent?>? _globalCallKitSubscription;
+String? _activeCallId;
+
+
 Future<void> updateFcmToken() async {
   String? token = await FirebaseMessaging.instance.getToken();
   if (token != null && FirebaseAuth.instance.currentUser != null) {
@@ -66,14 +48,12 @@ Future<void> updateFcmToken() async {
     }
   });
 }
-
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   final data = message.data;
-
   if (data['type'] == 'call') {
+    // this is a new incoming call app must be inittiated in a call screen , crusial 
     final params = CallKitParams(
       id: data['dealId'],
       nameCaller: data['callerName'] ?? 'Shnell Driver',
@@ -90,36 +70,91 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ios: const IOSParams(
         supportsVideo: false,
         maximumCallsPerCallGroup: 1,
-        iconName: 'CallKitIcon', // Optional: add your app icon in iOS assets
+        iconName: 'CallKitIcon',
       ),
     );
 
-    await FlutterCallkitIncoming.showCallkitIncoming(params);
-  }
+    await FlutterCallkitIncoming.showCallkitIncoming(params).then(  (value) {
+      _setupGlobalCallKitListener();
+      print('✅ Incoming call displayed from background handler');
+    }).catchError((error) {
+      print('❌ Error displaying incoming call: $error');
+    });
 
+  }
   if (data['type'] == 'call_terminated') {
     await FlutterCallkitIncoming.endAllCalls();
   }
 }
 
+
+
+
+void _setupGlobalCallKitListener() {
+  _globalCallKitSubscription ??=
+      FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+    if (event == null) return;
+
+    final body = event.body as Map<String, dynamic>;
+    final extra = Map<String, dynamic>.from(body['extra'] ?? {});
+    final dealId = extra['dealId'];
+
+    if (dealId == null) return;
+
+    switch (event.event) {
+      case Event.actionCallAccept:
+      
+        _activeCallId = dealId;
+        // Persist for cold start recovery
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('acceptedDealId', dealId);
+
+        // Update backend (best effort)7
+        await FirebaseFirestore.instance
+            .collection('calls')
+            .doc(dealId)
+            .update({'callStatus': 'connected'});
+        break;
+
+      case Event.actionCallDecline:
+      case Event.actionCallEnded:
+        await FirebaseFirestore.instance
+            .collection('calls')
+            .doc(dealId)
+            .update({'callStatus': 'declined'});
+
+        _activeCallId = null;
+        await FlutterCallkitIncoming.endAllCalls();
+     
+        break;
+      default:
+
+        break;
+    }
+  });
+}
+
+
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  // Initialize FCM token if user is already logged in
+
   if (FirebaseAuth.instance.currentUser != null) {
     FCMTokenManager().initialize();
+   // _requestPermissions();
     unawaited(updateFcmToken());
   }
-
-  // Global CallKit listener (works even after cold start)
- //await CallService().init();
+  _setupGlobalCallKitListener();
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
 
   static void setLocale(BuildContext context, Locale newLocale) {
     _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
@@ -131,41 +166,28 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.mobile];
 
-  StreamSubscription<CallEvent?>? _callKitSubscription;
-
   Locale? _locale;
   static const String _currentAppVersion = "2.0.0";
 
-  String? _activeCallId;
-
   @override
-
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
     _initConnectivity();
-    _setupCallKitListener();
     _setupForegroundMessaging();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Optional: react to lifecycle changes if needed
-  }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   void setLocale(Locale locale) {
     setState(() => _locale = locale);
   }
 
-  // Connectivity
   Future<void> _initConnectivity() async {
     try {
       final result = await _connectivity.checkConnectivity();
@@ -178,123 +200,65 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     setState(() => _connectionStatus = result);
   }
 
-  // Foreground FCM handling – show custom overlay ONLY when app is active
-void _setupForegroundMessaging() {
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-    final data = message.data;
+  void _setupForegroundMessaging() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      final data = message.data;
 
-    if (data['type'] == 'call_terminated') {
-      await FlutterCallkitIncoming.endAllCalls();
-      if (_activeCallId != null && navigatorKey.currentState?.canPop() == true) {
-        navigatorKey.currentState?.pop();
+      if (data['type'] == 'call_terminated') {
+        await FlutterCallkitIncoming.endAllCalls();
+        if (_activeCallId != null && navigatorKey.currentState?.canPop() == true) {
+          navigatorKey.currentState?.pop();
+        }
+        _activeCallId = null;
+        return;
       }
-      _activeCallId = null;
-      return;
-    }
 
-    if (data['type'] != 'call') return;
+      if (data['type'] != 'call') return;
 
-    final String dealId = data['dealId'];
-    if (_activeCallId == dealId) return;
+      final String dealId = data['dealId'];
+      if (_activeCallId == dealId) return;
 
-    // Only if truly in foreground
-    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
-      return; // Let background handler show CallKit
-    }
+      if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+        return;
+      }
 
-    final doc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
-    if (!doc.exists) return;
+      final doc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
+      if (!doc.exists) return;
 
-    final call = Call.fromFirestore(doc);
-    _activeCallId = dealId;
+      final call = Call.fromFirestore(doc);
+      _activeCallId = dealId;
 
-    // CRITICAL: Suppress native CallKit UI in foreground
-    //await FlutterCallkitIncoming.endAllCalls();
-
-    // Show your beautiful full-screen custom overlay
-    navigatorKey.currentState?.push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (_) => IncomingCallOverlay(
-          call: call,
-          onAccept: () async {
-            await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
-              'callStatus': 'connected',
-            });
-            navigatorKey.currentState?.pop();
-            navigatorKey.currentState?.push(
-              MaterialPageRoute(builder: (_) => VoiceCallScreen(call: call, isCaller: false)),
-            );
-          },
-          onDecline: () async {
-            await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
-              'callStatus': 'declined',
-            });
-            _activeCallId = null;
-            navigatorKey.currentState?.pop();
-            await FlutterCallkitIncoming.endAllCalls();
-          },
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => IncomingCallOverlay(
+            call: call,
+            onAccept: () async {
+              await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
+                'callStatus': 'connected',
+              });
+              navigatorKey.currentState?.pop();
+             /* navigatorKey.currentState?.push(
+                MaterialPageRoute(builder: (_) => VoiceCallScreen(call: call, isCaller: false)),
+              );*/
+            },
+            onDecline: () async {
+              await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
+                'callStatus': 'declined',
+              });
+              _activeCallId = null;
+              navigatorKey.currentState?.pop();
+              await FlutterCallkitIncoming.endAllCalls();
+            },
+          ),
         ),
-      ),
-    );
-  });
-}
-  // Global CallKit listener – handles accept/decline from native UI (background/terminated)
- 
- 
- 
-  void _setupCallKitListener() {
-    _callKitSubscription = FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-      if (event == null) return;
-
-      final extra = Map<String, dynamic>.from(event.body['extra'] ?? {});
-      final String? dealId = extra['dealId']?.toString();
-      if (dealId == null) return;
-
-      switch (event.event) {
-        case Event.actionCallAccept:
-          _activeCallId = dealId;
-
-          final doc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
-          if (!doc.exists) return;
-
-          final call = Call.fromFirestore(doc);
-
-          // Update status
-          await FirebaseFirestore.instance
-              .collection('calls')
-              .doc(dealId)
-              .update({'callStatus': 'connected'});
-
-          navigatorKey.currentState?.push(
-            MaterialPageRoute(
-              builder: (_) => VoiceCallScreen(call: call, isCaller: false),
-            ),
-          );
-          break;
-
-        case Event.actionCallDecline:
-        case Event.actionCallTimeout:
-        case Event.actionCallEnded:
-          await FirebaseFirestore.instance
-              .collection('calls')
-              .doc(dealId)
-              .update({'callStatus': 'declined'});
-
-          _activeCallId = null;
-          await FlutterCallkitIncoming.endAllCalls();
-          break;
-
-        default:
-          break;
-      }
+      );
     });
   }
 
   @override
   void dispose() {
     _connectivitySubscription.cancel();
-    _callKitSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -317,73 +281,70 @@ void _setupForegroundMessaging() {
 
   @override
   Widget build(BuildContext context) {
-    // No internet
     if (_connectionStatus.contains(ConnectivityResult.none)) {
-      return  StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, authSnapshot) {
-            if (authSnapshot.connectionState == ConnectionState.waiting) {
-              return const MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-              );
-            }
+      return StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, authSnapshot) {
+          if (authSnapshot.connectionState == ConnectionState.waiting) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+            );
+          }
 
-            if (!authSnapshot.hasData) {
+          if (!authSnapshot.hasData) {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              locale: _locale ?? const Locale('fr'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              theme: getLightTheme(),
+              darkTheme: getDarkTheme(),
+              themeMode: ThemeMode.light,
+              home: const SignInScreen(),
+            );
+          }
+
+          return StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).snapshots(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                );
+              }
+
+              final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
+
+              if (userData == null) {
+                FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).set({
+                  'email': authSnapshot.data!.email ?? '',
+                  'name': authSnapshot.data!.displayName ?? 'User',
+                  'language': 'fr',
+                  'darkMode': true,
+                }, SetOptions(merge: true));
+              }
+
+              final bool darkMode = userData?['darkMode'] ?? true;
+              final String languageCode = userData?['language'] ?? 'fr';
+
               return MaterialApp(
                 navigatorKey: navigatorKey,
                 debugShowCheckedModeBanner: false,
-                locale: _locale ?? const Locale('fr'),
+                locale: Locale(languageCode),
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 theme: getLightTheme(),
                 darkTheme: getDarkTheme(),
-                themeMode: ThemeMode.light,
-                home: const SignInScreen(),
+                themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+                home: const VerifyInternetScreen(),
               );
-            }
-
-            final user = authSnapshot.data!;
-
-            return StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-              builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return const MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-                  );
-                }
-
-                final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
-
-                if (userData == null) {
-                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                    'email': user.email ?? '',
-                    'name': user.displayName ?? 'User',
-                    'language': 'fr',
-                    'darkMode': true,
-                  }, SetOptions(merge: true));
-                }
-
-                final bool darkMode = userData?['darkMode'] ?? true;
-                final String languageCode = userData?['language'] ?? 'fr';
-
-                return MaterialApp(
-                  navigatorKey: navigatorKey,
-                  debugShowCheckedModeBanner: false,
-                  locale: Locale(languageCode),
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
-                  theme: getLightTheme(),
-                  darkTheme: getDarkTheme(),
-                  themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-                  home: VerifyInternetScreen()
-                );
-              },
-            );
-          },
-        );
+            },
+          );
+        },
+      );
     }
 
     return StreamBuilder<DocumentSnapshot>(
@@ -407,71 +368,69 @@ void _setupForegroundMessaging() {
         final String requiredVersion = data['version_customer_app'] ?? '';
 
         if (requiredVersion != _currentAppVersion) {
-          return  StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, authSnapshot) {
-            if (authSnapshot.connectionState == ConnectionState.waiting) {
-              return const MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-              );
-            }
+          return StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, authSnapshot) {
+              if (authSnapshot.connectionState == ConnectionState.waiting) {
+                return const MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                );
+              }
 
-            if (!authSnapshot.hasData) {
-              return MaterialApp(
-                navigatorKey: navigatorKey,
-                debugShowCheckedModeBanner: false,
-                locale: _locale ?? const Locale('fr'),
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                theme: getLightTheme(),
-                darkTheme: getDarkTheme(),
-                themeMode: ThemeMode.light,
-                home: const SignInScreen(),
-              );
-            }
-
-            final user = authSnapshot.data!;
-
-            return StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-              builder: (context, userSnapshot) {
-                if (userSnapshot.connectionState == ConnectionState.waiting) {
-                  return const MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-                  );
-                }
-
-                final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
-
-                if (userData == null) {
-                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                    'email': user.email ?? '',
-                    'name': user.displayName ?? 'User',
-                    'language': 'fr',
-                    'darkMode': true,
-                  }, SetOptions(merge: true));
-                }
-
-                final bool darkMode = userData?['darkMode'] ?? true;
-                final String languageCode = userData?['language'] ?? 'fr';
-
+              if (!authSnapshot.hasData) {
                 return MaterialApp(
                   navigatorKey: navigatorKey,
                   debugShowCheckedModeBanner: false,
-                  locale: Locale(languageCode),
+                  locale: _locale ?? const Locale('fr'),
                   supportedLocales: AppLocalizations.supportedLocales,
                   localizationsDelegates: AppLocalizations.localizationsDelegates,
                   theme: getLightTheme(),
                   darkTheme: getDarkTheme(),
-                  themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-                  home: UpdateAppScreen()
+                  themeMode: ThemeMode.light,
+                  home: const SignInScreen(),
                 );
-              },
-            );
-          },
-        );
+              }
+
+              return StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).snapshots(),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+                    );
+                  }
+
+                  final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
+
+                  if (userData == null) {
+                    FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).set({
+                      'email': authSnapshot.data!.email ?? '',
+                      'name': authSnapshot.data!.displayName ?? 'User',
+                      'language': 'fr',
+                      'darkMode': true,
+                    }, SetOptions(merge: true));
+                  }
+
+                  final bool darkMode = userData?['darkMode'] ?? true;
+                  final String languageCode = userData?['language'] ?? 'fr';
+
+                  return MaterialApp(
+                    navigatorKey: navigatorKey,
+                    debugShowCheckedModeBanner: false,
+                    locale: Locale(languageCode),
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    theme: getLightTheme(),
+                    darkTheme: getDarkTheme(),
+                    themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+                    home: const UpdateAppScreen(),
+                  );
+                },
+              );
+            },
+          );
         }
 
         return StreamBuilder<User?>(
@@ -498,10 +457,8 @@ void _setupForegroundMessaging() {
               );
             }
 
-            final user = authSnapshot.data!;
-
             return StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+              stream: FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).snapshots(),
               builder: (context, userSnapshot) {
                 if (userSnapshot.connectionState == ConnectionState.waiting) {
                   return const MaterialApp(
@@ -513,9 +470,9 @@ void _setupForegroundMessaging() {
                 final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
                 if (userData == null) {
-                  FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                    'email': user.email ?? '',
-                    'name': user.displayName ?? 'User',
+                  FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).set({
+                    'email': authSnapshot.data!.email ?? '',
+                    'name': authSnapshot.data!.displayName ?? 'User',
                     'language': 'fr',
                     'darkMode': true,
                   }, SetOptions(merge: true));

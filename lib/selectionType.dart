@@ -71,81 +71,84 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen>
     super.dispose();
   }
 
-  Future<void> _fetchVehiclesFromCloud() async {
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('settings')
-          .doc('vehicles')
-          .get();
+Future<void> _fetchVehiclesFromCloud() async {
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('settings')
+        .doc('vehicles')
+        .get();
 
-      if (!doc.exists || doc.data() == null) {
-        if (mounted) setState(() => _isLoading = false);
-        return;
+    if (!doc.exists || doc.data() == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    final data = doc.data() as Map<String, dynamic>;
+    List<VehicleUiModel> light = [];
+    List<VehicleUiModel> heavy = [];
+
+    data.forEach((key, value) {
+      if (value is Map<String, dynamic>) {
+        // --- ADMIN CONSTRAINT: isActive CHECK ---
+        // If isActive is false or null, we skip this vehicle entirely
+        final bool isActive = value['isActive'] ?? false; 
+        if (!isActive) return; 
+        // ----------------------------------------
+
+        final double weight = (value['max_weight'] ?? 0).toDouble();
+        final String image = _getLocalImageForType(key);
+
+        final String weightStr = weight >= 1000
+            ? "${(weight / 1000).toStringAsFixed(1).replaceAll('.0', '')} T"
+            : "${weight.toStringAsFixed(0)} kg";
+
+        final bool isRecommended = widget.filterVehicleIds == null ||
+            widget.filterVehicleIds!.isEmpty ||
+            widget.filterVehicleIds!.contains(key);
+
+        final vehicle = VehicleUiModel(
+          id: key,
+          name: value['name']?.toString() ?? 'Unknown',
+          imagePath: image,
+          maxWeight: weight,
+          weightDisplay: weightStr,
+          isRecommended: isRecommended,
+        );
+
+        if (weight < 3500) {
+          light.add(vehicle);
+        } else {
+          heavy.add(vehicle);
+        }
       }
+    });
 
-      final data = doc.data() as Map<String, dynamic>;
-      List<VehicleUiModel> light = [];
-      List<VehicleUiModel> heavy = [];
+    light.sort((a, b) => a.maxWeight.compareTo(b.maxWeight));
+    heavy.sort((a, b) => a.maxWeight.compareTo(b.maxWeight));
 
-      data.forEach((key, value) {
-        if (value is Map<String, dynamic>) {
-          final double weight = (value['max_weight'] ?? 0).toDouble();
-          final String image = _getLocalImageForType(key);
+    if (mounted) {
+      setState(() {
+        _lightVehicles = light;
+        _heavyVehicles = heavy;
 
-          final String weightStr = weight >= 1000
-              ? "${(weight / 1000).toStringAsFixed(1).replaceAll('.0', '')} T"
-              : "${weight.toStringAsFixed(0)} kg";
+        // Auto-select first recommended vehicle from the ACTIVE list
+        final all = [...light, ...heavy];
+        final recommended = all.where((v) => v.isRecommended).toList();
 
-          final bool isRecommended = widget.filterVehicleIds == null ||
-              widget.filterVehicleIds!.isEmpty ||
-              widget.filterVehicleIds!.contains(key);
-
-          final vehicle = VehicleUiModel(
-            id: key,
-            name: value['name']?.toString() ?? 'Unknown',
-            imagePath: image,
-            maxWeight: weight,
-            weightDisplay: weightStr,
-            isRecommended: isRecommended,
-          );
-
-          if (weight < 3500) {
-            light.add(vehicle);
-          } else {
-            heavy.add(vehicle);
+        if (recommended.isNotEmpty) {
+          _selectedVehicleId = recommended.first.id;
+          if (heavy.contains(recommended.first)) {
+            _tabController.animateTo(1);
           }
         }
+        _isLoading = false;
       });
-
-      light.sort((a, b) => a.maxWeight.compareTo(b.maxWeight));
-      heavy.sort((a, b) => a.maxWeight.compareTo(b.maxWeight));
-
-      if (mounted) {
-        setState(() {
-          _lightVehicles = light;
-          _heavyVehicles = heavy;
-
-          // Auto-select first recommended vehicle
-          final all = [...light, ...heavy];
-          final recommended = all.where((v) => v.isRecommended).toList();
-
-          if (recommended.isNotEmpty) {
-            _selectedVehicleId = recommended.first.id;
-            if (heavy.contains(recommended.first)) {
-              _tabController.animateTo(1);
-            }
-          }
-          // If no recommended, leave unselected → button stays disabled
-
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading vehicles: $e');
-      if (mounted) setState(() => _isLoading = false);
     }
+  } catch (e) {
+    debugPrint('Error loading vehicles: $e');
+    if (mounted) setState(() => _isLoading = false);
   }
-
+}
   String _getLocalImageForType(String type) {
     switch (type) {
       case 'super_light':
@@ -458,7 +461,7 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen>
                           pickupLocation: widget.pickup,
                           dropOffDestination: widget.dropOffDestination,
                           pickup_name: widget.pickup_name,
-                          serviceTypeId: widget.serviceTypeId,
+                          serviceTypeId: widget.serviceTypeId, tripCount: 1,
                         ),
                       ),
                     );

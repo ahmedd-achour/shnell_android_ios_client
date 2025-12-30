@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/calls/CallService.dart';
+import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
@@ -574,6 +574,12 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
         timestamp: DateTime.now(),
       );
       final isproceed =  await CallService().makeCall(call: call);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => VoiceCallScreen(call: call , isCaller: true,),
+        ),
+      );
+      
 
       if (isproceed == false) {
         if (mounted) {
@@ -583,13 +589,6 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
         }
         return;
       }
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => VoiceCallScreen(call: call, isCaller: true)
-        ),
-      );
     } catch (e) {
        // Handle error
     } finally {

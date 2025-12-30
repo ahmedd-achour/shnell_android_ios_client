@@ -36,8 +36,7 @@
   
 
   "cancellationHeading": "11. Politique d'annulation et Système 2ⁿ",
-  "cancellationBody": "**11.1 Scénarios Client**\n- **Gratuit** : Avant l'acceptation du chauffeur.\n- **Pénalité de 10%** : Après l'acceptation mais *avant* le chargement (pour le carburant).\n- **Plein Tarif (100%)** : Une fois chargé, l'annulation est verrouillée. Requiert une intervention Admin. Si le chauffeur n'est pas en faute, la course est facturée intégralement.\n\n**11.2 Discipline Chauffeur (Système Exponentiel 2ⁿ)**\nPas d'amendes financières, mais des suspensions temporelles qui doublent à chaque infraction (2 puissance n) :\n- **Annulation Gratuite** : Uniquement si le client ne se présente pas après 12 minutes d'attente.\n- **Échelle des Sanctions** :\n  1. **1ère** : Avertissement (0 jour).\n  2. **2ème** : **1 Jour** de suspension.\n  3. **3ème** : **2 Jours**.\n  4. **4ème** : **4 Jours**.\n  5. **5ème** : **8 Jours**.\n  6. **Suite** : 16, 32, jusqu'à **64 Jours**.\n- **Réinitialisation** : Annuelle.\n\n**11.3 Accord Mutuel** : L'Admin peut annuler les frais si les deux parties sont d'accord.",
-
+  "cancellationBody": "Pour garantir l'équité dans la logistique à enjeux élevés, Shnell Logistics applique une politique stricte basée sur le moment de l'annulation et la partie responsable.\n\n**11.1 Scénarios Clients**\n- **Annulation gratuite**: Autorisée avant que le chauffeur n’accepte la course.\n- **Frais 10%**: Après acceptation mais avant le chargement (compensation carburant/temps).\n- **Frais complets (100%) / Décision Admin**: Une fois la marchandise chargée ou le chauffeur en route, l’annulation est bloquée. Intervention admin requise. Sans faute du chauffeur, le prix complet s’applique.\n\n**11.2 Discipline du Chauffeur (Système exponentiel 2ⁿ)**\nPas de pénalités financières. Utilisation de suspensions exponentielles:\n- **Exception annulation gratuite**: Seulement si client absent après 12 min d’attente au point de prise.\n- **Échelle des sanctions**:\n  1. **1ère infraction**: Avertissement (0 jour)\n  2. **2ème infraction**: **1 jour** suspension\n  3. **3ème infraction**: **2 jours** suspension\n  4. **4ème infraction**: **4 jours** suspension\n  5. **5ème infraction**: **8 jours** suspension\n  6. **Suivantes**: 16, 32, jusqu’à **64 jours**\n- **Récupération**: Chaque **5 services réussis** supprime **1 annulation** du registre, permettant de regagner progressivement la fiabilité.\n- **Réinitialisation annuelle**: Le registre des annulations est remis à zéro chaque année.\n\n**11.3 Accord mutuel**: L’admin peut annuler les frais si les deux parties sont d’accord.",
 
 "suspensionHeading": "12. Suspension de compte",
   "suspensionBody": "**12.1 Suspension Automatique**\n- Les comptes chauffeurs sont suspendus automatiquement selon le système 2ⁿ (Section 11.2). Ce blocage est technique et ne peut être levé manuellement.\n\n**12.2 Résiliation**\n- **Fraude** : Fausses commandes ou contournement de la commission.\n- **Comportement** : Harcèlement ou insécurité.\n- **Abus Client** : Les clients annulant de manière abusive seront bannis définitivement.",
@@ -652,16 +651,14 @@
   
   "unsupportedAreaTitle": "Zone non desservie",
   "serviceTunisiaOnly": "Le service est disponible uniquement en Tunisie.",
-  "pickupRestrictedError": "Le ramassage est limité au Grand Tunis (Tunis, Ariana, Ben Arous, Manouba).",
+  "pickupRestrictedError": "Désolé, le service n'est pas encore disponible dans votre région. Nous arrivons bientôt !",
   "expansionMessagePickup": "Expansion bientôt ! Actuellement opérationnel sur le Grand Tunis.",
   "expansionMessageDropoff": "Les livraisons sont disponibles partout en Tunisie.",
   "selectDifferentLocation": "Choisir un autre lieu",
   "zoneValidationFailed": "Impossible de vérifier la zone. Vérifiez la connexion.",
   "locationSelectedOnMap": "Position sélectionnée sur la carte",
-    "service_note": "Remarque : Ce tarif couvre uniquement le service de transport de base. Les services supplémentaires peuvent varier selon les besoins et les exigences de chaque cas et peuvent être arrangés directement avec l’opérateur si nécessaire."
-
-
-
+    "service_note": "Remarque : Ce tarif couvre uniquement le service de transport de base. Les services supplémentaires peuvent varier selon les besoins et les exigences de chaque cas et peuvent être arrangés directement avec l’opérateur si nécessaire.",
+    "cancelFeeNotice": "L'annulation après acceptation nécessite des frais de déplacement camion de {amount} DT (10%)."
 
 
 

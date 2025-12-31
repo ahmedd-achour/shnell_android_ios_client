@@ -1,392 +1,548 @@
+import 'dart:async';
+import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shnell/SignUpScreen.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+
+import 'package:shnell/Account/privacyPolicy.dart';
+import 'package:shnell/model/users.dart';
 import 'package:shnell/passwordReset.dart';
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+class UnifiedAuthScreen extends StatefulWidget {
+  const UnifiedAuthScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _UserSignInScreenState();
+  State<UnifiedAuthScreen> createState() => _UnifiedAuthScreenState();
 }
 
-class _UserSignInScreenState extends State<SignInScreen> with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  
+class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
+    with SingleTickerProviderStateMixin {
+  bool _isSignUp = false;
   bool _isLoading = false;
-  bool _isPasswordVisible = false;
-  
-  // Animations
-  late AnimationController _animController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    
-    _fadeAnimation = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
-    // Modified animation to come from bottom up smoothly
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutQuart));
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-    _animController.forward();
-  }
+  PhoneNumber tunisiaPhone = PhoneNumber(isoCode: 'TN');
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _animController.dispose();
-    super.dispose();
-  }
-
-  // --- AUTH LOGIC (Unchanged) ---
-  Future<void> _handleSignIn() async {
-    final loc = AppLocalizations.of(context)!;
-    if (!_formKey.currentState!.validate()) return;
-
+  // === SIGN UP ===
+  Future<void> _handleSignUp() async {
+    HapticFeedback.lightImpact();
+    FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
-    HapticFeedback.selectionClick();
+
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final name = nameController.text.trim();
+    final phoneLocal = phoneController.text.trim().replaceAll(' ', '');
+
+    if (!_validatePhone(phoneLocal)) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    if (password.length < 7) {
+      _showError("Le mot de passe doit contenir au moins 7 caractères.");
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    final phoneFull = '+216$phoneLocal';
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      UserCredential credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+
+      User? user = credential.user;
+
+      if (user != null) {
+        final shnellUser = shnellUsers(
+          email: email,
+          name: name,
+          phone: phoneFull,
+          role: 'user',
+          darkMode: true,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set(shnellUser.toJson());
+
+        await user.sendEmailVerification();
+
+        _showSuccess("Compte créé ! Vérifiez votre email pour continuer.");
+        
+        // NO NAVIGATION HERE
+        // Global wrapper will redirect to EmailVerificationScreen
+      }
     } on FirebaseAuthException catch (e) {
-      _showError(_mapAuthErrorMessage(e.code, loc));
+      _showError(_parseFirebaseError(e));
     } catch (e) {
-      _showError(loc.connectionError);
+      _showError("Erreur lors de la création du compte.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  String _mapAuthErrorMessage(String code, AppLocalizations loc) {
-    switch (code) {
-      case 'user-not-found': return loc.userNotFound;
-      case 'wrong-password': return loc.wrongPassword;
-      case 'invalid-email': return loc.invalidEmail;
-      case 'user-disabled': return loc.userDisabled;
-      default: return loc.signInFailed;
+  // === LOGIN ===
+  Future<void> _handleLogin() async {
+    HapticFeedback.lightImpact();
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      _showSuccess("Connexion réussie !");
+
+      // NO MANUAL NAVIGATION
+      // The main app wrapper will handle routing based on:
+      // - emailVerified
+      // - Firestore document existence
+      // - role == 'user'
+
+    } on FirebaseAuthException catch (e) {
+      _showError(_parseFirebaseError(e));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showError(String message) {
-    if (!mounted) return;
-    final theme = Theme.of(context);
+  bool _validatePhone(String phone) {
+    if (!RegExp(r'^[2-9][0-9]{7}$').hasMatch(phone)) {
+      _showError("Numéro invalide (8 chiffres, commençant par 2-9).");
+      return false;
+    }
+    return true;
+  }
+
+  String _parseFirebaseError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        return "Cet email est déjà utilisé.";
+      case 'weak-password':
+        return "Mot de passe trop faible.";
+      case 'user-not-found':
+        return "Aucun compte trouvé avec cet email.";
+      case 'wrong-password':
+        return "Mot de passe incorrect.";
+      case 'invalid-credential':
+        return "Identifiants invalides.";
+      case 'too-many-requests':
+        return "Trop de tentatives. Réessayez plus tard.";
+      default:
+        return "Erreur : ${e.message}";
+    }
+  }
+
+  void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(children: [Icon(Icons.error_outline, color: theme.colorScheme.onError), const SizedBox(width: 12), Expanded(child: Text(message))]),
-        backgroundColor: theme.colorScheme.error,
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(msg)),
+          ],
+        ),
+        backgroundColor: Colors.red.shade800,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
-  // --- UI CONSTRUCTION ---
+  void _showSuccess(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(msg)),
+          ],
+        ),
+        backgroundColor: Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final loc = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      // IMPORTANT: This allows the UI to slide up when keyboard appears
-      resizeToAvoidBottomInset: true, 
-      backgroundColor: colorScheme.primary, 
-      body: Stack(
-        children: [
-          // 1. Dynamic Background
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.primary,
-                    Color.lerp(colorScheme.primary, colorScheme.surface, 0.2)!, 
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      cs.primaryContainer.withOpacity(0.3),
+                      cs.surface,
+                      cs.surface
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: size.width * 0.06),
+                child: Column(
+                  children: [
+                    SizedBox(height: size.height * 0.02),
+                    Hero(
+                      tag: 'app_logo',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Column(
+                          children: [
+                            Text(
+                              "SHNELL",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 4,
+                                color: cs.primary,
+                              ),
+                            ),
+                            Text(
+                              "L'excellence en mouvement",
+                              style: GoogleFonts.inter(
+                                color: cs.onSurfaceVariant,
+                                fontSize: 16,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.05),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: cs.surface.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(30),
+                            border:
+                                Border.all(color: cs.outlineVariant.withOpacity(0.3)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              )
+                            ],
+                          ),
+                          child: AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOutBack,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _AuthTabButton(
+                                        title: "Connexion",
+                                        isActive: !_isSignUp,
+                                        onTap: () => setState(() => _isSignUp = false),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: _AuthTabButton(
+                                        title: "Inscription",
+                                        isActive: _isSignUp,
+                                        onTap: () => setState(() => _isSignUp = true),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 30),
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position: Tween<Offset>(
+                                              begin: const Offset(0, 0.05),
+                                              end: Offset.zero)
+                                          .animate(animation),
+                                      child: child,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    key: ValueKey<bool>(_isSignUp),
+                                    children: [
+                                      if (_isSignUp) ...[
+                                        _CustomTextField(
+                                          controller: nameController,
+                                          label: "Nom complet",
+                                          icon: Icons.person_outline_rounded,
+                                          inputAction: TextInputAction.next,
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                      _CustomTextField(
+                                        controller: emailController,
+                                        label: "Email",
+                                        icon: Icons.alternate_email_rounded,
+                                        inputType: TextInputType.emailAddress,
+                                        inputAction: TextInputAction.next,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      if (_isSignUp) ...[
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: cs.surfaceVariant.withOpacity(0.3),
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 4),
+                                          child: InternationalPhoneNumberInput(
+                                            onInputChanged: (_) {},
+                                            selectorConfig: const SelectorConfig(
+                                              selectorType:
+                                                  PhoneInputSelectorType.BOTTOM_SHEET,
+                                              showFlags: true,
+                                              useEmoji: true,
+                                              trailingSpace: false,
+                                            ),
+                                            initialValue: tunisiaPhone,
+                                            textFieldController: phoneController,
+                                            formatInput: false,
+                                            cursorColor: cs.primary,
+                                            countries: const ['TN'],
+                                            inputDecoration: const InputDecoration(
+                                              hintText: "29 123 456",
+                                              border: InputBorder.none,
+                                              contentPadding:
+                                                  EdgeInsets.only(bottom: 12),
+                                            ),
+                                            textStyle: GoogleFonts.inter(
+                                                fontSize: 16, color: cs.onSurface),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                      _CustomTextField(
+                                        controller: passwordController,
+                                        label: "Mot de passe",
+                                        icon: Icons.lock_outline_rounded,
+                                        isPassword: true,
+                                        inputAction: TextInputAction.done,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (!_isSignUp)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const PasswordResetScreen())),
+                                      child: Text("Mot de passe oublié ?",
+                                          style: TextStyle(
+                                              color: cs.primary,
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+                                  ),
+                                if (_isSignUp) ...[
+                                  const SizedBox(height: 16),
+                                  GestureDetector(
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const PrivacyPolicyScreen())),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.check_circle_outline,
+                                            size: 16, color: cs.primary),
+                                        const SizedBox(width: 8),
+                                        Text.rich(
+                                          TextSpan(
+                                            text: "J'accepte la ",
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: cs.onSurfaceVariant),
+                                            children: [
+                                              TextSpan(
+                                                text: "politique de confidentialité",
+                                                style: TextStyle(
+                                                    color: cs.primary,
+                                                    fontWeight: FontWeight.bold,
+                                                    decoration:
+                                                        TextDecoration.underline),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: FilledButton(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () => _isSignUp
+                                            ? _handleSignUp()
+                                            : _handleLogin(),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: cs.primary,
+                                      foregroundColor: cs.onPrimary,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16)),
+                                      elevation: 2,
+                                    ),
+                                    child: _isLoading
+                                        ? SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: CircularProgressIndicator(
+                                                color: cs.onPrimary,
+                                                strokeWidth: 2.5))
+                                        : Text(
+                                            _isSignUp
+                                                ? "Créer un compte"
+                                                : "Se connecter",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.05),
                   ],
                 ),
               ),
             ),
-          ),
-          
-          // 2. Responsive Layout
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Determine if we need to scroll (keyboard open) or stretch (keyboard closed)
-                return SingleChildScrollView(
-                  // BouncingScrollPhysics gives a nice native feel
-                  physics: const BouncingScrollPhysics(),
-                  child: ConstrainedBox(
-                    // CRITICAL FIX: Ensures the container is at least as tall as the screen
-                    // but can grow (scroll) if the keyboard covers it.
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth,
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: IntrinsicHeight(
-                      child: constraints.maxWidth > 600 
-                        ? _buildTabletLayout(theme, loc)
-                        : _buildMobileLayout(theme, loc),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- MOBILE LAYOUT (Refactored for Scrolling) ---
-  Widget _buildMobileLayout(ThemeData theme, AppLocalizations loc) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Pushes content to edges
-      children: [
-        // TOP SECTION: Logo (Will scroll up when typing)
-        Padding(
-          padding: const EdgeInsets.only(top: 40, bottom: 20),
-          child: _buildBrandHeader(theme, isDarkText: false, loc: loc),
-        ),
-
-        // BOTTOM SECTION: Form (Will stick to bottom, or slide up)
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(32),
-              topRight: Radius.circular(32),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(32), topRight: Radius.circular(32)),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                  child: _buildFormContent(theme, loc),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- TABLET LAYOUT ---
-  Widget _buildTabletLayout(ThemeData theme, AppLocalizations loc) {
-    return Center(
-      child: Container(
-        width: 450,
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 40)],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildBrandHeader(theme, isDarkText: true, loc: loc),
-            const SizedBox(height: 40),
-            _buildFormContent(theme, loc),
           ],
         ),
       ),
     );
   }
+}
 
-  // --- COMPONENTS ---
+class _CustomTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final bool isPassword;
+  final TextInputType? inputType;
+  final TextInputAction? inputAction;
 
-  Widget _buildBrandHeader(ThemeData theme, {required bool isDarkText, required AppLocalizations loc}) {
-    final colorScheme = theme.colorScheme;
-    final textColor = isDarkText ? colorScheme.onSurface : colorScheme.onPrimary;
-    
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Hero( // Added Hero for smooth transition if you navigate elsewhere
-          tag: 'app_logo',
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: CircleAvatar(
-              radius: 40,
-              backgroundColor: colorScheme.surface,
-              backgroundImage: const AssetImage("assets/shnell.jpeg"),
-              onBackgroundImageError: (_, __) {},
-            ),
-          ),
+  const _CustomTextField({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    this.isPassword = false,
+    this.inputType,
+    this.inputAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      keyboardType: inputType,
+      textInputAction: inputAction,
+      style: GoogleFonts.inter(fontSize: 16),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: cs.onSurfaceVariant),
+        prefixIcon: Icon(icon, color: cs.primary.withOpacity(0.7), size: 22),
+        filled: true,
+        fillColor: cs.surfaceVariant.withOpacity(0.3),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: cs.primary, width: 1.5),
         ),
-        const SizedBox(height: 16),
-        Text(
-          "SHNELL",
-          style: GoogleFonts.montserrat(
-            fontSize: 28, fontWeight: FontWeight.w900, color: textColor, letterSpacing: 3.0,
-          ),
-        ),
-        Text(
-          loc.slogan, 
-          style: GoogleFonts.inter(
-            fontSize: 14, color: textColor.withOpacity(0.9), fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFormContent(ThemeData theme, AppLocalizations loc) {
-    final colorScheme = theme.colorScheme;
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(loc.hello, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(loc.signInToContinue, style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
-          const SizedBox(height: 24),
-
-          _buildTextField(
-            controller: _emailController,
-            label: loc.emailLabel,
-            icon: Icons.email_outlined,
-            theme: theme,
-            keyboardType: TextInputType.emailAddress,
-            validator: (v) => (v == null || !v.contains('@')) ? loc.emailError : null,
-          ),
-          
-          const SizedBox(height: 16),
-
-          _buildTextField(
-            controller: _passwordController,
-            label: loc.passwordLabel,
-            icon: Icons.lock_outline,
-            theme: theme,
-            obscureText: !_isPasswordVisible,
-            validator: (v) => (v == null || v.length < 6) ? loc.passwordError : null,
-            isLastField: true, // Handle "Done" action on keyboard
-            suffixIcon: IconButton(
-              icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-            ),
-          ),
-
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => PasswordResetScreen(initialEmail: _emailController.text.trim())));
-              },
-              child: Text(loc.forgotPassword, style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          SizedBox(
-            height: 52,
-            child: FilledButton(
-              onPressed: _isLoading ? null : _handleSignIn,
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              child: _isLoading 
-                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2.5))
-                : Text(loc.signInButton, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-            ),
-          ),
-
-          const SizedBox(height: 24), 
-          
-          // Safer layout for small screens
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(loc.noAccountYet, style: TextStyle(color: colorScheme.onSurfaceVariant)),
-              const SizedBox(width: 5),
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SignUpScreen())),
-                child: Text(
-                  loc.createAccount,
-                  style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold, decoration: TextDecoration.underline, decorationColor: colorScheme.primary),
-                ),
-              ),
-            ],
-          ),
-          // Add extra padding at bottom so scrolling feels good
-          const SizedBox(height: 16),
-        ],
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       ),
     );
   }
+}
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required ThemeData theme,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-    Widget? suffixIcon,
-    bool isLastField = false,
-  }) {
-    final colorScheme = theme.colorScheme;
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: validator,
-      // Helps UX: Next moves to next field, Done submits
-      textInputAction: isLastField ? TextInputAction.done : TextInputAction.next,
-      onFieldSubmitted: isLastField ? (_) => _handleSignIn() : null,
-      style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface),
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: colorScheme.primary),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: colorScheme.primary, width: 2)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: colorScheme.error, width: 1.5)),
+class _AuthTabButton extends StatelessWidget {
+  final String title;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _AuthTabButton(
+      {required this.title, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: isActive ? cs.primary : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            color: isActive ? cs.primary : cs.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }

@@ -1,27 +1,31 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui show ImageByteFormat, instantiateImageCodec;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as lt;
 import 'package:http/http.dart' as http;
+import 'package:shnell/customMapStyle.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/googlePlaces.dart';
 import 'package:shnell/jobType.dart';
 import 'package:shnell/locationService.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:shnell/main.dart';
 import 'dart:convert';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'dart:ui' show ImageByteFormat, TextDirection, instantiateImageCodec;
 
 class ShnellMAp extends StatefulWidget {
   const ShnellMAp({super.key});
-  
 
   @override
   State<ShnellMAp> createState() => _MapViewState();
 }
+
 class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -43,14 +47,24 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
   bool _isWaitingForSet = false;
   bool _needsBoundsUpdate = false;
 
-
-
   @override
   void initState() {
     super.initState();
-    _dropOffControllersNotifier.value.add(TextEditingController());
-    _dropOffData.add(DropOffData(destination: lt.LatLng(0, 0), destinationName: ''));
+    // Initialize with one empty drop-off
+    _dropOffControllersNotifier.value = [TextEditingController()];
+      mapStyleNotifier.addListener(_updateMapStyle); 
+      
+         _dropOffData.add(DropOffData(destination: const lt.LatLng(0, 0), destinationName: ''));
   }
+void _updateMapStyle() {
+  if (_mapController.isCompleted) {
+    _mapController.future.then((controller) {
+      controller.setMapStyle(mapStyleNotifier.value);
+    });
+  }
+}
+
+
 
   @override
   void dispose() {
@@ -66,13 +80,13 @@ class _MapViewState extends State<ShnellMAp> with AutomaticKeepAliveClientMixin 
     super.dispose();
   }
 
-  bool _isRtl(String? localeName) {
-    return false;
+  bool _isRtl(String localeName) {
+    return localeName == 'ar'; // Add more RTL languages if needed
   }
 
-  // --- LOGIQUE API & MAP ---
+  // ==================== MAP & ROUTING LOGIC ====================
 
-  Future<void> _updateMapElements({bool forceBoundsUpdate = false}) async {
+Future<void> _updateMapElements({bool forceBoundsUpdate = false}) async {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
     
@@ -260,9 +274,9 @@ newMarkers.add(
 
   Future<BitmapDescriptor> _loadCustomMarker() async {
     final imageBytes = (await rootBundle.load('assets/pin.png')).buffer.asUint8List();
-    final codec = await instantiateImageCodec(imageBytes, targetWidth: 85);
+    final codec = await ui.instantiateImageCodec(imageBytes, targetWidth: 85);
     final frameInfo = await codec.getNextFrame();
-    final imageData = await frameInfo.image.toByteData(format: ImageByteFormat.png);
+    final imageData = await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
     return BitmapDescriptor.fromBytes(imageData!.buffer.asUint8List());
   }
 
@@ -353,7 +367,7 @@ newMarkers.add(
       _updateMapElements(forceBoundsUpdate: true);
     }
   }
-
+/*
   void _addDropOffField() {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return;
@@ -401,7 +415,7 @@ newMarkers.add(
     }
   }
 
-
+*/
 
   void _navigateToVehicleSelection() {
     final l10n = AppLocalizations.of(context);
@@ -487,322 +501,8 @@ newMarkers.add(
     );
   }
 
-  // --- WIDGETS UI ---
-
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const Scaffold(body: Center(child: Text('Localization not available')));
-
-    super.build(context);
-    return Scaffold(
-      body: Directionality(
-        textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
-        child: Stack(
-          children: [
-            ValueListenableBuilder<Set<Marker>>(
-              valueListenable: _markersNotifier,
-              builder: (context, markers, child) {
-                return ValueListenableBuilder<Set<Polyline>>(
-                  valueListenable: _polylinesNotifier,
-                  builder: (context, polylines, child) {
-                    return GoogleMap(
-                      initialCameraPosition: const CameraPosition(target: LatLng(36.8065, 10.1815), zoom: 11.0),
-                      mapType: MapType.normal,
-                      onMapCreated: (GoogleMapController controller) {
-                        
-                        if (!_mapController.isCompleted) {
-                          _mapController.complete(controller);
-                          _updateMapElements();
-                        }
-                      },                      
-                      markers: markers,
-                      polylines: polylines,
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      compassEnabled: true,
-                      zoomControlsEnabled: false,
-                    );
-                  },
-                );
-              },
-            ),
-            if (_isWaitingForSet) const Center(child: RotatingDotsIndicator()),
-          ],
-        ),
-      ),
-      bottomSheet: _buildDraggableSheet(),
-    );
-  }
-
-Widget _buildDropOffFieldSliver({
-    required BuildContext context,
-    required TextEditingController controller,
-    required int index,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final primaryColor = colorScheme.primary;
-
-    return ReorderableDragStartListener(
-      index: index,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Poignée visuelle
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                child: Icon(Icons.drag_indicator, color: colorScheme.outline.withOpacity(0.5)),
-              ),
-              _buildDotsAndLines(index, _dropOffControllersNotifier.value.length, primaryColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  readOnly: true,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _openSearch('dropoff', index: index);
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.destinationWithNumber('${index + 1}'),
-                    prefixIcon: Icon(Icons.location_on_outlined, color: primaryColor, size: 24),
-                    border: InputBorder.none, // Suppression des bordures internes pour alléger le rendu
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
-                ),
-              ),
-              // Boutons d'action
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.close, color: colorScheme.onSurface.withOpacity(0.6), size: 20),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      _removeDropOffField(index);
-                    },
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-
-Widget _buildDraggableSheet() {
-  final l10n = AppLocalizations.of(context);
-  if (l10n == null) return const SizedBox.shrink();
-
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  final primaryColor = colorScheme.primary;
-
-  // Condition: Continue button is valid only if pickup is set AND at least one valid drop-off exists
-  final bool canContinue = _pickupAddress != null &&
-      _dropOffData.any((d) => d.destination.latitude != 0 && d.destination.longitude != 0);
-
-  return AnimatedBuilder(
-    animation: _dropOffControllersNotifier,
-    builder: (context, child) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final double screenHeight = constraints.maxHeight;
-
-          // Fixed heights
-          const double headerPixels = 70.0; // Handle + title + small margins
-          const double pickupCardPixels = 110.0; // Approx height of pickup card + spacing
-          const double destinationTitlePixels = 40.0; // "Destination" label + spacing
-
-          // Footer when button is shown
-          const double footerVisiblePixels = 48.0 + 10.0 + 16.0; // button 48 + padding top 10 + bottom 16
-
-          // Footer when button is hidden (minimal safe area margin)
-          const double footerHiddenPixels = 20.0;
-
-          // Choose footer height based on button visibility
-          final double footerPixels = canContinue ? footerVisiblePixels : footerHiddenPixels;
-
-          // Base content height (always present)
-          double baseContentPixels = headerPixels + pickupCardPixels + destinationTitlePixels;
-
-          // Add approximate height for drop-off fields (only if any exist)
-          // Each drop-off field ≈ 64px (including margins)
-          if (_dropOffControllersNotifier.value.isNotEmpty) {
-            baseContentPixels += _dropOffControllersNotifier.value.length * 72.0;
-            baseContentPixels += 40.0; // Add destination button space if present
-          }
-
-          // Final min height calculation
-          final double totalMinPixels = baseContentPixels + footerPixels + 20; // +20 safety
-          final double minChildSize = (totalMinPixels / screenHeight).clamp(0.15, 0.5);
-
-          return DraggableScrollableSheet(
-            key: _bottomSheetKey,
-            initialChildSize: canContinue ? 0.55 : minChildSize + 0.05, // Slightly larger than min when small
-            minChildSize: minChildSize,
-            maxChildSize: 0.88,
-            expand: false,
-            snap: true,
-            snapSizes: [minChildSize, 0.88],
-            builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.2),
-                      blurRadius: 20,
-                      offset: const Offset(0, -10),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Scrollable content
-                    CustomScrollView(
-                      controller: scrollController,
-                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                      slivers: [
-                        // Handle
-                        SliverToBoxAdapter(
-                          child: Center(
-                            child: Container(
-                              width: 48,
-                              height: 4,
-                              margin: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: primaryColor.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Title + Pickup
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.whereDoYouWantToGo,
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    color: colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                _buildLocationCard(
-                                  context: context,
-                                  title: l10n.pickup,
-                                  icon: Icons.my_location_rounded,
-                                  controller: _pickupController,
-                                  hintText: l10n.pickupLocation,
-                                  onTap: () => _openSearch('pickup'),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  l10n.destination,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurface.withOpacity(0.6),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Drop-off fields
-                        ValueListenableBuilder<List<TextEditingController>>(
-                          valueListenable: _dropOffControllersNotifier,
-                          builder: (context, controllers, child) {
-                            return SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  return _buildDropOffFieldSliver(
-                                    context: context,
-                                    controller: controllers[index],
-                                    index: index,
-                                  );
-                                },
-                                childCount: controllers.length,
-                              ),
-                            );
-                          },
-                        ),
-
-                        // Add destination button
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: _dropOffControllersNotifier.value.length < _maxDropOffs
-                                ? _buildAddDestinationButton(context)
-                                : const SizedBox(height: 20),
-                          ),
-                        ),
-
-                        // Bottom padding to avoid overlap with footer
-                        SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: footerPixels + MediaQuery.of(context).viewInsets.bottom,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Fixed Continue button — only shown when valid
-                    if (canContinue)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            border: Border(top: BorderSide(color: colorScheme.outline.withOpacity(0.05))),
-                          ),
-                          child: SafeArea(
-                            top: false,
-                            child: _buildContinueButton(context, isActive: true),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    },
-  );
-}
-
-// --- BOUTON CONTINUER RÉDUIT ---
+ 
+ 
   Widget _buildContinueButton(BuildContext context, {required bool isActive}) {
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
@@ -811,192 +511,420 @@ Widget _buildDraggableSheet() {
     final colorScheme = theme.colorScheme;
     final primaryColor = colorScheme.primary;
 
-    return SizedBox(
-      width: double.infinity,
-      height: 48, // Hauteur réduite (avant c'était 60 ou plus)
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 1.0, end: _isWaitingForSet ? 0.95 : 1.0),
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        builder: (context, scale, child) {
-          return Transform.scale(
-            scale: scale,
-            child: ElevatedButton(
-              onPressed: _isWaitingForSet || !isActive
-                  ? isActive ? (){} : null
-                  : () {
-                      HapticFeedback.mediumImpact();
-                      _navigateToVehicleSelection();
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isActive ? primaryColor : colorScheme.onSurface.withOpacity(0.12),
-                foregroundColor: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
-                // Padding interne réduit
-                padding: const EdgeInsets.symmetric(vertical: 0), 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16), // Rayon un peu plus petit pour matcher la taille
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: SizedBox(
+        height: 48, // Hauteur réduite (avant c'était 60 ou plus)
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 1.0, end: _isWaitingForSet ? 0.95 : 1.0),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          builder: (context, scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: ElevatedButton(
+                onPressed: _isWaitingForSet || !isActive
+                    ? isActive ? (){} : null
+                    : () {
+                        HapticFeedback.mediumImpact();
+                        _navigateToVehicleSelection();
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isActive ? primaryColor : colorScheme.onSurface.withOpacity(0.12),
+                  foregroundColor: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
+                  // Padding interne réduit
+                  padding: const EdgeInsets.symmetric(vertical: 0), 
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16), // Rayon un peu plus petit pour matcher la taille
+                  ),
+                  elevation: isActive ? 4 : 0, // Élévation réduite
+                  shadowColor: primaryColor.withOpacity(0.4),
                 ),
-                elevation: isActive ? 4 : 0, // Élévation réduite
-                shadowColor: primaryColor.withOpacity(0.4),
-              ),
-              child: _isWaitingForSet
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: RotatingDotsIndicator(), // Assurez-vous que votre indicateur s'adapte à 20px
-                    )
-                  : Text(
-                      l10n.continueText,
-                      style: TextStyle(
-                        fontSize: 16, // Police légèrement réduite pour l'équilibre
-                        fontWeight: FontWeight.w600,
-                        color: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
+                child: _isWaitingForSet
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: RotatingDotsIndicator(), // Assurez-vous que votre indicateur s'adapte à 20px
+                      )
+                    : Text(
+                        l10n.continueText,
+                        style: TextStyle(
+                          fontSize: 16, // Police légèrement réduite pour l'équilibre
+                          fontWeight: FontWeight.w600,
+                          color: isActive ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.38),
+                        ),
                       ),
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-  
-  
-   Widget _buildLocationCard({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required TextEditingController controller,
-    required String hintText,
-    required VoidCallback onTap,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest, // Remplaçant de surfaceVariant dans M3
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: _isRtl(l10n.localeName) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface.withOpacity(0.6),
-            ),
-            textAlign: _isRtl(l10n.localeName) ? TextAlign.end : TextAlign.start,
-          ),
-          const SizedBox(height: 8),
-          _buildTextField(
-            context: context,
-            controller: controller,
-            hintText: hintText,
-            icon: icon,
-            onTap: onTap,
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _buildTextField({
-    required BuildContext context,
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return TextField(
-      controller: controller,
-      readOnly: true,
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      decoration: InputDecoration(
-        hintText: hintText,
-        prefixIcon: Icon(icon, color: colorScheme.primary, size: 24),
-        filled: true,
-        fillColor: colorScheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+              ),
+            );
+          },
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       ),
-      style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
-      textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
     );
   }
 
- 
-  Widget _buildDotsAndLines(int index, int total, Color primaryColor) {
+  void _addDropOff() {
+    if (_dropOffControllersNotifier.value.length >= _maxDropOffs) return;
+
+    setState(() {
+      _dropOffControllersNotifier.value.add(TextEditingController());
+      _dropOffData.add(DropOffData(destination: const lt.LatLng(0, 0), destinationName: ''));
+    });
+    _dropOffControllersNotifier.value = List.from(_dropOffControllersNotifier.value);
+  }
+
+  void _removeDropOff(int index) {
+    if (_dropOffControllersNotifier.value.length <= 1) return;
+
+    setState(() {
+      _dropOffControllersNotifier.value[index].dispose();
+      _dropOffControllersNotifier.value.removeAt(index);
+      if (index < _dropOffData.length) {
+        _dropOffData.removeAt(index);
+      }
+      _needsBoundsUpdate = true;
+    });
+    _dropOffControllersNotifier.value = List.from(_dropOffControllersNotifier.value);
+    _updateMapElements(forceBoundsUpdate: true);
+  }
+  // ==================== UI ====================
+
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) return const Scaffold(body: Center(child: Text('Localization not available')));
+
+  super.build(context);
+
+  return Scaffold(
+    body: Directionality(
+      textDirection: _isRtl(l10n.localeName) ? TextDirection.rtl : TextDirection.ltr,
+      child: Stack(
+        children: [
+          // The full-screen Google Map
+          ValueListenableBuilder<Set<Marker>>(
+            valueListenable: _markersNotifier,
+            builder: (context, markers, child) {
+              return ValueListenableBuilder<Set<Polyline>>(
+                valueListenable: _polylinesNotifier,
+                builder: (context, polylines, child) {
+                  return GoogleMap(
+                    initialCameraPosition: const CameraPosition(target: LatLng(36.8065, 10.1815), zoom: 11.0),
+                    mapType: MapType.normal,
+                    
+                    onMapCreated: (GoogleMapController controller) {
+                      if (!_mapController.isCompleted) {
+                        // _applyMapStyle(controller, context);
+                        _mapController.complete(controller);
+                        _updateMapElements();
+                        controller.setMapStyle(mapStyleNotifier.value);
+                      }
+                    },
+                    markers: markers,
+                    polylines: polylines,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    compassEnabled: true,
+                    zoomControlsEnabled: false,
+                  );
+                },
+              );
+            },
+          ),
+
+          // Loading indicator overlay
+          if (_isWaitingForSet) const Center(child: RotatingDotsIndicator()),
+
+          // Draggable bottom sheet overlay
+          _buildDraggableSheet(),  // Move your entire _buildDraggableSheet() here
+        ],
+      ),
+    ),
+  );
+}
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+
+  // If the map is already created, update the style when theme changes
+  if (_mapController.isCompleted) {
+    _mapController.future.then((controller) {
+      _applyMapStyle(controller, context);
+    });
+  }
+}
+void _applyMapStyle(GoogleMapController controller, BuildContext context) {
+  final brightness = Theme.of(context).brightness;
+  final style = brightness == Brightness.dark ? darkMapStyle : lightMapStyle;
+  
+  controller.setMapStyle(style).catchError((e) {
+    // Silently handle if style is invalid (optional)
+    print('Map style error: $e');
+  });
+}
+  Widget _buildDraggableSheet() {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final dropOffCount = _dropOffControllersNotifier.value.length;
+    final canContinue = _pickupAddress != null &&
+        _dropOffData.any((d) => d.destination.latitude != 0 && d.destination.longitude != 0);
+
+    return AnimatedBuilder(
+      animation: _dropOffControllersNotifier,
+      builder: (_, __) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final screenHeight = constraints.maxHeight;
+
+            const handleH = 20.0;
+            const titleH = 50.0;
+            const slotH = 58.0;
+            const addBtnH = 40.0;
+            const footerH = 80.0;
+
+            double contentH = handleH +
+                titleH +
+                slotH * (1 + dropOffCount) +
+                (dropOffCount < _maxDropOffs ? addBtnH : 10) +
+                40;
+
+            if (canContinue) contentH += footerH;
+
+            final minSize = (contentH / screenHeight).clamp(0.25, 0.55);
+            final initialSize = canContinue ? 0.45 : minSize;
+
+            return DraggableScrollableSheet(
+              key: _bottomSheetKey,
+              initialChildSize: initialSize,
+              minChildSize: 0.25,
+              maxChildSize: 0.85,
+              snap: true,
+              snapSizes: [0.25, minSize, 0.85],
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 15,
+                          offset: const Offset(0, -5)),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      CustomScrollView(
+                        controller: scrollController,
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Container(
+                                width: 36,
+                                height: 4,
+                                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              child: Text(
+                                l10n.whereDoYouWantToGo,
+                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildTimelineVisuals(dropOffCount, colors),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          _buildThinInput(
+                                            title: l10n.pickupLocation,
+                                            controller: _pickupController,
+                                            onTap: () => _openSearch('pickup'),
+                                            isPickup: true,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          ...List.generate(dropOffCount, (i) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(bottom: 12),
+                                              child: _buildThinInput(
+                                                title: l10n.destination,
+                                                controller: _dropOffControllersNotifier.value[i],
+                                                onTap: () => _openSearch('dropoff', index: i),
+                                                onRemove: () => _removeDropOff(i),
+                                                showRemove: true,
+                                              ),
+                                            );
+                                          }),
+                                          if (dropOffCount < _maxDropOffs)
+                                            GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                _addDropOff();
+                                              },
+                                              child: Container(
+                                                height: 36,
+                                                alignment: Alignment.centerLeft,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                decoration: BoxDecoration(
+                                                  color: colors.surfaceContainerHighest.withOpacity(0.3),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.add_rounded,
+                                                        size: 18, color: colors.primary),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      l10n.addDestination,
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: colors.primary,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(height: 100),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                        if(canContinue)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child:_buildContinueButton(context, isActive: canContinue)),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTimelineVisuals(int dropOffCount, ColorScheme colors) {
     return Column(
       children: [
-        if (index == 0)
-          Icon(Icons.circle, size: 12, color: primaryColor)
-        else
-          Icon(Icons.circle, size: 12, color: primaryColor),
-        if (index < total - 1)
-          Container(
-            height: 32,
-            width: 2,
-            color: primaryColor.withOpacity(0.5),
+        // Pickup dot
+        SizedBox(
+          height: 46,
+          child: Center(
+            child: Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle),
+            ),
           ),
+        ),
+        // Connecting line
+        Expanded(
+          child: Container(
+            width: 2,
+            color: colors.outlineVariant.withOpacity(0.5),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+          ),
+        ),
+        // Drop-off squares
+        ...List.generate(dropOffCount, (i) {
+          return Column(
+            children: [
+              SizedBox(
+                height: 46,
+                child: Center(
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(color: colors.primary, shape: BoxShape.rectangle),
+                  ),
+                ),
+              ),
+              if (i < dropOffCount - 1) const SizedBox(height: 12),
+            ],
+          );
+        }),
+        if (dropOffCount < _maxDropOffs) const SizedBox(height: 40),
       ],
     );
   }
 
-  Widget _buildAddDestinationButton(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const SizedBox.shrink();
+  Widget _buildThinInput({
+    required String title,
+    required TextEditingController controller,
+    required VoidCallback onTap,
+    bool isPickup = false,
+    bool showRemove = false,
+    VoidCallback? onRemove,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    final isEmpty = controller.text.isEmpty;
 
-    final primaryColor = Theme.of(context).colorScheme.primary;
-
-    return Align(
-      alignment: _isRtl(l10n.localeName) ? Alignment.centerRight : Alignment.centerLeft,
-      child: TextButton.icon(
-        onPressed: () {
-          HapticFeedback.lightImpact();
-          _addDropOffField();
-        },
-        icon: Icon(Icons.add_location_alt_rounded, color: primaryColor),
-        label: Text(
-          l10n.addDestination,
-          style: TextStyle(
-            color: primaryColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 46,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.outline.withOpacity(0.1)),
         ),
-        style: TextButton.styleFrom(
-          foregroundColor: primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                isEmpty ? title : controller.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isEmpty ? FontWeight.w400 : FontWeight.w600,
+                  color: isEmpty ? colors.onSurfaceVariant : colors.onSurface,
+                ),
+              ),
+            ),
+            if (showRemove)
+              GestureDetector(
+                onTap: onRemove,
+                child: Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: colors.surfaceDim),
+                  child: Icon(Icons.delete, size: 20, color: colors.error),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
-
 }

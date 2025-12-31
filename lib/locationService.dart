@@ -12,6 +12,8 @@ import 'package:shnell/location_utils.dart'; // Ensure this contains the updated
 import 'package:shnell/googlePlaces.dart'; // Ensure this model exists
 import 'dart:ui' show TextDirection;
 
+import 'package:shnell/main.dart';
+
 class SearchLocationScreen extends StatefulWidget {
   final String hintText;
   final bool isPickup; 
@@ -33,6 +35,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   bool _isLoading = false;
   String? _errorMessage;
   Timer? _debounce;
+
   
   static const String _hereApiKey = "b2zG0dap6jOlqXTOvF2HWrHRq-QFvkcoGjogNxUr-EE"; 
   static const String _googleApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w"; 
@@ -57,9 +60,16 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    mapStyleNotifier.addListener(_updateMapStyle);
     _initAnimations();
   }
-
+void _updateMapStyle() {
+  if (_mapController.isCompleted) {
+    _mapController.future.then((controller) {
+      controller.setMapStyle(mapStyleNotifier.value);
+    });
+  }
+}
   void _initAnimations() {
     _pinDropController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
     _pinDropAnimation = Tween<double>(begin: -100.0, end: 0.0).animate(CurvedAnimation(parent: _pinDropController, curve: Curves.bounceOut));
@@ -84,6 +94,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
     _pinDropController.dispose();
     _pulseController.dispose();
     _selectController.dispose();
+    mapStyleNotifier.removeListener(_updateMapStyle); // ← Clean up listener
     super.dispose();
   }
 
@@ -523,6 +534,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
           onMapCreated: (GoogleMapController controller) {
             if (!_mapController.isCompleted) {
               _mapController.complete(controller);
+              controller.setMapStyle(mapStyleNotifier.value); // ← This is FREE
             }
           },
           onCameraMove: _onMapCameraMove, 

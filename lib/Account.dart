@@ -9,7 +9,6 @@ import 'package:shnell/AuthHandler.dart';
 import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/drawer.dart';
-import 'package:shnell/splashScreen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -28,7 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await AuthMethods().logout();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const SignInScreen()),
+      MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()),
       (_) => false,
     );
   }
@@ -160,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           
-          if (_isProcessing) const Waiting(),
+          if (_isProcessing) const RotatingDotsIndicator(),
         ],
       ),
     );

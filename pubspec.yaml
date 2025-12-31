@@ -65,6 +65,11 @@ dependencies:
   maps_launcher: ^3.0.0+1
   webview_flutter: ^4.13.0
   shared_preferences: ^2.5.3
+  intl_phone_number_input: ^0.7.4
+  pin_code_fields: ^8.0.1
+  mailer: ^6.1.0
+  
+
   
 
 dev_dependencies:

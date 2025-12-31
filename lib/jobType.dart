@@ -31,7 +31,6 @@ class ServiceTypeUiModel {
       title: map['title'] ?? '',
       subtitle: map['subtitle'] ?? '',
       iconAsset: map['icon_asset'] ?? 'assets/box.png',
-      // Parse multiplier (default to 1.0 if missing)
       priceMultiplier: (map['price_multiplier'] ?? 1.0).toDouble(),
       allowedVehicles: List<String>.from(map['allowed_vehicles'] ?? []),
     );
@@ -86,6 +85,8 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
             });
           }
         }
+      } else {
+        if(mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint("Error fetching service types: $e");
@@ -104,18 +105,11 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
       context,
       MaterialPageRoute(
         builder: (context) => VehicleSelectionScreen(
-          // --- PASS DATA FORWARD ---
           pickup: widget.pickup,
           dropOffDestination: widget.dropOffDestination,
           pickup_name: widget.pickupName,
-          
-          // 1. Filter vehicles based on service type
           filterVehicleIds: selectedService.allowedVehicles,
-          
-          // 2. Pass ID for tracking
           serviceTypeId: selectedService.id,
-          
-          // 3. Pass Multiplier for pricing calculation
           priceMultiplier: selectedService.priceMultiplier, 
         ),
       ),
@@ -123,7 +117,6 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
   }
 
   // --- LOCALIZATION HELPERS ---
-  // Maps DB IDs to ARB Keys
   String _getLocalizedTitle(String id, AppLocalizations l10n, String fallback) {
     switch (id) {
       case 'simple_transport': return l10n.st_simple_transport_title;
@@ -144,313 +137,304 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final l10n = AppLocalizations.of(context)!;
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
-  if (_isLoading) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: const Center(child: RotatingDotsIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      body: const Center(child: RotatingDotsIndicator()),
-    );
-  }
-
-  return Scaffold(
-    backgroundColor: colorScheme.surface,
-    body: SafeArea(
-      child: Column(
-        children: [
-          // === Enhanced Header ===
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 24, 8),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    l10n.serviceTypeTitle,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // === HEADER ===
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 24, 8),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              l10n.serviceTypeSubtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // === Service Type Cards ===
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: _serviceTypes.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final type = _serviceTypes[index];
-                final isSelected = _selectedTypeId == type.id;
-
-                return _buildServiceCard(type, isSelected, colorScheme, l10n);
-              },
-            ),
-          ),
-
-          // === Bottom Continue Button ===
-          _buildBottomBar(colorScheme, l10n),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildServiceCard(
-  ServiceTypeUiModel data,
-  bool isSelected,
-  ColorScheme colorScheme,
-  AppLocalizations l10n,
-) {
-  final title = _getLocalizedTitle(data.id, l10n, data.title);
-  final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
-  return GestureDetector(
-    onTap: () {
-      HapticFeedback.lightImpact();
-      setState(() => _selectedTypeId = data.id);
-    },
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-      decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.primaryContainer.withOpacity(0.35)
-            : colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isSelected ? colorScheme.primary : colorScheme.outline.withOpacity(0.15),
-          width: isSelected ? 2.5 : 1,
-        ),
-        boxShadow: isSelected
-            ? [
-                BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // === 1. MAIN SERVICE IMAGE ===
-              ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  color: isSelected
-                      ? colorScheme.primary.withOpacity(0.18)
-                      : colorScheme.primaryContainer.withOpacity(0.35),
-                  child: Image.asset(
-                    data.iconAsset,
-                    fit: BoxFit.cover,
-                    width: 72,
-                    height: 72,
-                    // Subtle tint blending for cohesion
-                    color: isSelected ? colorScheme.primary.withOpacity(0.25) : null,
-                    colorBlendMode: isSelected ? BlendMode.srcATop : null,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // === 2. TITLE & SUBTITLE ===
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          l10n.serviceTypeTitle,
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
                             color: colorScheme.onSurface,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          l10n.serviceTypeSubtitle,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.4,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              const SizedBox(width: 8),
+            const SizedBox(height: 16),
 
-              // === 3. SELECTION CHECKMARK ===
-              AnimatedScale(
-                scale: isSelected ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  color: colorScheme.primary,
-                  size: 28,
-                ),
+            // === LIST ===
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                itemCount: _serviceTypes.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final type = _serviceTypes[index];
+                  final isSelected = _selectedTypeId == type.id;
+                  return _buildServiceCard(type, isSelected, colorScheme, l10n);
+                },
               ),
-            ],
+            ),
+
+            // === BOTTOM BAR ===
+            _buildBottomBar(colorScheme, l10n),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceCard(
+    ServiceTypeUiModel data,
+    bool isSelected,
+    ColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
+    final title = _getLocalizedTitle(data.id, l10n, data.title);
+    final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
+    final detailIcons = _getDetailIcons(data.id);
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        setState(() => _selectedTypeId = data.id);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          // Logic: Subtle background change, clear border
+          color: isSelected
+              ? colorScheme.primaryContainer.withOpacity(0.3)
+              : colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : Colors.transparent,
+            width: 2,
           ),
-
-          const SizedBox(height: 16),
-
-          // === 4. BOTTOM ROW: PRICE & PREMIUM ASSETS ===
-          Row(
-            children: [
-              // -- Avg Price Pill -
-
-              // -- 3 Premium Detail Icons --
-              ..._getDetailIcons(data.id).map((assetPath) => Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Image.asset(
-                  assetPath,
-                  width: 20,
-                  height: 20,
-                  // Optional: Tint them to match text color for a clean look, 
-                  // or remove 'color' to keep original icon colors.
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Icon Container
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(                    borderRadius: BorderRadius.circular(16),
+                    // Removed shadow as requested
+                    border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
+                  ),
+                  child: Image.asset(
+                    data.iconAsset,
+                    fit: BoxFit.fill,
+                    // REMOVED: color/colorBlendMode to keep original asset colors
+                  ),
                 ),
-              )),
-            ],
-          )
+
+                const SizedBox(width: 16),
+
+                // 2. Text Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          // Selection Indicator
+                          AnimatedScale(
+                            scale: isSelected ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(Icons.check_circle, color: colorScheme.primary, size: 24),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // 3. "Suitable For" Section
+            if (detailIcons.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Divider(color: colorScheme.outlineVariant.withOpacity(0.3), height: 1),
+              ),
+              Row(
+                children: [
+                  Text(
+                    l10n.bestValueTag, // Fallback
+                    style: TextStyle(
+                      fontSize: 11, 
+                      color: colorScheme.primary, 
+                      fontWeight: FontWeight.w600
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: detailIcons.map((asset) => Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.2)),
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: Image.asset(
+                              asset,
+                              fit: BoxFit.fill,
+                              // Ensure no tint is applied here either
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  )
+                ],
+              )
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
+  // === ASSET MAPPING (Fixed Paths) ===
+  List<String> _getDetailIcons(String serviceId) {
+    switch (serviceId) {
+      case 'simple_transport': 
+        return [
+          'assets/icons/shopping-bag.png',   
+          'assets/icons/bicycle.png',      
+        ];
+      case 'store_pickup':
+        return [
+          'assets/icons/smart-tv.png',       
+          'assets/icons/oven.png',
+          'assets/icons/vegetables.png',           
+        ];
+      case 'small_move': 
+        return [
+          'assets/icons/fridge.png',          
+          'assets/icons/laundry-machine.png', 
+          'assets/icons/seater-sofa.png',  
+          'assets/icons/double-bed.png',   
+        ];
+      case 'full_move': 
+        return [
+          'assets/icons/moving-home.png',     
+          'assets/icons/office.png',          
+          'assets/icons/furniture.png',           
+          'assets/icons/treadmill.png',   
+        ];
+      default:
+        return [];
+    }
+  }
+
+  Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
+    final bool isEnabled = _selectedTypeId != null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 34),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -8),
+          ),
         ],
       ),
-    ),
-  );
-}
-
-// === HELPER: MAPPING IDs TO ASSETS ===
-// This keeps your build method clean.
-List<String> _getDetailIcons(String serviceId) {
-  switch (serviceId) {
-    case 'simple_transport': // Small / Express / Store Pickup
-    case 'store_pickup':
-      return [
-        'assets/icons/smart-tv.png',       // Electronics (Fragile)
-        'assets/icons/vegetables.png', // Legumes/Market (Heavy/Commercial)
-        'assets/icons/oven.png',           // Mouton/Aid (Cultural/Live Animal)
-        'assets/icons/shopping-bag.png',    // Fashion/Retail
-        'assets/icons/bicycle.png',         // Small Appliances
-      ];
-      
-    case 'small_move': // Medium (Household Heavy)
-      return [
-        'assets/icons/fridge.png',          // #1 Heavy Item
-        'assets/icons/laundry-machine.png', // Standard Appliance
-        'assets/icons/double-bed.png',      // Bulky Furniture
-        'assets/icons/seater-sofa.png',     // Long Furniture
-        'assets/icons/motorcycle.png',         // <--- SUGGESTION: Fits in a medium van, very common transport need!
-      ];
-      
-    case 'full_move': // Big (Spaces & Pro)
-      return [
-        'assets/icons/moving-home.png',     // Full House
-        'assets/icons/office.png',          // B2B / Desk moves
-        'assets/icons/furniture.png',           // Specialty / Heavy
-        'assets/icons/treadmill.png',   // Complex Assembly
-        'assets/icons/closet.png',            // Labor (3+ People)
-      ];
-      
-    default:
-      return [];
-  }
-}
-// === Helper Widget for the small icons ===
-
-
-
-Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
-  final bool isEnabled = _selectedTypeId != null;
-
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(24, 16, 24, 34),
-    decoration: BoxDecoration(
-      color: colorScheme.surface,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 20,
-          offset: const Offset(0, -8),
-        ),
-      ],
-    ),
-    child: SafeArea(
-      top: false,
-      child: SizedBox(
-        height: 56,
-        child: FilledButton.tonal(
-          onPressed: isEnabled ? _onContinue : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: isEnabled ? colorScheme.primary : colorScheme.surfaceContainerHighest,
-            foregroundColor: isEnabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            elevation: isEnabled ? 6 : 0,
-            shadowColor: isEnabled ? colorScheme.primary.withOpacity(0.4) : Colors.transparent,
-          ),
-          child: Text(
-            l10n.continueText,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 56,
+          // Reverted to FilledButton.tonal as requested
+          child: FilledButton.tonal(
+            onPressed: isEnabled ? _onContinue : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: isEnabled ? colorScheme.primary : colorScheme.surfaceContainerHighest,
+              foregroundColor: isEnabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              elevation: isEnabled ? 4 : 0,
+              shadowColor: isEnabled ? colorScheme.primary.withOpacity(0.4) : Colors.transparent,
+            ),
+            child: Text(
+              l10n.continueText,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

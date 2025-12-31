@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:http/http.dart' as http;
 import 'package:shnell/model/calls.dart';
 
@@ -14,19 +13,6 @@ class CallService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
-  Future<void> init() async {
-    await _requestPermissions();
-  }
-
-  Future<void> _requestPermissions() async {
-    await FlutterCallkitIncoming.requestNotificationPermission({
-      "title": "Notifications",
-      "rationaleMessagePermission": "Allow notifications for incoming calls",
-    });
-    if (await FlutterCallkitIncoming.canUseFullScreenIntent() == false) {
-      await FlutterCallkitIncoming.requestFullIntentPermission();
-    }
-  }
 
   Future<bool> makeCall({required Call call}) async {
     final user = FirebaseAuth.instance.currentUser;

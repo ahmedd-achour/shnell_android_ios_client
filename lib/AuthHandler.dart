@@ -7,18 +7,23 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/model/users.dart';
 
 class AuthMethods {
-   static FirebaseAuth _auth = FirebaseAuth.instance;
-  static FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Get Current User
   User? getCurrentUser() {
     return _auth.currentUser;
   }
-  void _requestPermissions()  {
-     Permission.location.request();
-     Permission.audio.request();
+
+  void _requestPermissions() {
+    Permission.location.request();
+    Permission.audio.request();
   }
-  // Sign Up with Email and Password
+
+  // --- SIGN UP (STRICT FLOW) ---
+  // 1. Create User
+  // 2. Write to Firestore immediately
+  // 3. Send Verification Email
   Future<String?> signUp({
     required String email,
     required String password,
@@ -28,13 +33,7 @@ class AuthMethods {
     try {
       // Validate inputs
       if (phone.isNotEmpty && !RegExp(r'^\+?[0-9]{7,15}$').hasMatch(phone) && phone.length != 8) {
-        return 'Invalid phone number format';
-      }
-
-      // Check if email already exists in Firestore
-      final existingEmail = await _firestore.collection('users').where('email', isEqualTo: email).get();
-      if (existingEmail.docs.isNotEmpty) {
-        return 'Email already registered';
+        return 'Format de téléphone invalide';
       }
 
       // Create user with email and password
@@ -43,53 +42,83 @@ class AuthMethods {
         password: password,
       );
 
-      if (userCredential.user != null) {
-        // Save user data to Firestore
-        final user = shnellUsers(
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Update Display Name
+        await user.updateDisplayName(name);
+
+        // Save user data to Firestore IMMEDIATELY
+        final shnellUser = shnellUsers(
           email: email,
           name: name,
           phone: phone.isEmpty ? '' : phone,
           role: 'user',
+          isActive: true, // Active, but needs verification to login
+          darkMode: false,
         );
-        await _firestore.collection('users').doc(userCredential.user!.uid).set(user.toJson());
-        debugPrint('User signed up and saved to Firestore: ${userCredential.user!.uid}');
-        return 'success';
+
+        // Using set(..., SetOptions(merge: true)) is safer
+        await _firestore.collection('users').doc(user.uid).set(
+              shnellUser.toJson(),
+              SetOptions(merge: true),
+            );
+        
+        // CRITICAL: Send Verification Email
+        await user.sendEmailVerification();
+
+        debugPrint('User signed up, saved, and verification sent: ${user.uid}');
+        return 'success'; 
       } else {
-        return 'Failed to create user';
+        return 'Échec de la création de l\'utilisateur';
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('Sign Up Error: ${e.message}');
       return _mapAuthError(e.code);
     } catch (e) {
       debugPrint('Sign Up General Error: $e');
-      return 'An unexpected error occurred: $e';
+      return 'Une erreur inattendue est survenue: $e';
     }
   }
 
-  // Sign In with Email and Password
+  // --- SIGN IN (STRICT FLOW) ---
+  // 1. Check Credentials
+  // 2. Check Email Verification
   Future<String?> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      // Sign in with email and password
+      // Attempt Sign In
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      if (userCredential.user != null) {
-        debugPrint('Sign-in successful for user: ${userCredential.user!.uid}');
+
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // CRITICAL: Check Verification Status
+        if (!user.emailVerified) {
+          // If not verified, we DO NOT request permissions or proceed.
+          // We sign them out immediately to prevent access.
+          await _auth.signOut();
+          return 'email-not-verified'; // Special code for UI to handle
+        }
+
+        // Success Path
+        debugPrint('Sign-in successful for verified user: ${user.uid}');
         _requestPermissions();
         return 'success';
       } else {
-        return 'Failed to sign in';
+        return 'Échec de la connexion';
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('Sign In Error: ${e.message}');
       return _mapAuthError(e.code);
     } catch (e) {
       debugPrint('Sign In General Error: $e');
-      return 'An unexpected error occurred: $e';
+      return 'Une erreur inattendue est survenue: $e';
     }
   }
 
@@ -104,12 +133,27 @@ class AuthMethods {
     }
   }
 
+  // Resend Verification Email (Helper)
+  Future<String?> resendVerificationEmail() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return 'success';
+      }
+      return 'User not found or already verified';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   // Get User Data
   Future<shnellUsers?> getUserData(String userId) async {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        return shnellUsers.fromJson(doc.data() as Map<String, dynamic>);
+        // Ensure your ShnellUser.fromJson handles the parsing correctly
+        return shnellUsers.fromJson(doc.data() as Map<String, dynamic> );
       } else {
         debugPrint('User not found in Firestore: $userId');
         return null;
@@ -120,102 +164,80 @@ class AuthMethods {
     }
   }
 
-  // Map Firebase Auth Errors to User-Friendly Messages
+  // Map Firebase Auth Errors to French Messages
   String _mapAuthError(String code) {
     switch (code) {
       case 'email-already-in-use':
-        return 'This email is already registered';
+        return 'Cet email est déjà enregistré';
       case 'invalid-email':
-        return 'Invalid email format';
+        return 'Format d\'email invalide';
       case 'weak-password':
-        return 'Password is too weak (minimum 6 characters)';
+        return 'Le mot de passe est trop faible (min 6 caractères)';
       case 'user-not-found':
-        return 'No user found with this email';
+        return 'Aucun utilisateur trouvé avec cet email';
       case 'wrong-password':
-        return 'Incorrect password';
+        return 'Mot de passe incorrect';
       case 'too-many-requests':
-        return 'Too many attempts. Please try again later';
+        return 'Trop de tentatives. Veuillez réessayer plus tard';
       case 'network-request-failed':
-        return 'Network error. Please check your connection';
+        return 'Erreur réseau. Vérifiez votre connexion';
       case 'user-disabled':
-        return 'This user account has been disabled';
+        return 'Ce compte utilisateur a été désactivé';
+      case 'credential-already-in-use':
+        return 'Ces identifiants sont déjà associés à un autre compte';
       default:
-        return 'Authentication error: $code';
+        return 'Erreur d\'authentification: $code';
     }
   }
 
-
-
-
-
-
-  /// Update name (direct Firestore update)
-  static Future<void> updateName(String name) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception("User not logged in");
-
-    await _firestore.collection("users").doc(uid).update({"name": name});
-  }
-
-  /// Send password reset email
-  static Future<void> sendPasswordResetEmail() async {
-    final email = _auth.currentUser?.email;
-    if (email == null) throw Exception("No email found for user");
-
-    await _auth.sendPasswordResetEmail(email: email);
-  }
-
   // -------------------------------
-  // 🔐 OTP HANDLING FOR EMAIL/PHONE
+  // 🔐 OTP HANDLING (Unchanged)
   // -------------------------------
   static final Map<String, _OtpData> _pendingOtps = {};
 
-  /// Request OTP for updating email
-static Future<void> updateEmailWithOtp(String newEmail) async {
-  final uid = _auth.currentUser?.uid;
-  if (uid == null) throw Exception("User not logged in");
-  final otp = _generateOtp();
-  _pendingOtps[uid] = _OtpData(
-    otp: otp,
-    expiry: DateTime.now().add(const Duration(seconds: 90)),
-    field: "email",
-    newValue: newEmail,
-  );
-  print("DEBUG OTP for email update: $otp");
-}
+  static Future<void> updateEmailWithOtp(String newEmail) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception("User not logged in");
+    final otp = _generateOtp();
+    _pendingOtps[uid] = _OtpData(
+      otp: otp,
+      expiry: DateTime.now().add(const Duration(seconds: 90)),
+      field: "email",
+      newValue: newEmail,
+    );
+    print("DEBUG OTP for email update: $otp");
+  }
 
-static Future<void> verifyOtpAndApply(String otp) async {
-  final uid = _auth.currentUser?.uid;
-  if (uid == null) throw Exception("User not logged in");
-  final data = _pendingOtps[uid];
-  if (data == null) throw Exception("No pending OTP request");
-  if (DateTime.now().isAfter(data.expiry)) {
+  static Future<void> verifyOtpAndApply(String otp) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception("User not logged in");
+    final data = _pendingOtps[uid];
+    if (data == null) throw Exception("No pending OTP request");
+    if (DateTime.now().isAfter(data.expiry)) {
+      _pendingOtps.remove(uid);
+      throw Exception("OTP expired");
+    }
+    if (otp != data.otp) throw Exception("Invalid OTP");
+    if (data.field == "email") {
+      await _auth.currentUser?.verifyBeforeUpdateEmail(data.newValue);
+      await _firestore.collection("users").doc(uid).update({"email": data.newValue});
+    }
     _pendingOtps.remove(uid);
-    throw Exception("OTP expired");
   }
-  if (otp != data.otp) throw Exception("Invalid OTP");
-  if (data.field == "email") {
-    await _auth.currentUser?.verifyBeforeUpdateEmail(data.newValue);
-    await _firestore.collection("users").doc(uid).update({"email": data.newValue});
-  }
-  _pendingOtps.remove(uid);
-}
-  /// Request OTP for updating phone
-static Future<void> updatePhoneWithOtp(String newPhone) async {
-  final uid = _auth.currentUser?.uid;
-  if (uid == null) throw Exception("User not logged in");
-  final otp = _generateOtp();
-  _pendingOtps[uid] = _OtpData(
-    otp: otp,
-    expiry: DateTime.now().add(const Duration(seconds: 90)),
-    field: "phone",
-    newValue: newPhone,
-  );
-  print("DEBUG OTP for phone update: $otp");
-}
 
-  // 🔧 Helpers
-  // -------------------------------
+  static Future<void> updatePhoneWithOtp(String newPhone) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception("User not logged in");
+    final otp = _generateOtp();
+    _pendingOtps[uid] = _OtpData(
+      otp: otp,
+      expiry: DateTime.now().add(const Duration(seconds: 90)),
+      field: "phone",
+      newValue: newPhone,
+    );
+    print("DEBUG OTP for phone update: $otp");
+  }
+
   static String _generateOtp() {
     final random = Random();
     return (100000 + random.nextInt(900000)).toString();
@@ -225,7 +247,7 @@ static Future<void> updatePhoneWithOtp(String newPhone) async {
 class _OtpData {
   final String otp;
   final DateTime expiry;
-  final String field; // "email" or "phone"
+  final String field; 
   final String newValue;
 
   _OtpData({
@@ -234,6 +256,4 @@ class _OtpData {
     required this.field,
     required this.newValue,
   });
-
-  
 }

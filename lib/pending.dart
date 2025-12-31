@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/model/destinationdata.dart';
-import 'package:shnell/dots.dart'; 
+// import 'package:shnell/dots.dart'; // Assuming this is your custom loading indicator used elsewhere
 
 class PendingOrderWidget extends StatefulWidget {
   final String orderId;
@@ -25,6 +26,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
   @override
   void initState() {
     super.initState();
+    // Slightly faster animation for better ripple effect over 3 seconds
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -41,7 +43,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     return (value * 100).floorToDouble() / 100;
   }
 
-  // --- FIRESTORE ACTIONS ---
+  // --- LOGIC ---
 
   Future<DocumentSnapshot> getStopById(String id) async {
     return await FirebaseFirestore.instance.collection("stops").doc(id).get();
@@ -50,30 +52,20 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
   Future<void> _cancelOrder() async {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: theme.colorScheme.error, size: 28),
-            const SizedBox(width: 8),
-            Text(l10n.cancelOrder, style: TextStyle(color: theme.colorScheme.onSurface)),
-          ],
-        ),
+        title: Text(l10n.cancelOrder),
         content: Text(l10n.cancelOrderMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.keepOrder, style: TextStyle(color: theme.colorScheme.primary)),
+            child: Text(l10n.keepOrder),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-              foregroundColor: theme.colorScheme.onError,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.yesCancel),
           ),
@@ -85,46 +77,36 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
 
     try {
       final orderDoc = await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).get();
-      if (orderDoc.exists && orderDoc.data() != null) {
+      if (orderDoc.exists) {
         final order = Orders.fromFirestore(orderDoc);
         for (final stopId in order.stops) {
           await FirebaseFirestore.instance.collection('stops').doc(stopId).delete();
         }
       }
       await FirebaseFirestore.instance.collection('orders').doc(widget.orderId).delete();
-      if(mounted) _showSnack(l10n.orderCanceledSuccess, false);
+      if (mounted) Navigator.of(context).pop(); // Go back after cancel
     } catch (e) {
-      if(mounted) _showSnack(l10n.orderCancelFailed(e.toString()), true);
+      debugPrint("Error canceling: $e");
     }
   }
 
-  void _showSnack(String msg, bool isError) {
-    final scheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg, style: TextStyle(color: isError ? scheme.onError : scheme.onPrimary)),
-      backgroundColor: isError ? scheme.error : scheme.primary,
-      behavior: SnackBarBehavior.floating,
-    ));
-  }
-
-  // --- UI BUILDING ---
+  // --- UI ---
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: cs.surface,
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('orders').doc(widget.orderId).snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: _buildHeaderStatus(l10n.connecting, colorScheme));
-          }
-          
           if (!snapshot.hasData || !snapshot.data!.exists) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
             return Center(child: Text(l10n.orderNotFound));
           }
 
@@ -132,49 +114,114 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
 
           return Stack(
             children: [
-              // 1. Radar Animation Background
+              // 1. TOP SECTION: THE RIPPLE ANIMATION (Prioritized Search)
               Positioned.fill(
-                child: _buildRadarBackground(colorScheme.primary),
-              ),
-
-              // 2. Center Vehicle Icon (Fancy Visual Hint)
-              Positioned(
-                top: MediaQuery.of(context).size.height * 0.25,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: _buildPulsingVehicle(order.vehicleType, colorScheme),
-                ),
-              ),
-              
-              // 3. Main Content
-              SafeArea(
                 child: Column(
                   children: [
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 20),
-                            _buildHeaderStatus(l10n.searchingForDrivers, colorScheme),
-                            const SizedBox(height: 180), // Space for the vehicle icon above
-
-                            // Price Card
-                            _buildPriceCard(order, l10n, colorScheme),
-                            const SizedBox(height: 16),
-                            
-                            // Route Card (Read Only)
-                            _buildRouteCard(order, l10n, colorScheme),
-                            const SizedBox(height: 100), 
-                          ],
-                        ),
+                      flex: 6, // 60% of screen for search animation
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // REPLACED RADAR WITH RIPPLE BACKGROUND
+                          _buildRippleBackground(cs.primary),
+                          _buildPulsingVehicle(order.vehicleType, cs),
+                          Positioned(
+                            top: MediaQuery.of(context).padding.top + 20,
+                            child: _buildStatusPill(l10n.searchingForDrivers, cs),
+                          ),
+                        ],
                       ),
                     ),
-                    
-                    // Bottom Action
-                    _buildBottomActions(l10n, colorScheme),
+                    const Expanded(flex: 4, child: SizedBox()), // Space holder for bottom sheet
                   ],
+                ),
+              ),
+
+              // 2. BOTTOM SECTION: COMPACT DETAILS
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Handle bar for visual cue
+                      Container(
+                        margin: const EdgeInsets.only(top: 12, bottom: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: cs.outlineVariant,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // A. Key Metrics (Price & Distance)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildMetric(
+                                    "${truncateTo2Decimals(order.price)} DT",
+                                    l10n.estimatedPrice,
+                                    cs.primary,
+                                    true,
+                                  ),
+                                  Container(width: 1, height: 40, color: cs.outlineVariant),
+                                  _buildMetric(
+                                    "${truncateTo2Decimals(order.distance)} km",
+                                    l10n.distance,
+                                    cs.onSurface,
+                                    false,
+                                  ),
+                                ],
+                              ),
+                              
+                              const SizedBox(height: 24),
+                              
+                              // B. Compact Timeline Route
+                              Text(l10n.details, style: TextStyle(color: cs.outline, fontSize: 12, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 12),
+                              _buildTimelineRoute(order, l10n, cs),
+                              
+                              const SizedBox(height: 30),
+                              
+                              // C. Cancel Button
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: _cancelOrder,
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: cs.error,
+                                    side: BorderSide(color: cs.error.withOpacity(0.5)),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                  child: Text(l10n.cancelSearch),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -184,219 +231,31 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     );
   }
 
-  // --- FANCY VEHICLE ICON ---
-  Widget _buildPulsingVehicle(String vehicleType, ColorScheme scheme) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            // Pulsing Ring
-            Container(
-              width: 100 + (20 * _animationController.value),
-              height: 100 + (20 * _animationController.value),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: scheme.primary.withOpacity(1 - _animationController.value),
-                  width: 2,
-                ),
-              ),
-            ),
-            // Background Circle
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: scheme.primary.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 5,
-                  )
-                ],
-              ),
-              padding: const EdgeInsets.all(15),
-              child: Image.asset(
-                'assets/$vehicleType.png', // Dynamic vehicle asset
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => 
-                  Icon(Icons.local_shipping, color: scheme.primary, size: 40),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // --- WIDGETS ---
 
-  Widget _buildRadarBackground(Color color) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return CustomPaint(
-          size: Size.infinite,
-          painter: _RadarPainter(_animationController.value, color),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeaderStatus(String text, ColorScheme scheme) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        RotatingDotsIndicator(),
-        const SizedBox(height: 16),
-        Text(
-          text,
-          style: TextStyle(
-            color: scheme.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceCard(Orders order, AppLocalizations l10n, ColorScheme scheme) {
-    return Card(
-      elevation: 0,
-      color: scheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.estimatedPrice,
-                  style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "${truncateTo2Decimals(order.price)} DT",
-                  style: TextStyle(fontSize: 32, color: scheme.primary, fontWeight: FontWeight.w900),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.route, size: 16, color: scheme.onSurface),
-                  const SizedBox(width: 4),
-                  Text(
-                    "${truncateTo2Decimals(order.distance)} km",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: scheme.onSurface),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
+  Widget _buildStatusPill(String text, ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: const Offset(0, 4))],
       ),
-    );
-  }
-
-  Widget _buildRouteCard(Orders order, AppLocalizations l10n, ColorScheme scheme) {
-    final stopIds = order.stops.where((id) => id.isNotEmpty).toList();
-
-    return Card(
-      elevation: 4,
-      shadowColor: Colors.black12,
-      color: scheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildLocationRow(
-              isStart: true,
-              icon: Icons.my_location,
-              title: l10n.pickupLocation,
-              address: order.namePickUp,
-              scheme: scheme,
-            ),
-            _buildConnectorLine(scheme),
-            FutureBuilder<List<Map<String, dynamic>>>(
-              future: Future.wait(stopIds.map((id) async {
-                final doc = await getStopById(id);
-                if (doc.exists) {
-                  final data = DropOffData.fromFirestore(doc);
-                  return {'id': id, 'data': data};
-                }
-                return null;
-              })).then((list) => list.whereType<Map<String, dynamic>>().toList()),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const LinearProgressIndicator();
-                final stops = snapshot.data!;
-                return Column(
-                  children: stops.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final dropOffData = entry.value['data'] as DropOffData;
-                    final isLast = index == stops.length - 1;
-                    return Column(
-                      children: [
-                        _buildLocationRow(
-                          isStart: false,
-                          icon: isLast ? Icons.flag_rounded : Icons.stop_circle_outlined,
-                          title: isLast ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
-                          address: dropOffData.destinationName,
-                          scheme: scheme,
-                        ),
-                        if (!isLast) _buildConnectorLine(scheme),
-                      ],
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLocationRow({
-    required bool isStart,
-    required IconData icon,
-    required String title,
-    required String address,
-    required ColorScheme scheme,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isStart ? scheme.primary : scheme.secondary, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(
-                  address, 
-                  style: TextStyle(fontSize: 16, color: scheme.onSurface, fontWeight: FontWeight.w600),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          SizedBox(
+            width: 14, 
+            height: 14, 
+            child: CircularProgressIndicator(strokeWidth: 2, color: cs.onPrimaryContainer)
+          ),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: TextStyle(
+              color: cs.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
           ),
         ],
@@ -404,75 +263,219 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
     );
   }
 
-  Widget _buildConnectorLine(ColorScheme scheme) {
-    return Container(
-      margin: const EdgeInsets.only(left: 11),
-      alignment: Alignment.centerLeft,
-      height: 24,
-      child: VerticalDivider(color: scheme.outlineVariant, thickness: 1.5, width: 1.5),
+  Widget _buildMetric(String value, String label, Color color, bool isBig) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: TextStyle(
+          fontSize: isBig ? 28 : 22, 
+          fontWeight: FontWeight.w800, 
+          color: color,
+          height: 1.0,
+        )),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
+      ],
     );
   }
 
-  Widget _buildBottomActions(AppLocalizations l10n, ColorScheme scheme) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: scheme.error, width: 1.5),
-              foregroundColor: scheme.error,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            onPressed: _cancelOrder,
-            icon: const Icon(Icons.close),
-            label: Text(l10n.cancelSearch, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
+  Widget _buildTimelineRoute(Orders order, AppLocalizations l10n, ColorScheme cs) {
+    final stopIds = order.stops.where((id) => id.isNotEmpty).toList();
+
+    return Column(
+      children: [
+        // Pickup
+        _buildTimelineTile(
+          isFirst: true,
+          isLast: false,
+          title: l10n.pickupLocation,
+          subtitle: order.namePickUp,
+          cs: cs,
         ),
+        // Stops (Future Builder)
+        FutureBuilder<List<DocumentSnapshot>>(
+          future: Future.wait(stopIds.map((id) => getStopById(id))),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2));
+            
+            final stops = snapshot.data!;
+            return Column(
+              children: stops.asMap().entries.map((entry) {
+                final index = entry.key;
+                final data = DropOffData.fromFirestore(entry.value);
+                final isLastItem = index == stops.length - 1;
+                
+                return _buildTimelineTile(
+                  isFirst: false,
+                  isLast: isLastItem,
+                  title: isLastItem ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
+                  subtitle: data.destinationName,
+                  cs: cs,
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimelineTile({
+    required bool isFirst,
+    required bool isLast,
+    required String title,
+    required String subtitle,
+    required ColorScheme cs,
+  }) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Timeline Line & Dot
+          SizedBox(
+            width: 24,
+            child: Column(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: isFirst ? cs.primary : (isLast ? cs.tertiary : cs.surface),
+                    border: Border.all(color: isFirst ? cs.primary : (isLast ? cs.tertiary : cs.outline), width: 2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: isFirst || isLast ? null : Center(child: Container(width: 4, height: 4, decoration: BoxDecoration(color: cs.outline, shape: BoxShape.circle))),
+                ),
+                if (!isLast) 
+                  Expanded(
+                    child: Container(
+                      width: 2, 
+                      color: cs.outlineVariant.withOpacity(0.5),
+                      margin: const EdgeInsets.symmetric(vertical: 2),
+                    )
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0), // Spacing between items
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle, 
+                    style: TextStyle(fontSize: 14, color: cs.onSurface, fontWeight: FontWeight.w500),
+                    maxLines: 1, 
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildPulsingVehicle(String vehicleType, ColorScheme scheme) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            // Vehicle Icon Background - subtly pulses with the ripples
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withOpacity(0.3 * (1-_animationController.value)),
+                    blurRadius: 25,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Image.asset(
+                'assets/$vehicleType.png',
+                fit: BoxFit.contain,
+                errorBuilder: (_,__,___) => Icon(Icons.local_shipping, color: scheme.primary, size: 40),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // NEW: RIPPLE PAINTER WIDGET
+  Widget _buildRippleBackground(Color color) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return CustomPaint(
+          size: Size.infinite,
+          painter: _RipplePainter(_animationController.value, color),
+        );
+      },
     );
   }
 }
 
-class _RadarPainter extends CustomPainter {
+// NEW: THE RIPPLE PAINTER CLASS
+class _RipplePainter extends CustomPainter {
   final double animationValue;
   final Color baseColor;
-  _RadarPainter(this.animationValue, this.baseColor);
+  
+  _RipplePainter(this.animationValue, this.baseColor);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height * 0.3); // Adjust center to match icon position
-    final maxRadius = size.width * 0.5;
+    final center = Offset(size.width / 2, size.height / 2);
+    // Calculate max radius to cover expanding area
+    final maxRadius = size.width * 0.8; 
 
-    final circlePaint = Paint()
-      ..color = baseColor.withOpacity(0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+    // Define how many ripples we want active at once
+    const int rippleCount = 3; 
+    // Stagger them evenly across the animation timeline (0.0 to 1.0)
+    const double stagger = 1.0 / rippleCount;
 
-    for (int i = 1; i <= 3; i++) {
-      canvas.drawCircle(center, maxRadius * (i / 3), circlePaint);
+    for (int i = 0; i < rippleCount; i++) {
+      // Calculate progress for this specific ripple
+      // The modulo % 1.0 ensures the progress loops back to 0 when it hits 1
+      final double progress = (animationValue + (i * stagger)) % 1.0;
+      
+      // Current size based on progress
+      final double currentRadius = maxRadius * progress;
+
+      // Opacity calculation:
+      // Starts at 0.25 opacity when small, fades down to 0.0 as it reaches maxRadius
+      final double opacity = (1.0 - progress) * 0.25;
+
+      // Line thickness calculation:
+      // Starts thick (5.0), gets thinner as it expands
+      final double strokeWidth = 5.0 * (1.0 - progress);
+
+      final paint = Paint()
+        ..color = baseColor.withOpacity(opacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth > 0 ? strokeWidth : 0.1; // ensure it doesn't crash
+
+      if (currentRadius > 0 && opacity > 0) {
+        canvas.drawCircle(center, currentRadius, paint);
+      }
     }
-
-    final sweepAngle = 2 * 3.14159 * animationValue;
-    final sweepPaint = Paint()
-      ..shader = SweepGradient(
-        colors: [Colors.transparent, baseColor.withOpacity(0.3)],
-        stops: const [0.75, 1.0],
-        startAngle: sweepAngle - (3.14159 / 2),
-        endAngle: sweepAngle + (3.14159 / 2),
-        transform: GradientRotation(sweepAngle) 
-      ).createShader(Rect.fromCircle(center: center, radius: maxRadius));
-
-    canvas.drawCircle(center, maxRadius, sweepPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _RipplePainter oldDelegate) => true;
 }

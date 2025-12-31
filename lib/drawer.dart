@@ -46,7 +46,7 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
     await AuthMethods().logout();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const SignInScreen()),
+      MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()),
       (_) => false,
     );
   }

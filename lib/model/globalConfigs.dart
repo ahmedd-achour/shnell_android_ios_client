@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shnell/VehiculeDetail.dart';
@@ -156,19 +155,5 @@ class GlobalConfig {
         "Service not available in your area yet.";
   }
 
-  double calculatePrice({
-    required String vehicleType,
-    required double distanceInKm,
-    required int numberOfStops,
-    double serviceMultiplier = 1.0,
-  }) {
-    final vehicle = vehicles[vehicleType];
-    if (vehicle == null) return 0.0;
 
-    double pricePerKm = distanceInKm < vehicle.shortDistThreshold
-        ? max(vehicle.shortDistMin, (1 - (distanceInKm / 1000)) * vehicle.shortDistMult)
-        : vehicle.longDistRate;
-
-    return (vehicle.basePrice + (distanceInKm * pricePerKm) + (numberOfStops * stopFee)) * serviceMultiplier;
-  }
 }

@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/calls/CallService.dart';
 import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/dots.dart';
+import 'package:shnell/main.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/ratingsScreen.dart';
@@ -45,7 +46,7 @@ class Deoaklna extends StatefulWidget {
 class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveClientMixin {
   // Configuration Constants
   static const Duration _fetchTimeout = Duration(seconds: 15);
-  static const String googleDirectionsApiKey = 'YOUR_GOOGLE_API_KEY_HERE'; 
+  static const String googleDirectionsApiKey = 'AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w'; 
 
   // State Variables
   final Completer<GoogleMapController> _mapController = Completer();
@@ -100,6 +101,8 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
     super.initState();
     _loadCustomMarkerIcons(); 
     _initializeScreen();
+          mapStyleNotifier.addListener(_updateMapStyle); 
+
   }
 
   @override
@@ -112,8 +115,17 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
     _circlesNotifier.dispose();
     _polylinesNotifier.dispose();
     _mapController.future.then((controller) => controller.dispose());
+            mapStyleNotifier.removeListener(_updateMapStyle); // ← Clean up listener
+
     super.dispose();
   }
+  void _updateMapStyle() {
+  if (_mapController.isCompleted) {
+    _mapController.future.then((controller) {
+      controller.setMapStyle(mapStyleNotifier.value);
+    });
+  }
+}
 
   // --- 1. ROUTING API ---
 
@@ -598,8 +610,8 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
 
   Future<void> _loadCustomMarkerIcons() async {
     try {
-      _driverIcon = await _loadCustomMarker('delivery_boy' , 64);
-      _pickupIcon = await _loadCustomMarker('custom' , 96);
+      _driverIcon = await _loadCustomMarker('delivery_boy' , 96);
+      _pickupIcon = await _loadCustomMarker('pin' , 64);
       _undeliveredStopIcon = await _loadCustomMarker('pin' , 64);
       _deliveredStopIcon = await _loadCustomMarker('check' , 64);
       setState(() {});
@@ -607,6 +619,7 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
       debugPrint("Asset error: $e");
     }
   }
+
 
   Future<BitmapDescriptor> _loadCustomMarker(String path , int width) async {
     final imageBytes = (await rootBundle.load('assets/$path.png')).buffer.asUint8List();
@@ -681,7 +694,8 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
           // 1. Google Map
           GoogleMap(
             initialCameraPosition: const CameraPosition(target: LatLng(36.8065, 10.1815), zoom: 10.0),
-            onMapCreated: (controller) => _mapController.complete(controller),
+            onMapCreated: (controller) { _mapController.complete(controller);                        controller.setMapStyle(mapStyleNotifier.value);
+},
             markers: _markersNotifier.value,
             circles: _circlesNotifier.value,
             polylines: _polylinesNotifier.value,
@@ -710,156 +724,149 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
             ),
 
           // 4. Driver Card with Localized ETA
-          if (_screenState == ScreenState.ready && widget.watcher)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.2),
-                        blurRadius: 24,
-                        offset: const Offset(0, -6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 32,
-                            backgroundColor: colorScheme.primaryContainer,
-                            child: Image.asset("assets/${_order?.vehicleType}.png"),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _driverName ?? loc.driverTitle,
-                                  style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSurface,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                
-                                // --- LOCALIZED ETA BADGE ---
-                                if (_dealStatus == DealStatus.accepted) ...[
-                                  // Phase: Picking up (Green)
-                                  Builder(builder: (context) {
-                                    String timeString = "--";
-                                    if (_etaSecondsRemaining != null) {
-                                      if (_etaSecondsRemaining! < 60) {
-                                        timeString = loc.lessThanOneMin;
-                                      } else {
-                                        final min = (_etaSecondsRemaining! / 60).ceil().toString();
-                                        timeString = loc.minutesShort(min);
-                                      }
-                                    }
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.shade100,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        loc.pickupIn(timeString), // "Pickup in 15 min"
-                                        style: textTheme.labelSmall?.copyWith(
-                                          color: Colors.green.shade800,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ] else ...[
-                                  // Phase: In Transit (Blue)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      loc.inTransit,
-                                      style: textTheme.labelSmall?.copyWith(
-                                        color: Colors.blue.shade800,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ]
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          if (_driverID != null)
-                            FloatingActionButton(
-                              onPressed: _isCallLoading ? (){} : _initiateInAppCall,
-                              backgroundColor: colorScheme.primary,
-                              foregroundColor: colorScheme.onPrimary,
-                              elevation: 6,
-                              child: _isCallLoading
-                                  ? const SizedBox(
-                                      width: 28,
-                                      height: 28,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 3,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : const Icon(Icons.call_rounded, size: 32),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _order?.price != null
-                                ? loc.totalPrice(_order!.price.toStringAsFixed(2))
-                                : loc.totalPriceEmpty,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          // Cancellation Fee (Only show in early stages)
-                          if (_dealStatus == DealStatus.accepted)
-                            Text(
-                              loc.cancellationFeeWarning(
-                                (_order?.price != null ? _order!.price * 0.10 : 0).toStringAsFixed(2)
-                              ),
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.error,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+     if (_screenState == ScreenState.ready && widget.watcher)
+  Positioned(
+    bottom: 0,
+    left: 0,
+    right: 0,
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          )
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- TOP DRAG HANDLE ---
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.outline.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-        ],
+            const SizedBox(height: 16),
+
+            // --- HEADER ROW: DRIVER INFO & CALL ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: colorScheme.surfaceVariant,
+                      child: Image.asset(
+                        "assets/${_order?.vehicleType}.png",
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _driverName ?? loc.driverTitle,
+                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        // Status Badge (Pickup vs Transit)
+                        if (_dealStatus == DealStatus.accepted)
+                          Builder(builder: (context) {
+                            String timeString = "--";
+                            if (_etaSecondsRemaining != null) {
+                              timeString = _etaSecondsRemaining! < 60 
+                                  ? loc.lessThanOneMin 
+                                  : loc.minutesShort((_etaSecondsRemaining! / 60).ceil().toString());
+                            }
+                            return Text(
+                              loc.pickupIn(timeString),
+                              style: TextStyle(fontSize: 12, color: Colors.green.shade700, fontWeight: FontWeight.w600),
+                            );
+                          })
+                        else
+                          Text(
+                            loc.inTransit,
+                            style: TextStyle(fontSize: 12, color: Colors.blue.shade700, fontWeight: FontWeight.w600),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Call Button matched to Driver Design
+                if (_driverID != null)
+                  IconButton.filled(
+                    onPressed: _isCallLoading ? null : _initiateInAppCall,
+                    icon: _isCallLoading
+                        ? const SizedBox(width: 18, height: 18, child: RotatingDotsIndicator())
+                        : const Icon(Icons.phone),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.green.shade100,
+                      foregroundColor: Colors.green.shade800,
+                    ),
+                  ),
+              ],
+            ),
+
+            const Divider(height: 32),
+
+            // --- FARE DETAILS (Matching fareRowCompact style) ---
+            _fareRowCompact(
+              icon: Icons.payments_outlined,
+              label: loc.priceLabel, // or tripFare
+              amount: _order?.price ?? 0,
+              colorScheme: colorScheme,
+            ),
+
+            if (_dealStatus == DealStatus.accepted)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: _fareRowCompact(
+                  icon: Icons.info_outline,
+                  label: loc.cancel,
+                  amount: (_order?.price ?? 0) * 0.1,
+                  colorScheme: colorScheme,
+                  isError: true,
+                ),
+              ),
+            // --- ACTION BUTTONS (Optional: Keep for consistent height or status) ---
+            if (_dealStatus != DealStatus.accepted)
+               Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceVariant.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colorScheme.outline.withOpacity(0.1)),
+                ),
+                child: Center(
+                  child: Text(
+                    loc.inTransit,
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  ),],
       ),
     );
   }
@@ -867,4 +874,28 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
 
 extension LatLngConverter on latlong.LatLng {
   LatLng toLatLng() => LatLng(latitude, longitude);
+}
+
+Widget _fareRowCompact({
+  required IconData icon,
+  required String label,
+  required double amount,
+  required ColorScheme colorScheme,
+  bool isError = false,
+}) {
+  return Row(
+    children: [
+      Icon(icon, size: 20, color: isError ? colorScheme.error : colorScheme.outline),
+      const SizedBox(width: 8),
+      Text(label, style: TextStyle(color: isError ? colorScheme.error : colorScheme.onSurface)),
+      const Spacer(),
+      Text(
+        amount.toStringAsFixed(2),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: isError ? colorScheme.error : colorScheme.onSurface,
+        ),
+      ),
+    ],
+  );
 }

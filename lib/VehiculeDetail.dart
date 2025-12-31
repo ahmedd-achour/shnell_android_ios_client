@@ -253,8 +253,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return null;
   }
 
-  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.9;
-  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.2;
+  double get _minAllowedPrice => _calculatedEstimatedPrice * 0.95;
+  double get _maxAllowedPrice => _calculatedEstimatedPrice * 1.08;
 
   void _validateOffer(String value) {
     // We update the state to trigger rebuild, 

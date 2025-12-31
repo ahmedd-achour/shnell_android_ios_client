@@ -7,6 +7,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:shnell/callMediaControle.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/mainUsers.dart' show MainUsersScreen;
 import 'package:shnell/model/calls.dart';
@@ -50,7 +51,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
 
 
   Future<void> _initializeCall() async {
-   /* if (widget.isCaller) {
+  /* if (widget.isCaller) {
       _ringtonePlayer.play(
         android: AndroidSounds.ringtone,
         ios: IosSounds.glass,
@@ -102,8 +103,10 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
   Future<void> _initializeAgora() async {
     _engine = createAgoraRtcEngine();
     await _engine.initialize(RtcEngineContext(appId: _appId));
+CallMediaController.instance.attachEngine(_engine);
 
     _engine.registerEventHandler(
+      
       RtcEngineEventHandler(
         onJoinChannelSuccess: (_, __) {
           if (!mounted) return;
@@ -167,17 +170,22 @@ class _VoiceCallScreenState extends State<VoiceCallScreen> with WidgetsBindingOb
     _ringtonePlayer.stop();
     _durationTimer?.cancel();
     _callStatusSubscription?.cancel();
+    await CallMediaController.instance.hardStopAudio();
+
 
     // Notify backend
       await _notifyTermination(reason);
-      await FirebaseFirestore.instance.collection('calls').doc(widget.call.agoraChannel).update({
-      'callStatus': reason,
-    });
+      
     // Leave Agora
     try {
       await _engine.leaveChannel();
       await _engine.release();
     } catch (_) {}
+    await CallMediaController.instance.hardStopAudio();
+
+    await FirebaseFirestore.instance.collection('calls').doc(widget.call.agoraChannel).update({
+      'callStatus': reason,
+    });
 
     // End CallKit
     try {

@@ -1,12 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shnell/Account.dart';
 import 'package:shnell/History.dart';
-import 'package:shnell/calls/VoiceCall.dart';
 import 'package:shnell/drawer.dart';
 import 'package:shnell/tabsControlerMultipleAsignements.dart';
-import 'package:shnell/model/calls.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MainUsersScreen extends StatelessWidget {
@@ -15,44 +11,15 @@ class MainUsersScreen extends StatelessWidget {
   const MainUsersScreen({super.key, this.initialIndex});
 
   @override
+
   Widget build(BuildContext context) {
-    final User? firebaseUser = FirebaseAuth.instance.currentUser;
+   
 
-    if (firebaseUser == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please log in')),
-      );
-    }
 
-    final String currentDriverId = firebaseUser.uid;
-
-    // Root reactive stream: listen only for CONNECTED calls
-  return StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance
-      .collection('calls')
-      .where('receiverId', isEqualTo: currentDriverId)
-      .where('callStatus', isEqualTo:  'connected')
-      .limit(1)
-      .snapshots(),
-  builder: (context, snapshot) {
-    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return _MainTabsContent(initialIndex: initialIndex ?? 0);
-    }
-
-    final call = Call.fromFirestore(snapshot.data!.docs.first);
-    final bool isCaller = call.callerId == currentDriverId;
-
-    if (call.callStatus == 'connected') {
-      // Both sides get the ongoing call screen
-      return VoiceCallScreen(call: call, isCaller: isCaller);
-    }
-        // Otherwise → normal driver interface
-        return _MainTabsContent(initialIndex: initialIndex ?? 0);
-      },
-    );
-  }
+  // Otherwise → normal driver interface
+        return _MainTabsContent(initialIndex: initialIndex ?? 0);         
+      }
 }
-
 // Separate widget for the main tab interface
 class _MainTabsContent extends StatefulWidget {
   final int initialIndex;

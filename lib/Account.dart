@@ -159,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           
-          if (_isProcessing) const RotatingDotsIndicator(),
+          if (_isProcessing) const SizedBox.shrink()
         ],
       ),
     );

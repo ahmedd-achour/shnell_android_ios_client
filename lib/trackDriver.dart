@@ -7,16 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as latlong;
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shnell/calls/CallService.dart';
-import 'package:shnell/calls/VoiceCall.dart';
+import 'package:shnell/calls/AgoraService.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/main.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/ratingsScreen.dart';
-import 'package:shnell/model/users.dart';
-import 'package:shnell/model/calls.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 // --- Localization Import ---
@@ -66,7 +62,6 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   
   // Driver Details
   String? _driverID;
-  String? _driverName;
   String? _orderId;
   latlong.LatLng? _driverPosition;
   
@@ -90,6 +85,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   StreamSubscription? _orderSubscription;
   StreamSubscription? _driverLocationSubscription;
   StreamSubscription? _stopsSubscription;
+    final AgoraService _agoraService = AgoraService();
 
   List<List<LatLng>> _routeSegments = [];
 
@@ -352,11 +348,8 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
     try {
       final driverDoc = await FirebaseFirestore.instance.collection('users').doc(_driverID).get();
       if (driverDoc.exists && driverDoc.data() != null) {
-        final driverData = shnellUsers.fromJson(driverDoc.data()!);
         if (mounted) {
-          setState(() {
-            _driverName = driverData.name;
-          });
+         
         }
       }
     } catch (e) {
@@ -386,6 +379,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
       }
     });
   }
+
 
   void _listenToOrderUpdates() {
     if (_orderId == null) return;
@@ -539,73 +533,23 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   }
 
   // --- ACTIONS ---
-
-Future<bool> _checkCallPermissions(BuildContext context) async {
-
-  final status = await Permission.microphone.status;
-
-  if (status.isGranted) {
-    return true;
-  }
-
-  final result = await Permission.microphone.request();
-
-  if (result.isGranted) {
-    return true;
-  }
-
-  if (result.isPermanentlyDenied) {
-    if (context.mounted) {
-      await openAppSettings();
-    }
-  }
-
-  return false;
-}
-
   Future<void> _initiateInAppCall() async {
-    if (_driverID == null || _isCallLoading) return;
-    final hasPermission = await _checkCallPermissions(context);
-  if (!hasPermission) return;
     setState(() => _isCallLoading = true);
-    
-    final loc = AppLocalizations.of(context)!;
-
-    try {
-      final call = Call(
-        callId: widget.dealId,
-        dealId: widget.dealId,
-        driverId: _driverID!,
-        userId:  FirebaseAuth.instance.currentUser!.uid,
-        callerId: FirebaseAuth.instance.currentUser!.uid,
-        receiverId: _driverID!, 
-        callStatus: 'dialing',
-        agoraChannel: widget.dealId, 
-        agoraToken: '',
-        hasVideo: false,
-        timestamp: DateTime.now(),
-      );
-      final isproceed =  await CallService().makeCall(call: call);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => VoiceCallScreen(call: call , isCaller: true,),
-        ),
-      );
-      
-
-      if (isproceed == false) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(loc.callInitiationFailed)),
-          );
-        }
-        return;
-      }
+    //bool proceed=await _checkCallPermissions(context);
+    //if (proceed){
+   try {
+      DocumentSnapshot driverData = await FirebaseFirestore.instance.collection("users").doc(_driverID).get();
+      DocumentSnapshot ourDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
+      final driverFCM  = driverData["fcmToken"];
+    await _agoraService.initiateCall(receiverId: _driverID!, receiverFCMToken: driverFCM, sessionId: widget.dealId, callerName: ourDoc['name']);
     } catch (e) {
        // Handle error
     } finally {
       if (mounted) setState(() => _isCallLoading = false);
     }
+
+   // }
+ 
   }
 
   Future<void> _loadCustomMarkerIcons() async {
@@ -683,7 +627,6 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
     super.build(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
     // Localizations
     final loc = AppLocalizations.of(context)!;
 
@@ -779,10 +722,6 @@ Future<bool> _checkCallPermissions(BuildContext context) async {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _driverName ?? loc.driverTitle,
-                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
                         // Status Badge (Pickup vs Transit)
                         if (_dealStatus == DealStatus.accepted)
                           Builder(builder: (context) {

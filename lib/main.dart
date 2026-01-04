@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,45 +14,20 @@ import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shnell/FcmManagement.dart';
-import 'package:shnell/SignInScreen.dart';
-import 'package:shnell/callMediaControle.dart';
-import 'package:shnell/calls/customIncommingCall.dart';
+import 'package:http/http.dart' as http;
+import 'package:shnell/calls/AgoraService.dart';
+import 'package:shnell/calls/callUIController.dart';
 import 'package:shnell/customMapStyle.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/emailVerif.dart';
 import 'package:shnell/firebase_options.dart';
 import 'package:shnell/mainUsers.dart';
-import 'package:shnell/model/calls.dart';
 import 'package:shnell/updateApp.dart';
 import 'package:shnell/verrifyInternet.dart';
+import 'package:shnell/welcome.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-StreamSubscription<CallEvent?>? _globalCallKitSubscription;
-String? _activeCallId;
 final ValueNotifier<String> mapStyleNotifier = ValueNotifier<String>('');
-
-
-
-Future<void> updateFcmToken() async {
-  String? token = await FirebaseMessaging.instance.getToken();
-  if (token != null && FirebaseAuth.instance.currentUser != null && FirebaseAuth.instance.currentUser!.emailVerified) {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'fcmToken': token,
-    });
-  }
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-    if (FirebaseAuth.instance.currentUser != null) {
-      final uid = FirebaseAuth.instance.currentUser!.uid;
-      FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'fcmToken': newToken,
-      });
-    }
-  });
-}
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -77,13 +53,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ),
     );
 
-    await FlutterCallkitIncoming.showCallkitIncoming(params).then(  (value) {
-      
-      _setupGlobalCallKitListener();
-      print('✅ Incoming call displayed from background handler');
-    }).catchError((error) {
-      print('❌ Error displaying incoming call: $error');
-    });
+    await FlutterCallkitIncoming.showCallkitIncoming(params);
 
   }
   if (data['type'] == 'call_terminated') {
@@ -92,61 +62,82 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 
-
-
 void _setupGlobalCallKitListener() {
-  _globalCallKitSubscription ??=
-      FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+  FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
     if (event == null) return;
+    try {
+      final Map<String, dynamic> body = Map<String, dynamic>.from(event.body ?? {});
+      final Map<String, dynamic> extra = Map<String, dynamic>.from(body['extra'] ?? {});
+      final String? dealId = body['id']?.toString() ?? extra['dealId']?.toString();
 
-    final body = event.body as Map<String, dynamic>;
-    final extra = Map<String, dynamic>.from(body['extra'] ?? {});
-    final dealId = extra['dealId'];
+      if (dealId == null) return;
 
-    if (dealId == null) return;
+      switch (event.event) {
+        case Event.actionCallAccept:
+          // 1. Hand off to Native System UI (stops ringtone)
+          await FlutterCallkitIncoming.setCallConnected(dealId);
+          
+          // 2. Init Agora (Instance A)
+          await AgoraService().init(
+            token: extra['receiverToken'], 
+            channel: dealId, 
+            uid: extra["receiverUid"]
+          );
+          
+          // 3. Update Firestore
+          await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
+            'callStatus': 'connected'
+          });
+          break;
 
-    switch (event.event) {
-      case Event.actionCallAccept:      
-        _activeCallId = dealId;
-        final statusDoc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
-        final statusData =  statusDoc.data()!['callStatus'];
-        if(statusData!='connected'){
-   await FirebaseFirestore.instance
-            .collection('calls')
-            .doc(dealId)
-            .update({'callStatus': 'connected'});
-        }
+        case Event.actionCallDecline:
+        case Event.actionCallEnded:
+          // --- THE SMART CLEANUP START ---
+          
+          // 1. ALWAYS free hardware resources immediately
+          await AgoraService().leave(); 
+          
+          // 2. Check if the call still exists in DB before notifying
+          final callDoc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
 
-      case Event.actionCallDecline:
-      case Event.actionCallEnded:
-        await FlutterCallkitIncoming.endAllCalls();
-        await CallMediaController.instance.hardStopAudio();
-        await FirebaseFirestore.instance
-            .collection('calls')
-            .doc(dealId)
-            .update({'callStatus': 'declined'});
-        _activeCallId = null;
-     
-        break;
-      default:
+          if (callDoc.exists) {
+            // I am the first to hang up, notify the other person
+            unawaited(http.post(
+              Uri.parse("$cloudFunctionUrl/terminateCall"),
+              headers: {"Content-Type": "application/json"},
+              body: jsonEncode({
+                "dealId": dealId,
+                "callerFCMToken": extra['callerFCMToken'],
+                "receiverFCMToken": extra['receiverFCMToken'],
+              }),
+            ));
 
-        break;
+            // Delete the doc so the peer doesn't trigger a loop back to us
+            await FirebaseFirestore.instance.collection('calls').doc(dealId).delete();
+            debugPrint('✅ Call terminated manually. Peer notified.');
+          } else {
+            // Doc is already gone. Peer must have hung up first.
+            debugPrint('🧹 Doc already gone. Just cleaned local hardware.');
+          }
+          
+          // 3. Clear all system UI notifications
+          await FlutterCallkitIncoming.endAllCalls();
+          break;
+
+        default:
+          break;
+      }
+    } catch (e, st) {
+      debugPrint('⚠️ Error in CallKit listener: $e\n$st');
     }
   });
 }
-
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  if (FirebaseAuth.instance.currentUser != null) {
-    FCMTokenManager().initialize();
-   // _requestPermissions();
-  }
   _setupGlobalCallKitListener();
 
   runApp(const MyApp());
@@ -171,7 +162,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.mobile];
 
   Locale? _locale;
-  static const String _currentAppVersion = "2.0.0";
+  static const String _currentAppVersion = "8.12.32";
   late Stream<DocumentSnapshot> _configStream;
   @override
   void initState() {
@@ -179,7 +170,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _configStream = FirebaseFirestore.instance.collection('settings').doc('config').snapshots();
     _initConnectivity();
-    _setupForegroundMessaging();
   }
 
   @override
@@ -200,62 +190,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _updateConnectionStatus(List<ConnectivityResult> result) {
     setState(() => _connectionStatus = result);
-  }
-
-  void _setupForegroundMessaging() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      final data = message.data;
-
-      if (data['type'] == 'call_terminated') {
-        await FlutterCallkitIncoming.endAllCalls();
-        if (_activeCallId != null && navigatorKey.currentState?.canPop() == true) {
-          navigatorKey.currentState?.pop();
-        }
-        _activeCallId = null;
-        return;
-      }
-
-      if (data['type'] != 'call') return;
-
-      final String dealId = data['dealId'];
-      if (_activeCallId == dealId) return;
-
-      if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
-        return;
-      }
-
-      final doc = await FirebaseFirestore.instance.collection('calls').doc(dealId).get();
-      if (!doc.exists) return;
-
-      final call = Call.fromFirestore(doc);
-      _activeCallId = dealId;
-
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (_) => IncomingCallOverlay(
-            call: call,
-            onAccept: () async {
-              await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
-                'callStatus': 'connected',
-              });
-              navigatorKey.currentState?.pop();
-             /* navigatorKey.currentState?.push(
-                MaterialPageRoute(builder: (_) => VoiceCallScreen(call: call, isCaller: false)),
-              );*/
-            },
-            onDecline: () async {
-              await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
-                'callStatus': 'declined',
-              });
-              _activeCallId = null;
-              navigatorKey.currentState?.pop();
-              await FlutterCallkitIncoming.endAllCalls();
-            },
-          ),
-        ),
-      );
-    });
   }
 
   @override
@@ -304,7 +238,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               theme: getLightTheme(),
               darkTheme: getDarkTheme(),
               themeMode: ThemeMode.light,
-              home: const UnifiedAuthScreen(),
+              home: const ShnellWelcomeScreen(),
             );
           }
 
@@ -380,7 +314,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   theme: getLightTheme(),
                   darkTheme: getDarkTheme(),
                   themeMode: ThemeMode.light,
-                  home: const UnifiedAuthScreen(),
+                  home: const ShnellWelcomeScreen(),
                 );
               }
               return StreamBuilder<DocumentSnapshot>(
@@ -434,7 +368,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         theme: getLightTheme(),
         darkTheme: getDarkTheme(),
         themeMode: ThemeMode.light,
-        home: const UnifiedAuthScreen(),
+        home: const ShnellWelcomeScreen(),
       );
     }
 
@@ -472,7 +406,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           theme: getLightTheme(),
           darkTheme: getDarkTheme(),
           themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-          home: FirebaseAuth.instance.currentUser!.emailVerified ==true ? MainUsersScreen():
+          home: FirebaseAuth.instance.currentUser!.emailVerified ==true ? CallOverlayWrapper(child: MainUsersScreen()):
           const EmailVerificationScreen(),
         );
       },

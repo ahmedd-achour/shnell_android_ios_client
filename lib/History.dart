@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shnell/dots.dart';
@@ -240,12 +241,17 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
 
   // --- HISTORY CARD ---
 
-  Widget _buildHistoryCard(HistoryItem item, ThemeData theme, AppLocalizations l10n) {
+Widget _buildHistoryCard(HistoryItem item, ThemeData theme, AppLocalizations l10n) {
     final colors = theme.colorScheme;
     final statusInfo = _getStatusInfo(item.deal.status, colors, l10n);
     final dateStr = DateFormat('MMM dd, HH:mm').format(item.deal.timestamp ?? DateTime.now());
 
-    
+    // --- ID Formatting Logic ---
+    // Safe display: Shows only last 4 chars if the ID is long enough
+    final fullId = item.deal.idOrder; // Assuming idDeal is the unique key
+    final displayId = fullId.length > 4 
+        ? "...${fullId.substring(fullId.length - 4).toUpperCase()}" 
+        : fullId.toUpperCase();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -259,7 +265,7 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Row 1: Header
+            // Header Row (Vehicle, Price, Status)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -311,7 +317,7 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
               child: Divider(height: 1, thickness: 0.5),
             ),
 
-            // Row 2: Addresses
+            // Route Information (Addresses)
             Row(
               children: [
                 Column(
@@ -333,7 +339,6 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        // Just showing destination count or first destination for brevity
                         "${item.order.stops.length} ${l10n.destinations}", 
                         style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
                       ),
@@ -341,13 +346,51 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
                   ),
                 )
               ],
-            )
+            ),
+
+            // --- NEW: SAFE ID FOOTER ---
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "ID: $displayId",
+                    style: TextStyle(
+                      fontFamily: 'monospace', // Monospace makes IDs easier to read
+                      fontSize: 11,
+                      color: colors.outline,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: fullId));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("ID Copied: $fullId"),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(Icons.copy_rounded, size: 14, color: colors.primary),
+                    ),
+                  )
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildEmptyState(AppLocalizations l10n, ColorScheme colors) {
     return Center(
       child: Column(
@@ -381,7 +424,7 @@ class _UserActivityDashboardState extends State<UserActivityDashboard> {
   IconData _getVehicleIcon(String type) {
     if (type.contains("moto")) return Icons.two_wheeler;
     if (type.contains("heavy")) return Icons.local_shipping;
-    return Icons.directions_car;
+    return Icons.local_shipping;
   }
 }
 

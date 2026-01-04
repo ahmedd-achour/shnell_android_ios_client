@@ -9,6 +9,7 @@ class FCMTokenManager {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+
   void initialize() {
     // 1. Mise à jour au changement de user (Login/Logout)
     _auth.authStateChanges().listen((User? user) {

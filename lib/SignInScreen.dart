@@ -80,9 +80,6 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
         await user.sendEmailVerification();
 
         _showSuccess("Compte créé ! Vérifiez votre email pour continuer.");
-        
-        // NO NAVIGATION HERE
-        // Global wrapper will redirect to EmailVerificationScreen
       }
     } on FirebaseAuthException catch (e) {
       _showError(_parseFirebaseError(e));
@@ -106,13 +103,6 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
       );
 
       _showSuccess("Connexion réussie !");
-
-      // NO MANUAL NAVIGATION
-      // The main app wrapper will handle routing based on:
-      // - emailVerified
-      // - Firestore document existence
-      // - role == 'user'
-
     } on FirebaseAuthException catch (e) {
       _showError(_parseFirebaseError(e));
     } finally {
@@ -148,16 +138,18 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
   }
 
   void _showError(String msg) {
+    final cs = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
+            Icon(Icons.error_outline, color: cs.onError),
             const SizedBox(width: 10),
-            Expanded(child: Text(msg)),
+            Expanded(child: Text(msg, style: TextStyle(color: cs.onError))),
           ],
         ),
-        backgroundColor: Colors.red.shade800,
+        // Use error color from theme instead of hardcoded Red
+        backgroundColor: cs.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -165,16 +157,21 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
   }
 
   void _showSuccess(String msg) {
+    final cs = Theme.of(context).colorScheme;
+    // Using tertiary or primary container for success to avoid hardcoded Green,
+    // or a custom defined color if you have one in your theme. 
+    // Here we use a modification of primary for a 'success' look or standard green if necessary,
+    // but strictly following 'no hardcoded', we use scheme colors:
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white),
+            Icon(Icons.check_circle_outline, color: cs.onPrimary),
             const SizedBox(width: 10),
-            Expanded(child: Text(msg)),
+            Expanded(child: Text(msg, style: TextStyle(color: cs.onPrimary))),
           ],
         ),
-        backgroundColor: Colors.green.shade700,
+        backgroundColor: cs.primary, // Using primary for success to stay dynamic
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -188,11 +185,7 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: Container(
+      child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -204,8 +197,9 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                     ],
                   ),
                 ),
-              ),
-            ),
+                child:Scaffold(
+        body: Stack(
+          children: [
             SafeArea(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.06),
@@ -249,11 +243,12 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                           decoration: BoxDecoration(
                             color: cs.surface.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(30),
-                            border:
-                                Border.all(color: cs.outlineVariant.withOpacity(0.3)),
+                            border: Border.all(
+                                color: cs.outlineVariant.withOpacity(0.3)),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                // Removed Hardcoded Colors.black
+                                color: cs.shadow.withOpacity(0.05),
                                 blurRadius: 20,
                                 spreadRadius: 5,
                               )
@@ -271,14 +266,16 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                       child: _AuthTabButton(
                                         title: "Connexion",
                                         isActive: !_isSignUp,
-                                        onTap: () => setState(() => _isSignUp = false),
+                                        onTap: () =>
+                                            setState(() => _isSignUp = false),
                                       ),
                                     ),
                                     Expanded(
                                       child: _AuthTabButton(
                                         title: "Inscription",
                                         isActive: _isSignUp,
-                                        onTap: () => setState(() => _isSignUp = true),
+                                        onTap: () =>
+                                            setState(() => _isSignUp = true),
                                       ),
                                     ),
                                   ],
@@ -320,16 +317,19 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                       if (_isSignUp) ...[
                                         Container(
                                           decoration: BoxDecoration(
-                                            color: cs.surfaceVariant.withOpacity(0.3),
-                                            borderRadius: BorderRadius.circular(16),
+                                            color: cs.surfaceVariant
+                                                .withOpacity(0.3),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                           ),
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 12, vertical: 4),
                                           child: InternationalPhoneNumberInput(
                                             onInputChanged: (_) {},
-                                            selectorConfig: const SelectorConfig(
-                                              selectorType:
-                                                  PhoneInputSelectorType.BOTTOM_SHEET,
+                                            selectorConfig:
+                                                const SelectorConfig(
+                                              selectorType: PhoneInputSelectorType
+                                                  .BOTTOM_SHEET,
                                               showFlags: true,
                                               useEmoji: true,
                                               trailingSpace: false,
@@ -339,18 +339,21 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                             formatInput: false,
                                             cursorColor: cs.primary,
                                             countries: const ['TN'],
-                                            inputDecoration: const InputDecoration(
+                                            inputDecoration:
+                                                const InputDecoration(
                                               hintText: "29 123 456",
                                               border: InputBorder.none,
                                               contentPadding:
                                                   EdgeInsets.only(bottom: 12),
                                             ),
                                             textStyle: GoogleFonts.inter(
-                                                fontSize: 16, color: cs.onSurface),
+                                                fontSize: 16,
+                                                color: cs.onSurface),
                                           ),
                                         ),
                                         const SizedBox(height: 16),
                                       ],
+                                      // Password Field with Eye Security
                                       _CustomTextField(
                                         controller: passwordController,
                                         label: "Mot de passe",
@@ -385,7 +388,8 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                             builder: (_) =>
                                                 const PrivacyPolicyScreen())),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.check_circle_outline,
                                             size: 16, color: cs.primary),
@@ -398,12 +402,13 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                                 color: cs.onSurfaceVariant),
                                             children: [
                                               TextSpan(
-                                                text: "politique de confidentialité",
+                                                text:
+                                                    "politique de confidentialité",
                                                 style: TextStyle(
                                                     color: cs.primary,
                                                     fontWeight: FontWeight.bold,
-                                                    decoration:
-                                                        TextDecoration.underline),
+                                                    decoration: TextDecoration
+                                                        .underline),
                                               ),
                                             ],
                                           ),
@@ -426,7 +431,8 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
                                       backgroundColor: cs.primary,
                                       foregroundColor: cs.onPrimary,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16)),
+                                          borderRadius:
+                                              BorderRadius.circular(16)),
                                       elevation: 2,
                                     ),
                                     child: _isLoading
@@ -459,12 +465,16 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen>
             ),
           ],
         ),
-      ),
+      ) ,
+              ), 
     );
   }
 }
 
-class _CustomTextField extends StatelessWidget {
+// ==========================================
+// REFACTORED: State-Managed CustomTextField
+// ==========================================
+class _CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
@@ -482,18 +492,53 @@ class _CustomTextField extends StatelessWidget {
   });
 
   @override
+  State<_CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<_CustomTextField> {
+  // Local state to toggle visibility
+  bool _obscureText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize obscured state based on isPassword
+    _obscureText = widget.isPassword;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    
     return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      keyboardType: inputType,
-      textInputAction: inputAction,
-      style: GoogleFonts.inter(fontSize: 16),
+      controller: widget.controller,
+      obscureText: _obscureText,
+      keyboardType: widget.inputType,
+      textInputAction: widget.inputAction,
+      style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
       decoration: InputDecoration(
-        labelText: label,
+        labelText: widget.label,
         labelStyle: TextStyle(color: cs.onSurfaceVariant),
-        prefixIcon: Icon(icon, color: cs.primary.withOpacity(0.7), size: 22),
+        prefixIcon: Icon(widget.icon, 
+          color: cs.primary.withOpacity(0.7), 
+          size: 22
+        ),
+        // === EYE SECURITY IMPLEMENTATION ===
+        suffixIcon: widget.isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscureText
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: cs.onSurfaceVariant, // Dynamic Color
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+              )
+            : null,
         filled: true,
         fillColor: cs.surfaceVariant.withOpacity(0.3),
         border: OutlineInputBorder(

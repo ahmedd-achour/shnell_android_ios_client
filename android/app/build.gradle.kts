@@ -42,8 +42,8 @@ android {
         applicationId = "com.shnell.app"
         minSdk = 23
         targetSdk = 35 
-        versionCode = 5
-        versionName = "4.42.16"
+        versionCode = 8
+        versionName = "8.42.16"
     }
 buildTypes {
     getByName("release") {

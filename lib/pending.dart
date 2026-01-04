@@ -126,10 +126,6 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
                           // REPLACED RADAR WITH RIPPLE BACKGROUND
                           _buildRippleBackground(cs.primary),
                           _buildPulsingVehicle(order.vehicleType, cs),
-                          Positioned(
-                            top: MediaQuery.of(context).padding.top + 20,
-                            child: _buildStatusPill(l10n.searchingForDrivers, cs),
-                          ),
                         ],
                       ),
                     ),
@@ -233,36 +229,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
 
   // --- WIDGETS ---
 
-  Widget _buildStatusPill(String text, ColorScheme cs) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: cs.primaryContainer,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: const Offset(0, 4))],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 14, 
-            height: 14, 
-            child: CircularProgressIndicator(strokeWidth: 2, color: cs.onPrimaryContainer)
-          ),
-          const SizedBox(width: 10),
-          Text(
-            text,
-            style: TextStyle(
-              color: cs.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+ 
   Widget _buildMetric(String value, String label, Color color, bool isBig) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,109 +245,139 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
       ],
     );
   }
+// You'll need this package for date formatting, or use the manual formatter below
+// import 'package:intl/intl.dart'; 
 
-  Widget _buildTimelineRoute(Orders order, AppLocalizations l10n, ColorScheme cs) {
-    final stopIds = order.stops.where((id) => id.isNotEmpty).toList();
+Widget _buildTimelineRoute(Orders order, AppLocalizations l10n, ColorScheme cs) {
+  final stopIds = order.stops.where((id) => id.isNotEmpty).toList();
 
-    return Column(
+  // Manual Formatter (In case you don't have intl package)
+  final DateTime date = order.scheduleAt!.toDate();
+  final String formattedDate = "${date.day}/${date.month}/${date.year} - ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+
+  return Column(
+    children: [
+      // 1. THE SCHEDULED TIME (Highlighted)
+      _buildTimelineTile(
+        isFirst: true,
+        isLast: false,
+        title: l10n.schedule, // Ensure this exists in your l10n file
+        subtitle: formattedDate,
+        cs: cs,
+        icon: Icons.access_time_filled_rounded,
+        customColor: cs.secondary, // Different color for the schedule
+      ),
+
+      // 2. PICKUP
+      _buildTimelineTile(
+        isFirst: false,
+        isLast: false,
+        title: l10n.pickupLocation,
+        subtitle: order.namePickUp,
+        cs: cs,
+      ),
+
+      // 3. STOPS
+      FutureBuilder<List<DocumentSnapshot>>(
+        future: Future.wait(stopIds.map((id) => getStopById(id))),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: LinearProgressIndicator(minHeight: 2),
+          );
+          
+          final stops = snapshot.data!;
+          return Column(
+            children: stops.asMap().entries.map((entry) {
+              final index = entry.key;
+              final data = DropOffData.fromFirestore(entry.value);
+              final isLastItem = index == stops.length - 1;
+              
+              return _buildTimelineTile(
+                isFirst: false,
+                isLast: isLastItem,
+                title: isLastItem ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
+                subtitle: data.destinationName,
+                cs: cs,
+              );
+            }).toList(),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+Widget _buildTimelineTile({
+  required bool isFirst,
+  required bool isLast,
+  required String title,
+  required String subtitle,
+  required ColorScheme cs,
+  IconData? icon,
+  Color? customColor,
+}) {
+  final Color activeColor = customColor ?? (isFirst ? cs.primary : (isLast ? Colors.orange : cs.outline));
+
+  return IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Pickup
-        _buildTimelineTile(
-          isFirst: true,
-          isLast: false,
-          title: l10n.pickupLocation,
-          subtitle: order.namePickUp,
-          cs: cs,
-        ),
-        // Stops (Future Builder)
-        FutureBuilder<List<DocumentSnapshot>>(
-          future: Future.wait(stopIds.map((id) => getStopById(id))),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return const SizedBox(height: 20, child: LinearProgressIndicator(minHeight: 2));
-            
-            final stops = snapshot.data!;
-            return Column(
-              children: stops.asMap().entries.map((entry) {
-                final index = entry.key;
-                final data = DropOffData.fromFirestore(entry.value);
-                final isLastItem = index == stops.length - 1;
-                
-                return _buildTimelineTile(
-                  isFirst: false,
-                  isLast: isLastItem,
-                  title: isLastItem ? l10n.finalDropOff : l10n.dropOffNumber(index + 1),
-                  subtitle: data.destinationName,
-                  cs: cs,
-                );
-              }).toList(),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimelineTile({
-    required bool isFirst,
-    required bool isLast,
-    required String title,
-    required String subtitle,
-    required ColorScheme cs,
-  }) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Timeline Line & Dot
-          SizedBox(
-            width: 24,
-            child: Column(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: isFirst ? cs.primary : (isLast ? cs.tertiary : cs.surface),
-                    border: Border.all(color: isFirst ? cs.primary : (isLast ? cs.tertiary : cs.outline), width: 2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: isFirst || isLast ? null : Center(child: Container(width: 4, height: 4, decoration: BoxDecoration(color: cs.outline, shape: BoxShape.circle))),
+        SizedBox(
+          width: 24,
+          child: Column(
+            children: [
+              // The Circle or Icon
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: icon != null ? Colors.transparent : (isFirst || isLast ? activeColor : cs.surface),
+                  border: Border.all(color: activeColor, width: 2),
+                  shape: BoxShape.circle,
                 ),
-                if (!isLast) 
-                  Expanded(
-                    child: Container(
-                      width: 2, 
-                      color: cs.outlineVariant.withOpacity(0.5),
-                      margin: const EdgeInsets.symmetric(vertical: 2),
-                    )
-                  ),
+                child: icon != null 
+                  ? Icon(icon, size: 10, color: activeColor) 
+                  : (isFirst || isLast ? null : Center(child: Container(width: 4, height: 4, decoration: BoxDecoration(color: cs.outline, shape: BoxShape.circle)))),
+              ),
+              // The Connecting Line
+              if (!isLast) 
+                Expanded(
+                  child: Container(
+                    width: 2, 
+                    color: cs.outlineVariant.withOpacity(0.5),
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                  )
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(), 
+                  style: TextStyle(fontSize: 10, color: activeColor, fontWeight: FontWeight.bold, letterSpacing: 0.5)
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle, 
+                  style: TextStyle(fontSize: 14, color: cs.onSurface, fontWeight: FontWeight.w600),
+                  maxLines: 2, 
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          // Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24.0), // Spacing between items
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle, 
-                    style: TextStyle(fontSize: 14, color: cs.onSurface, fontWeight: FontWeight.w500),
-                    maxLines: 1, 
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildPulsingVehicle(String vehicleType, ColorScheme scheme) {
     return AnimatedBuilder(

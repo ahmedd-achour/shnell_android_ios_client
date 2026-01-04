@@ -1,64 +1,71 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Call {
-  final String callId; // ID unique du document Firestore (doit être le dealId)
+class CallModel {
   final String dealId;
-  final String driverId;
-  final String userId;
-  final String callerId;
-  final String receiverId;
-  final String callStatus; // 'dialing', 'connected', 'ended', 'declined'
+  final String callStatus;
+  final String callerName;
   final String agoraChannel;
-  final String agoraToken;
-  final bool hasVideo;
-  final DateTime? timestamp;
-   String? callerToken = "";      // ← Token for the client
-   String? receiverToken = "";
+  final int callerUid;
+  final int receiverUid;
+  final String callerFirebaseUid;
+  final String receiverFirebaseUid;
+  final DateTime? createdAt;
+  final String callerToken;
+  final String receiverToken;
+  final String callerFCMToken;
+  final String receiverFCMToken;
 
-
-  Call({
-    required this.callId,
+  CallModel({
     required this.dealId,
-    required this.driverId,
-    required this.userId,
-    required this.callerId,
-    required this.receiverId,
     required this.callStatus,
+    required this.callerName,
     required this.agoraChannel,
-    required this.agoraToken,
-    this.hasVideo = false,
-    this.timestamp,
+    required this.callerUid,
+    required this.receiverUid,
+    required this.callerFirebaseUid,
+    required this.receiverFirebaseUid,
+    this.createdAt,
+    required this.callerToken,
+    required this.receiverToken,
+    required this.callerFCMToken,
+    required this.receiverFCMToken,
   });
 
-  factory Call.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return Call(
-      callId: doc.id,
-      dealId: data['dealId'] ?? '',
-      driverId: data['driverId'] ?? '',
-      userId: data['userId'] ?? '',
-      callerId: data['callerId'] ?? '',
-      receiverId: data['receiverId'] ?? '',
-      callStatus: data['callStatus'] ?? '',
-      agoraChannel: data['agoraChannel'] ?? '',
-      agoraToken: data['agoraToken'] ?? '',
-      hasVideo: data['hasVideo'] ?? false,
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate(),
+  // Convert a Map (from Firestore or Cloud Function) into a CallModel object
+  factory CallModel.fromMap(Map<String, dynamic> map) {
+    return CallModel(
+      dealId: map['dealId'] ?? '',
+      callStatus: map['callStatus'] ?? 'ringing',
+      callerName: map['callerName'] ?? 'Shnell',
+      agoraChannel: map['agoraChannel'] ?? '',
+      callerUid: map['callerUid'] is int ? map['callerUid'] : int.parse(map['callerUid'].toString()),
+      receiverUid: map['receiverUid'] is int ? map['receiverUid'] : int.parse(map['receiverUid'].toString()),
+      callerFirebaseUid: map['callerFirebaseUid'] ?? '',
+      receiverFirebaseUid: map['receiverFirebaseUid'] ?? '',
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
+      callerToken: map['callerToken'] ?? '',
+      receiverToken: map['receiverToken'] ?? '',
+      callerFCMToken: map['callerFCMToken'] ?? '',
+      receiverFCMToken: map['receiverFCMToken'] ?? '',
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  // Convert the CallModel object into a Map for Firestore
+  Map<String, dynamic> toMap() {
     return {
       'dealId': dealId,
-      'driverId': driverId,
-      'userId': userId,
-      'callerId': callerId,
-      'receiverId': receiverId,
       'callStatus': callStatus,
+      'callerName': callerName,
       'agoraChannel': agoraChannel,
-      'agoraToken': agoraToken,
-      'hasVideo': hasVideo,
-      'timestamp': FieldValue.serverTimestamp(),
+      'callerUid': callerUid,
+      'receiverUid': receiverUid,
+      'callerFirebaseUid': callerFirebaseUid,
+      'receiverFirebaseUid': receiverFirebaseUid,
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+      'callerToken': callerToken,
+      'receiverToken': receiverToken,
+      'callerFCMToken': callerFCMToken,
+      'receiverFCMToken': receiverFCMToken,
     };
   }
 }

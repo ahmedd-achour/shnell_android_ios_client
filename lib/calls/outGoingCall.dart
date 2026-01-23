@@ -18,17 +18,14 @@ class OutgoingCallOverlay extends StatefulWidget {
 class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
   @override
   Widget build(BuildContext context) {
-    final String callerName = widget.data['sessionId'] ?? "User";
+    final String callerName = widget.data['callerName'] ?? "Shnell";
 
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           // 1. Blurred Background Image
-          Image.network(
-            "https://your-placeholder-avatar.com/user.jpg", // Replace with real avatar URL
-            fit: BoxFit.cover,
-          ),
+          
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Container(color: Colors.black.withOpacity(0.5)),
@@ -70,14 +67,7 @@ class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
                     ),
 
                     // Middle Section: Avatar
-                    CircleAvatar(
-                      radius: constraints.maxWidth * 0.2, // Proportional size
-                      backgroundColor: Colors.white24,
-                      child: CircleAvatar(
-                        radius: constraints.maxWidth * 0.18,
-                        backgroundImage: const NetworkImage("https://your-placeholder-avatar.com/user.jpg"),
-                      ),
-                    ),
+                   
 
                     // Bottom Section: Action Buttons
                     Padding(
@@ -90,6 +80,8 @@ class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
                             color: Colors.redAccent,
                             onPressed: ()async{
                               await _agoraService.leave();
+            await FirebaseFirestore.instance.collection('calls').doc(widget.data['dealId']).delete();
+
                           
                              // final callerDoc = await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
                                // final callerFcm = callerDoc['fcmToken'];
@@ -105,7 +97,6 @@ class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
                // "callerFCMToken" : callerFCMToken
               }),
             ));
-            await FirebaseFirestore.instance.collection('calls').doc(widget.data['dealId']).delete();
             
                             })
                            

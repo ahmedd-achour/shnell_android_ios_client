@@ -30,12 +30,13 @@ class _AgoraActiveCallScreenState extends State<AgoraActiveCallScreen> {
   bool _isMuted = false;
   bool _isFrontCamera = true;
   late final String _channelName;
-  late final String _token;
   late final int _uid;
   late final bool _isCaller;
   late final String _callId;
   late final String _callerFCMToken;
   late final String _receiverFCMToken;
+ // late final String _token;
+
 
   final String _currentUserUid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -55,13 +56,13 @@ class _AgoraActiveCallScreenState extends State<AgoraActiveCallScreen> {
     _isCaller = callerId == _currentUserUid;
 
     if (_isCaller) {
-      _token =  data['callerToken']?? data['agoraToken'] as String;
+      //_token =  data['callerToken']?? data['agoraToken'] as String;
       _callerFCMToken = data['callerFCMToken'] ?? '';
       _uid = data['receiverUid']; // remote uid
 
       _receiverFCMToken = data['receiverFCMToken'] ?? '';
     } else {
-      _token =  data['receiverToken'] ?? data['agoraToken'] ;
+     // _token =  data['receiverToken'] ?? data['agoraToken'] ;
             _uid = data['callerUid'];
 
       _callerFCMToken = data['callerFCMToken'] ?? '';
@@ -221,7 +222,7 @@ ValueListenableBuilder<bool>(
                     children: [
                       const SizedBox(height: 8),
                       Text(
-                        _uid!=null  ? 'Connected' : 'Ringing...',
+                        'Connected',
                         style: const TextStyle(color: Colors.white70, fontSize: 16),
                       ),
                     ],

@@ -648,7 +648,12 @@
   "selectDifferentLocation": "Seleziona altra posizione",
   "zoneValidationFailed": "Impossibile verificare l'area di servizio. Controlla la connessione.",
   "locationSelectedOnMap": "Posizione selezionata sulla mappa",
-    "service_note": "Nota: Questa tariffa copre solo il servizio di trasporto di base. I servizi aggiuntivi possono variare in base alle necessità e ai requisiti di ogni caso e possono essere concordati direttamente con l’operatore se necessario."
+    "service_note": "Nota: Questa tariffa copre solo il servizio di trasporto di base. I servizi aggiuntivi possono variare in base alle necessità e ai requisiti di ogni caso e possono essere concordati direttamente con l’operatore se necessario.",
+    "serviceEconomic": "Economico",
+  "serviceProfessional": "Professionale",
+  "pro_banner_text": "Servizio Completo • Assicurazione Inclusa • Nessun Costo Nascosto",
+    "pro_banner_sub": "Eseguito da Agenzie Certificate",
+    "eco_banner_text": "Trasporto Base • Marciapiede su Marciapiede • Miglior Valore"
 
 
 

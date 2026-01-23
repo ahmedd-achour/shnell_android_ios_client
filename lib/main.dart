@@ -19,7 +19,6 @@ import 'package:shnell/calls/AgoraService.dart';
 import 'package:shnell/calls/callUIController.dart';
 import 'package:shnell/customMapStyle.dart';
 import 'package:shnell/dots.dart';
-import 'package:shnell/emailVerif.dart';
 import 'package:shnell/firebase_options.dart';
 import 'package:shnell/mainUsers.dart';
 import 'package:shnell/updateApp.dart';
@@ -61,6 +60,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
+// This keeps the index alive even if the widget is destroyed and recreated
+final ValueNotifier<int> persistentTabController = ValueNotifier<int>(0);
+
 
 void _setupGlobalCallKitListener() {
   FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
@@ -75,11 +77,10 @@ void _setupGlobalCallKitListener() {
       switch (event.event) {
         case Event.actionCallAccept:
           // 1. Hand off to Native System UI (stops ringtone)
-          await FlutterCallkitIncoming.setCallConnected(dealId);
           
           // 2. Init Agora (Instance A)
           await AgoraService().init(
-            token: extra['receiverToken'], 
+            token: extra['agoraToken'], 
             channel: dealId, 
             uid: extra["receiverUid"]
           );
@@ -88,6 +89,8 @@ void _setupGlobalCallKitListener() {
           await FirebaseFirestore.instance.collection('calls').doc(dealId).update({
             'callStatus': 'connected'
           });
+          await FlutterCallkitIncoming.setCallConnected(dealId);
+
           break;
 
         case Event.actionCallDecline:
@@ -111,7 +114,6 @@ void _setupGlobalCallKitListener() {
                 "receiverFCMToken": extra['receiverFCMToken'],
               }),
             ));
-
             // Delete the doc so the peer doesn't trigger a loop back to us
             await FirebaseFirestore.instance.collection('calls').doc(dealId).delete();
             debugPrint('✅ Call terminated manually. Peer notified.');
@@ -133,10 +135,25 @@ void _setupGlobalCallKitListener() {
   });
 }
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+  final User? user = FirebaseAuth.instance.currentUser;
+  
+  if (user != null && user.email != null) {
+    // This is the background "Call Saver"
+    // It updates the token in Firestore without the user doing anything
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.email)
+        .update({
+          'fcmToken': newToken,
+        });
+  }
+});
 
   _setupGlobalCallKitListener();
 
@@ -162,7 +179,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   List<ConnectivityResult> _connectionStatus = [ConnectivityResult.mobile];
 
   Locale? _locale;
-  static const String _currentAppVersion = "8.12.32";
+  static const String _currentAppVersion = "20.20.20";
   late Stream<DocumentSnapshot> _configStream;
   @override
   void initState() {
@@ -215,207 +232,173 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         brightness: Brightness.dark,
       );
 
-  @override
+@override
   Widget build(BuildContext context) {
-    if (_connectionStatus.contains(ConnectivityResult.none)) {
-      return StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, authSnapshot) {
-          if (authSnapshot.connectionState == ConnectionState.waiting) {
-            return const MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-            );
-          }
-
-          if (!authSnapshot.hasData) {
-            return MaterialApp(
-              navigatorKey: navigatorKey,
-              debugShowCheckedModeBanner: false,
-              locale: _locale ?? const Locale('fr'),
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              theme: getLightTheme(),
-              darkTheme: getDarkTheme(),
-              themeMode: ThemeMode.light,
-              home: const ShnellWelcomeScreen(),
-            );
-          }
-
-          return StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).snapshots(),
-            builder: (context, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-                );
-              }
-
-              final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
-              final bool darkMode = userData?['darkMode'] ?? true;
-              final String languageCode = userData?['language'] ?? 'fr';
-
-              return MaterialApp(
-                navigatorKey: navigatorKey,
-                debugShowCheckedModeBanner: false,
-                locale: Locale(languageCode),
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                theme: getLightTheme(),
-                darkTheme: getDarkTheme(),
-                themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-                home: const VerifyInternetScreen(),
-              );
-            },
-          );
-        },
-      );
-    }
-
-    return StreamBuilder<DocumentSnapshot>(
-      stream: _configStream
-      ,      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-          );
-        }
-
-        if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(body: Center(child: Text("Configuration Error"))),
-          );
-        }
-
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final String requiredVersion = data['version_customer_app'] ?? '';
-
-        if (requiredVersion != _currentAppVersion) {
-          return StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, authSnapshot) {
-              if (authSnapshot.connectionState == ConnectionState.waiting) {
-                return const MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-                );
-              }
-
-              if (!authSnapshot.hasData) {
-                return MaterialApp(
-                  navigatorKey: navigatorKey,
-                  debugShowCheckedModeBanner: false,
-                  locale: _locale ?? const Locale('fr'),
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
-                  theme: getLightTheme(),
-                  darkTheme: getDarkTheme(),
-                  themeMode: ThemeMode.light,
-                  home: const ShnellWelcomeScreen(),
-                );
-              }
-              return StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance.collection('users').doc(authSnapshot.data!.uid).snapshots(),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return const MaterialApp(
-                      debugShowCheckedModeBanner: false,
-                      home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-                    );
-                  }
-
-                  final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
-                  final bool darkMode = userData!['darkMode'] ?? true;
-                  final String languageCode = userData['language'] ?? 'fr';
-
-                  return MaterialApp(
-                    navigatorKey: navigatorKey,
-                    debugShowCheckedModeBanner: false,
-                    locale: Locale(languageCode),
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    localizationsDelegates: AppLocalizations.localizationsDelegates,
-                    theme: getLightTheme(),
-                    darkTheme: getDarkTheme(),
-                    themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-                    home: const UpdateAppScreen(),
-                  );
-                },
-              );
-            },
-          );
-        }
-
+    // 1. MASTER STREAM: Authentication
+    //    We check this first. If they aren't logged in, nothing else matters.
     return StreamBuilder<User?>(
-  stream: FirebaseAuth.instance.authStateChanges(),
-  builder: (context, authSnapshot) {
-    if (authSnapshot.connectionState == ConnectionState.waiting) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(body: Center(child: RotatingDotsIndicator())),
-      );
-    }
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, authSnapshot) {
+        
+        // --- State A: Loading Auth ---
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoaderApp();
+        }
 
-    if (!authSnapshot.hasData) {
-      return MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        locale: _locale ?? const Locale('fr'),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        theme: getLightTheme(),
-        darkTheme: getDarkTheme(),
-        themeMode: ThemeMode.light,
-        home: const ShnellWelcomeScreen(),
-      );
-    }
+        final User? user = authSnapshot.data;
 
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(authSnapshot.data!.uid)
-          .snapshots(),
-      builder: (context, userSnapshot) {
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: Scaffold(body: Center(child: RotatingDotsIndicator())),
+        // --- State B: Guest / Not Logged In ---
+        if (user == null) {
+          return _buildMaterialApp(
+            darkMode: false, // Force light mode for guests (or your preference)
+            locale: _locale ?? const Locale('fr'),
+            home: const ShnellWelcomeScreen(),
           );
         }
 
-        final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
+        // --- State C: Logged In (Fetch User Preferences) ---
+        //    We fetch this NOW so that "No Internet" or "Update" screens 
+        //    are still correctly themed in the user's language.
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .snapshots(),
+          builder: (context, userSnapshot) {
+            
+            // Wait for user data (cached or fresh)
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return _buildLoaderApp();
+            }
 
-        // SECURITY: If document missing or role invalid → sign out immediately
-    
+            final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
 
-        final bool darkMode = userData!['darkMode'] ?? true;
-        final String languageCode = userData['language'] ?? 'fr';
+            // SECURITY: If doc is missing but auth exists -> Force Logout
+               // SECURITY: If doc is missing but auth exists -> Force Logout
+            if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+  // Just show the loader and WAIT. 
+  // The stream will rebuild automatically when the doc is created.
+  return _buildLoaderApp(); 
+}
+            // Extract User Settings
+            final bool darkMode = userData!['darkMode'] ?? true;
+            final String languageCode = userData['language'] ?? 'fr';
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          mapStyleNotifier.value = darkMode ? darkMapStyle : lightMapStyle;
-        });
+            // Sync Map Style (Optimization: AddPostFrameCallback prevents render errors)
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              mapStyleNotifier.value = darkMode ? darkMapStyle : lightMapStyle;
 
-        return MaterialApp(
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          locale: Locale(languageCode),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: getLightTheme(),
-          darkTheme: getDarkTheme(),
-          themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-          home: FirebaseAuth.instance.currentUser!.emailVerified ==true ? CallOverlayWrapper(child: MainUsersScreen()):
-          const EmailVerificationScreen(),
+            });
+            // Add this near your mapStyleNotifier
+
+            // --- State D: Render The Full App ---
+            return _buildMaterialApp(
+              darkMode: darkMode,
+              
+              locale: Locale(languageCode),
+              // We pass the logic to a separate widget to keep 'build' clean
+              home: _MainContentSwitcher(
+                connectionStatus: _connectionStatus,
+                configStream: _configStream,
+                currentAppVersion: _currentAppVersion,
+                // The ultimate success screen:
+                child: CallOverlayWrapper(
+                  
+                  child: MainUsersScreen()
+                  )
+              ),
+            );
+          },
         );
       },
     );
-  },
-); },
+  }
+
+  // --- HELPER 1: The Unified MaterialApp ---
+  //    Defined once here to avoid duplicating it 5 times in your code.
+  Widget _buildMaterialApp({
+    required bool darkMode,
+    required Locale locale,
+    required Widget home,
+  }) {
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      theme: getLightTheme(),
+      darkTheme: getDarkTheme(),
+      themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
+      home: home,
+    );
+  }
+
+  // --- HELPER 2: Simple Loading Screen ---
+  Widget _buildLoaderApp() {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(body: Center(child: RotatingDotsIndicator())),
     );
   }
 }
+
+// --- LOGIC WIDGET: Decides which screen to show ---
+//    This separates the "Business Logic" from the "UI/Theme Logic"
+class _MainContentSwitcher extends StatelessWidget {
+  final List<ConnectivityResult> connectionStatus;
+  final Stream<DocumentSnapshot> configStream;
+  final String currentAppVersion;
+  final Widget child;
+
+  const _MainContentSwitcher({
+    Key? key,
+    required this.connectionStatus,
+    required this.configStream,
+    required this.currentAppVersion,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. PRIORITY: Check Internet
+    if (connectionStatus.contains(ConnectivityResult.none)) {
+      return const VerifyInternetScreen();
+    }
+
+    // 2. PRIORITY: Check App Version
+    return StreamBuilder<DocumentSnapshot>(
+      stream: configStream,
+      builder: (context, configSnapshot) {
+        
+        // If we are waiting for config, show loader or safe fallback
+        if (configSnapshot.connectionState == ConnectionState.waiting) {
+           return const Scaffold(body: Center(child: RotatingDotsIndicator()));
+        }
+
+        // If config fails, we usually let the user pass to avoid blocking them 
+        // entirely due to a server glitch, unless strict versioning is required.
+        if (configSnapshot.hasError || !configSnapshot.hasData || !configSnapshot.data!.exists) {
+           // Option A: Let them in (Safe Fallback)
+           return child; 
+           // Option B: Show Error (Strict)
+           // return const Scaffold(body: Center(child: Text("Config Error")));
+        }
+
+        final data = configSnapshot.data!.data() as Map<String, dynamic>;
+        final String requiredVersion = data['version_customer_app'] ?? '';
+
+        // If versions don't match -> Block with Update Screen
+        if (requiredVersion.isNotEmpty && requiredVersion != currentAppVersion) {
+          return const UpdateAppScreen();
+        }
+
+        // 3. PRIORITY: Success -> Show Main App
+        return child;
+      },
+    );
+  }
+  }
 
 
 

@@ -62,6 +62,7 @@ class OrderService {
           vehicleType: data['vehicleType'],
           isAcepted: data['isAcepted'] ?? false,
           id: data['id'],
+          category: data['category']
         );
       }
       return null;

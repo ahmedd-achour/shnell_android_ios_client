@@ -29,12 +29,14 @@ class ItemSelectionScreen extends StatefulWidget {
   final LatLng pickup;
   final List<DropOffData> dropOffDestination;
   final String pickupName;
+  final String category;
 
   const ItemSelectionScreen({
     super.key,
     required this.pickup,
     required this.dropOffDestination,
     required this.pickupName,
+    required this.category
   });
 
   @override
@@ -118,6 +120,7 @@ class _ItemSelectionScreenState extends State<ItemSelectionScreen> {
             dropOffDestination: widget.dropOffDestination,
             pickup_name: widget.pickupName,
             priceMultiplier: _calculatePriceMultiplier(),
+            category: widget.category,
           ),
         ),
       );

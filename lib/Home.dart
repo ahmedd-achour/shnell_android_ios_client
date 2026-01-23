@@ -73,6 +73,8 @@ void _updateMapStyle() {
     for (var controller in _dropOffControllersNotifier.value) {
       controller.dispose();
     }
+      mapStyleNotifier.removeListener(_updateMapStyle);
+
     _dropOffControllersNotifier.dispose();
     _markersNotifier.dispose();
     _polylinesNotifier.dispose();

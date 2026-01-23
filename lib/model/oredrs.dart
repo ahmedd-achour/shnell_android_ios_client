@@ -13,6 +13,7 @@ class Orders {
   bool isAcepted;
   String id;
   Timestamp? scheduleAt;
+  String category;
 
   Orders({
     required this.price,
@@ -25,6 +26,7 @@ class Orders {
     required this.userId,
     this.isAcepted = false,
     this.scheduleAt,
+    required this.category
   });
 
   Map<String, dynamic> toJson() {
@@ -40,6 +42,7 @@ class Orders {
       'vehicleType': vehicleType,
       'isAcepted': isAcepted,
       'scheduleAt': scheduleAt,
+      "category" : category
     };
   }
 
@@ -63,7 +66,8 @@ class Orders {
       stops: List<String>.from(data['stops'] ?? []),
       vehicleType: data['vehicleType'],
       isAcepted: data['isAcepted'] ?? false,
-      scheduleAt: data['scheduleAt']
+      scheduleAt: data['scheduleAt'],
+      category: data['category']
     );
   }
 }

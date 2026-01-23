@@ -6,7 +6,6 @@ import 'package:shnell/Account/changeLanguage.dart';
 import 'package:shnell/Account/personalDetails.dart';
 import 'package:shnell/Account/privacyPolicy.dart';
 import 'package:shnell/AuthHandler.dart';
-import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/drawer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -23,14 +22,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isProcessing = false;
 
   Future<void> _logoutAction() async {
-    setState(() => _isProcessing = true);
-    await AuthMethods().logout();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()),
-      (_) => false,
-    );
+   await GoogleSignInService().signOut();
   }
+
 
   Future<void> _toggleDarkMode(bool newValue) async {
     final l10n = AppLocalizations.of(context)!;
@@ -44,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedToUpdate(e.toString()))),
+          SnackBar(content: Text(l10n.failedToUpdate(e.toString()) , maxLines: 1,)),
         );
       }
     } finally {
@@ -56,6 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
   @override
+
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (_currentUser == null) {

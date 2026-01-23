@@ -7,82 +7,77 @@ class ShnellWelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Uses the native theme background
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // 1. Background Image Asset
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: MediaQuery.of(context).size.height * 0.65,
-            child: Image.asset(
-              'assets/shnellWelcome.png', // Your generated asset
-              fit: BoxFit.cover,
+    return SafeArea(
+      child: Scaffold(
+        // Uses the native theme background
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Stack(
+          children: [
+            // 1. Background Image Asset
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Image.asset(
+                'assets/shnellWelcome.png', // Your generated asset
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-
-          // 2. Rounded Interaction Panel
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.42,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                // Native surface color from your main theme
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28.0), // The "Slightly Rounded" edge
+      
+            // 2. Rounded Interaction Panel
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.35,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  // Native surface color from your main theme
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28.0), // The "Slightly Rounded" edge
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-              child: Column(
-                children: [
-                  // Branding Section
-                  Text(
-                    'SHNELL',
-                    
-                    style: GoogleFonts.montserrat(
-                                fontSize: 48,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 4,
-                                color: Theme.of(context).colorScheme.primary
-                              ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'L\'excellence en mouvement',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const Spacer(),
-
-                  // Buttons with slightly rounded corners
-                  _buildActionBtn(
-                    context,
-                    label: 'Sign in',
-                    isPrimary: true,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildActionBtn(
-                    context,
-                    label: 'Register',
-                    isPrimary: false,
-
-                  ),
-                ],
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                child: Column(
+                  children: [
+                    // Branding Section
+                    Text(
+                      'SHNELL',
+                      
+                      style: GoogleFonts.montserrat(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 4,
+                                  color: Theme.of(context).colorScheme.primary
+                                ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'L\'excellence en mouvement',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 12),
+                    _buildActionBtn(
+                      context,
+                      label: ' Commencer ',
+                      isPrimary: false,
+      
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -92,7 +87,6 @@ class ShnellWelcomeScreen extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 58,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: isPrimary ? colors.primary : colors.secondaryContainer,

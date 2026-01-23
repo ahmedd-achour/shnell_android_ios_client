@@ -45,7 +45,6 @@ Future<void> toggleLocalVideo() async {
         const ChannelMediaOptions(publishCameraTrack: false),
       );
     }
-    
     isLocalVideoActive.value = nextState;
   }
   Future<bool> init({
@@ -53,15 +52,11 @@ Future<void> toggleLocalVideo() async {
     required String channel,
     required int uid,
   }) async {
-    final micStatus = await Permission.microphone.request();
-  final camStatus = await Permission.camera.request();
 
-  if (micStatus != PermissionStatus.granted) {
-    print("Microphone permission denied");
-    // Optionally show dialog: "Mic required for calls"
-    return false;  // Abort init
+          bool permissions = await requestCallPermissions();
+  if(permissions ==false){
+    return false;
   }
-
     engine = createAgoraRtcEngine();
 
     await engine!.initialize(
@@ -139,6 +134,32 @@ return false;
     engine = null;
   }
 
+  Future<bool> requestCallPermissions() async {
+  // 1. Request multiple permissions correctly (OS handles the sequence)
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.microphone,
+    Permission.camera,
+  ].request();
+
+  // 2. Map results (request() returns a Map, not a List)
+  final micStatus = statuses[Permission.microphone];
+  final camStatus = statuses[Permission.camera];
+
+  // 3. Robust check: Ensure BOTH are granted
+  if (micStatus?.isGranted == true && camStatus?.isGranted == true) {
+    return true; 
+  }
+
+  // 4. Handle Permanent Denial (The User clicked "Never ask again")
+  if (micStatus?.isPermanentlyDenied == true || camStatus?.isPermanentlyDenied == true) {
+    // If you return null here, the user is stuck forever. 
+    // Usually, you'd show a dialog or open settings.
+    await openAppSettings();
+  }
+
+  return false;
+}
+
   Future<Map<String, dynamic>?> initiateCall({
     required String receiverId,
     required String receiverFCMToken,
@@ -153,11 +174,19 @@ return false;
     final myId = user.uid;
 
     try {
-       final micStatus = await Permission.microphone.request();
-  final camStatus = await Permission.camera.request();
+          bool permissions = await requestCallPermissions();
+  if(permissions ==false){
+    return null;
+  }
 
-      final idToken = await user.getIdToken();
-      final myFCMToken = await FirebaseMessaging.instance.getToken();
+final results = await Future.wait([
+  user.getIdToken(),
+  FirebaseMessaging.instance.getToken(),
+]);
+
+final String idToken = results[0] as String;
+final String? myFCMToken = results[1];
+
       final response = await http.post(
         Uri.parse("$cloudFunctionUrl/initiateCall"),
         headers: {"Content-Type": "application/json"},

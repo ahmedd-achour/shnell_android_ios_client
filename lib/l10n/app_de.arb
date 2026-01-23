@@ -665,7 +665,12 @@
   "selectDifferentLocation": "Anderen Standort wählen",
   "zoneValidationFailed": "Servicegebiet konnte nicht überprüft werden. Verbindung prüfen.",
   "locationSelectedOnMap": "Standort auf der Karte ausgewählt",
-  "service_note": "Hinweis: Diese Gebühr deckt nur den Basistransport ab. Zusätzliche Dienstleistungen können je nach Bedarf und Anforderungen variieren und können bei Bedarf direkt mit dem Betreiber vereinbart werden."
+  "service_note": "Hinweis: Diese Gebühr deckt nur den Basistransport ab. Zusätzliche Dienstleistungen können je nach Bedarf und Anforderungen variieren und können bei Bedarf direkt mit dem Betreiber vereinbart werden.",
+  "serviceEconomic": "Economy",
+  "serviceProfessional": "Professionell",
+  "pro_banner_text": "Rundum-Service • Versicherung Inklusive • Festpreis",
+    "pro_banner_sub": "Durchgeführt von zertifizierten Agenturen",
+    "eco_banner_text": "Basistransport • Bordstein zu Bordstein • Bester Wert"
 
 
 

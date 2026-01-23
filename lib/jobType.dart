@@ -6,6 +6,7 @@ import 'package:shnell/dots.dart';
 import 'package:shnell/model/destinationdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shnell/selectionType.dart';
+// import 'package:shnell/screens/vehicle_selection_screen.dart';
 
 // --- MODEL ---
 class ServiceTypeUiModel {
@@ -58,6 +59,7 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
   bool _isLoading = true;
   List<ServiceTypeUiModel> _serviceTypes = [];
   String? _selectedTypeId;
+  String _jobCategory = 'eco'; 
 
   @override
   void initState() {
@@ -68,12 +70,10 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
   Future<void> _fetchServiceTypes() async {
     try {
       final doc = await FirebaseFirestore.instance.collection('settings').doc('service_types').get();
-      
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         if (data['types'] is List) {
           final List<dynamic> rawList = data['types'];
-          
           final parsedList = rawList.map((item) {
             return ServiceTypeUiModel.fromMap(item as Map<String, dynamic>);
           }).toList();
@@ -94,29 +94,33 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
     }
   }
 
-  void _onContinue() {
+void _onContinue() {
     if (_selectedTypeId == null) return;
-
+    
+    // 1. Get the selected service model (contains the list of allowed vehicles)
     final selectedService = _serviceTypes.firstWhere((s) => s.id == _selectedTypeId);
-
+    
     HapticFeedback.mediumImpact();
 
-    Navigator.push(
-      context,
+    // 2. Pass 'filterVehicleIds' to the next screen
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => VehicleSelectionScreen(
           pickup: widget.pickup,
           dropOffDestination: widget.dropOffDestination,
           pickup_name: widget.pickupName,
-          filterVehicleIds: selectedService.allowedVehicles,
-          serviceTypeId: selectedService.id,
-          priceMultiplier: selectedService.priceMultiplier, 
+          // CRITICAL: This restricts the next screen to ONLY the vehicles allowed for this job
+          filterVehicleIds: selectedService.allowedVehicles, 
+          serviceTypeId: selectedService.id, // Optional: if your next screen needs the ID
+          priceMultiplier: selectedService.priceMultiplier,
+          category: _jobCategory, // 'eco' or 'pro'
         ),
       ),
     );
   }
 
   // --- LOCALIZATION HELPERS ---
+
   String _getLocalizedTitle(String id, AppLocalizations l10n, String fallback) {
     switch (id) {
       case 'simple_transport': return l10n.st_simple_transport_title;
@@ -195,8 +199,12 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
               ),
             ),
 
-            const SizedBox(height: 16),
+            // === JOB CATEGORY SELECTOR ===
+            _buildJobCategoryToggle(colorScheme),
 
+            // === NEW: CONTEXTUAL INFO WIDGET (Added Here) ===
+            _buildCategoryInfo(colorScheme),
+            
             // === LIST ===
             Expanded(
               child: ListView.separated(
@@ -219,12 +227,158 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
     );
   }
 
+  // === NEW: INFO WIDGET IMPLEMENTATION ===
+  Widget _buildCategoryInfo(ColorScheme colorScheme) {
+    // You should move these strings to your AppLocalizations later
+    final isPro = _jobCategory == 'pro';
+    
+    // Pro uses a premium Gold/Amber tint, Eco uses a clean Blue/Grey tint
+    final bgColor =  
+         colorScheme.surfaceContainerLow;
+        
+   
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.transparent, width: 1),
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: Row(
+          key: ValueKey<String>(_jobCategory), // Triggers animation
+          children: [
+            Icon(
+              isPro ? Icons.verified_user_rounded : Icons.info_outline_rounded,
+              size: 18,
+            ),
+            const SizedBox(width: 6),
+          // ... inside _buildCategoryInfo method
+
+Expanded(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        isPro 
+          ? AppLocalizations.of(context)!.pro_banner_text
+          : AppLocalizations.of(context)!.eco_banner_text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+      ),
+      if (isPro) ...[
+         Text(
+          AppLocalizations.of(context)!.pro_banner_sub,
+          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
+         )
+      ]
+    ],
+  ),
+),],
+        ),
+      ),
+    );
+  }
+
+  // === TOGGLE WIDGET ===
+  Widget _buildJobCategoryToggle(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 8, 20, 4), // Adjusted bottom margin
+      height: 50, // Slightly smaller
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          _buildToggleOption(
+            id: 'eco',
+            icon: Icons.savings_rounded,
+            label: l10n.serviceEconomic,
+            colorScheme: colorScheme,
+          ),
+          Container(
+            width: 1,
+            height: 24,
+            color: colorScheme.outlineVariant.withOpacity(0.5),
+          ),
+          _buildToggleOption(
+            id: 'pro',
+            icon: Icons.shield_rounded,
+            label: l10n.serviceProfessional,
+            colorScheme: colorScheme,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleOption({
+    required String id,
+    required IconData icon,
+    required String label,
+    required ColorScheme colorScheme,
+  }) {
+    final isSelected = _jobCategory == id;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _jobCategory = id);
+          HapticFeedback.lightImpact();
+        },
+        behavior: HitTestBehavior.opaque, 
+        child: AnimatedContainer( // Added Animation for smooth color transition
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity, 
+          alignment: Alignment.center, 
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isSelected ? colorScheme.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ... (Rest of your existing code: _buildServiceCard, _getDetailIcons, _buildBottomBar) ...
+  
   Widget _buildServiceCard(
     ServiceTypeUiModel data,
     bool isSelected,
     ColorScheme colorScheme,
     AppLocalizations l10n,
   ) {
+    // ... (Your existing card code) ...
+    // Just ensuring we return the same widget as before
     final title = _getLocalizedTitle(data.id, l10n, data.title);
     final subtitle = _getLocalizedSubtitle(data.id, l10n, data.subtitle);
     final detailIcons = _getDetailIcons(data.id);
@@ -238,7 +392,6 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          // Logic: Subtle background change, clear border
           color: isSelected
               ? colorScheme.primaryContainer.withOpacity(0.3)
               : colorScheme.surfaceContainerLow,
@@ -254,24 +407,16 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Icon Container
                 Container(
                   width: 72,
                   height: 72,
-                  decoration: BoxDecoration(                    borderRadius: BorderRadius.circular(16),
-                    // Removed shadow as requested
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
                   ),
-                  child: Image.asset(
-                    data.iconAsset,
-                    fit: BoxFit.fill,
-                    // REMOVED: color/colorBlendMode to keep original asset colors
-                  ),
+                  child: Image.asset(data.iconAsset, fit: BoxFit.fill),
                 ),
-
                 const SizedBox(width: 16),
-
-                // 2. Text Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +432,6 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
                               color: colorScheme.onSurface,
                             ),
                           ),
-                          // Selection Indicator
                           AnimatedScale(
                             scale: isSelected ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 200),
@@ -309,8 +453,6 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
                 ),
               ],
             ),
-
-            // 3. "Suitable For" Section
             if (detailIcons.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -319,12 +461,8 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
               Row(
                 children: [
                   Text(
-                    l10n.bestValueTag, // Fallback
-                    style: TextStyle(
-                      fontSize: 11, 
-                      color: colorScheme.primary, 
-                      fontWeight: FontWeight.w600
-                    ),
+                    l10n.bestValueTag, 
+                    style: TextStyle(fontSize: 11, color: colorScheme.primary, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -342,11 +480,7 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
                               border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.2)),
                             ),
                             padding: const EdgeInsets.all(6),
-                            child: Image.asset(
-                              asset,
-                              fit: BoxFit.fill,
-                              // Ensure no tint is applied here either
-                            ),
+                            child: Image.asset(asset, fit: BoxFit.fill),
                           ),
                         )).toList(),
                       ),
@@ -361,40 +495,24 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
     );
   }
 
-  // === ASSET MAPPING (Fixed Paths) ===
   List<String> _getDetailIcons(String serviceId) {
+    // ... (Your existing helper) ...
     switch (serviceId) {
       case 'simple_transport': 
-        return [
-          'assets/icons/shopping-bag.png',   
-          'assets/icons/bicycle.png',      
-        ];
+        return ['assets/icons/shopping-bag.png', 'assets/icons/bicycle.png'];
       case 'store_pickup':
-        return [
-          'assets/icons/smart-tv.png',       
-          'assets/icons/oven.png',
-          'assets/icons/vegetables.png',           
-        ];
+        return ['assets/icons/smart-tv.png', 'assets/icons/oven.png', 'assets/icons/vegetables.png'];
       case 'small_move': 
-        return [
-          'assets/icons/fridge.png',          
-          'assets/icons/laundry-machine.png', 
-          'assets/icons/seater-sofa.png',  
-          'assets/icons/double-bed.png',   
-        ];
+        return ['assets/icons/fridge.png', 'assets/icons/laundry-machine.png', 'assets/icons/seater-sofa.png', 'assets/icons/double-bed.png'];
       case 'full_move': 
-        return [
-          'assets/icons/moving-home.png',     
-          'assets/icons/office.png',          
-          'assets/icons/furniture.png',           
-          'assets/icons/treadmill.png',   
-        ];
+        return ['assets/icons/moving-home.png', 'assets/icons/office.png', 'assets/icons/furniture.png', 'assets/icons/treadmill.png'];
       default:
         return [];
     }
   }
 
   Widget _buildBottomBar(ColorScheme colorScheme, AppLocalizations l10n) {
+    // ... (Your existing bottom bar) ...
     final bool isEnabled = _selectedTypeId != null;
 
     return Container(
@@ -414,7 +532,6 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
         top: false,
         child: SizedBox(
           height: 56,
-          // Reverted to FilledButton.tonal as requested
           child: FilledButton.tonal(
             onPressed: isEnabled ? _onContinue : null,
             style: FilledButton.styleFrom(

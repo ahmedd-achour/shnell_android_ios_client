@@ -19,7 +19,9 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   @override
   Widget build(BuildContext context) {
     if (_currentUser == null) {
-      return const Scaffold(body: Center(child: Text("Erreur d'authentification")));
+      return const Scaffold(
+        body: Center(child: Text("Erreur d'authentification")),
+      );
     }
 
     final l10n = AppLocalizations.of(context);
@@ -35,35 +37,37 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          l10n?.personalInformation ?? "Informations Personnelles", 
-          style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)
+          l10n?.personalInformation ?? "Informations Personnelles",
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
-      // 1. STREAM UTILISATEUR
       body: StreamBuilder<DocumentSnapshot>(
         stream: _firestore.collection('users').doc(_currentUser!.uid).snapshots(),
-        builder: (context, userSnapshot) {
-          
-          if (userSnapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: RotatingDotsIndicator());
           }
-          
-          if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-            return Center(child: Text(l10n?.userDataNotFound ?? "Profil introuvable"));
+
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(
+              child: Text(l10n?.userDataNotFound ?? "Profil introuvable"),
+            );
           }
 
-          shnellUsers? userData;
+          late shnellUsers user;
           try {
-            userData = shnellUsers.fromJson(userSnapshot.data!.data() as Map<String, dynamic>);
+            user = shnellUsers.fromJson(
+              snapshot.data!.data() as Map<String, dynamic>,
+            );
           } catch (e) {
             return Center(child: Text("Erreur lecture profil: $e"));
           }
 
-          // Vérifier si l'utilisateur a un véhicule lié
-       
-          
-          return _buildContent(context, userData);
+          return _buildContent(context, user);
         },
       ),
     );
@@ -75,11 +79,12 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- INFO COMPTE ---
+            _buildProfileHeader(context, user),
+
             _buildSectionTitle(l10n?.accountInfo ?? "Compte", theme),
             _buildSettingsCard(
               children: [
@@ -88,55 +93,113 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   label: l10n?.name ?? "Nom",
                   initialValue: user.name,
                   onSave: (val) async {
-                    await _firestore.collection('users').doc(_currentUser!.uid).update({'name': val});
+                    await _firestore
+                        .collection('users')
+                        .doc(_currentUser!.uid)
+                        .update({'name': val});
                     await _currentUser!.updateDisplayName(val);
                   },
                   helperMessage: l10n?.updateNameHelper,
                 ),
                 _buildSeparator(),
-                _buildReadOnlyTile(icon: Icons.email_outlined, label: l10n!.emailLabel, value: user.email),
+                _buildReadOnlyTile(
+                  icon: Icons.email_outlined,
+                  label: l10n!.emailLabel,
+                  value: user.email,
+                  verified:
+                      _currentUser!.emailVerified ||
+                      _currentUser!.providerData
+                          .any((p) => p.providerId == 'google.com'),
+                ),
                 _buildSeparator(),
-                _buildReadOnlyTile(icon: Icons.phone_outlined, label: l10n.mobilePhoneLabel, value: user.phone),
-              ],
-            ),
-
-            const SizedBox(height: 32),
-
-            // --- SÉCURITÉ ---
-            _buildSectionTitle(l10n.security, theme),
-            _buildSettingsCard(
-              children: [
-                _buildSettingsTile(
-                  icon: Icons.lock_outline,
-                  title: l10n.changePassword,
-                  onTap: () async {
-                    try {
-                      await FirebaseAuth.instance.sendPasswordResetEmail(email: user.email);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.passwordResetSent), backgroundColor: Colors.green));
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red));
-                      }
-                    }
-                  },
-                  helperMessage: l10n.changePasswordHelper,
+                _buildReadOnlyTile(
+                  icon: Icons.phone_outlined,
+                  label: l10n.mobilePhoneLabel,
+                  value: user.phone,
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+
+
           ],
         ),
       ),
     );
   }
 
+  /// ================= PROFILE HEADER =================
+  Widget _buildProfileHeader(BuildContext context, shnellUsers user) {
+    final theme = Theme.of(context);
+    final authUser = FirebaseAuth.instance.currentUser;
 
+    final photoUrl = authUser?.photoURL;
+    final verified =
+        authUser?.emailVerified == true ||
+        authUser?.providerData.any((p) => p.providerId == 'google.com') == true;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 36,
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+            child: photoUrl == null
+                ? Icon(Icons.person,
+                    size: 36, color: theme.colorScheme.primary)
+                : null,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        user.email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    if (verified)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Icon(Icons.verified,
+                            size: 16, color: Colors.green),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ================= UI HELPERS =================
   Widget _buildSectionTitle(String title, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-      child: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+      padding: const EdgeInsets.only(left: 8, bottom: 12),
+      child: Text(
+        title,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.primary,
+        ),
+      ),
     );
   }
 
@@ -148,43 +211,66 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     );
   }
 
-  Widget _buildSeparator() => const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16);
+  Widget _buildSeparator() =>
+      const Divider(height: 1, thickness: 0.5, indent: 16, endIndent: 16);
 
-  Widget _buildReadOnlyTile({required IconData icon, required String label, required String value}) {
+  Widget _buildReadOnlyTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool verified = false,
+  }) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
-        const SizedBox(width: 16),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6))),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        ]),
-      ]),
-    );
-  }
-
-  Widget _buildSettingsTile({required IconData icon, required String title, required VoidCallback onTap, String? helperMessage}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary, size: 24),
           const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-            if (helperMessage != null) Text(helperMessage, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline)),
-          ])),
-          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-        ]),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    if (verified)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Icon(Icons.verified,
+                            size: 16, color: Colors.green),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
 }
 
-// --- WIDGET EDITABLE (Réutilisé) ---
+/// ================= EDITABLE TILE =================
 class EditableInfoTile extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -192,7 +278,14 @@ class EditableInfoTile extends StatefulWidget {
   final Future<void> Function(String) onSave;
   final String? helperMessage;
 
-  const EditableInfoTile({super.key, required this.icon, required this.label, required this.initialValue, required this.onSave, this.helperMessage});
+  const EditableInfoTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.initialValue,
+    required this.onSave,
+    this.helperMessage,
+  });
 
   @override
   State<EditableInfoTile> createState() => _EditableInfoTileState();
@@ -214,8 +307,13 @@ class _EditableInfoTileState extends State<EditableInfoTile> {
     setState(() => _isSaving = true);
     try {
       await widget.onSave(_controller.text.trim());
-      if (mounted) setState(() { _isEditing = false; _isSaving = false; });
-    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isEditing = false;
+          _isSaving = false;
+        });
+      }
+    } catch (_) {
       if (mounted) setState(() => _isSaving = false);
     }
   }
@@ -223,25 +321,60 @@ class _EditableInfoTileState extends State<EditableInfoTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(children: [
-        Icon(widget.icon, color: theme.colorScheme.primary, size: 24),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _isEditing
-              ? TextField(controller: _controller, autofocus: true, onSubmitted: (_) => _handleSave(), decoration: InputDecoration(labelText: widget.label, isDense: true, border: const OutlineInputBorder()))
-              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(widget.label, style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                  Text(_controller.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                ]),
-        ),
-        if (_isSaving) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-        else IconButton(
-          icon: Icon(_isEditing ? Icons.check : Icons.edit, color: _isEditing ? Colors.green : theme.colorScheme.primary),
-          onPressed: () => _isEditing ? _handleSave() : setState(() => _isEditing = true),
-        )
-      ]),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Icon(widget.icon, color: theme.colorScheme.primary, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _isEditing
+                ? TextField(
+                    controller: _controller,
+                    autofocus: true,
+                    onSubmitted: (_) => _handleSave(),
+                    decoration: InputDecoration(
+                      labelText: widget.label,
+                      isDense: true,
+                      border: const OutlineInputBorder(),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.label,
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.outline)),
+                      Text(
+                        _controller.text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+          ),
+          if (_isSaving)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            IconButton(
+              icon: Icon(
+                _isEditing ? Icons.check : Icons.edit,
+                color:
+                    _isEditing ? Colors.green : theme.colorScheme.primary,
+              ),
+              onPressed: () =>
+                  _isEditing ? _handleSave() : setState(() => _isEditing = true),
+            ),
+        ],
+      ),
     );
   }
 }

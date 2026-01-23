@@ -41,15 +41,15 @@ android {
     defaultConfig {
         applicationId = "com.shnell.app"
         minSdk = 23
-        targetSdk = 35 
-        versionCode = 8
-        versionName = "8.42.16"
+        targetSdk = 35
+        versionCode = 27
+        versionName = "20.16.16"
     }
 buildTypes {
     getByName("release") {
         // You must enable code shrinking (minify) to use resource shrinking
-        isMinifyEnabled = true 
-        isShrinkResources = true 
+        isMinifyEnabled = true
+        isShrinkResources = true
         
         signingConfig = signingConfigs.getByName("release")
         

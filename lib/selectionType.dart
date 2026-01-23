@@ -34,6 +34,7 @@ class VehicleSelectionScreen extends StatefulWidget {
   final List<String>? filterVehicleIds;
   final String? serviceTypeId;
   final double priceMultiplier;
+  final String category;
 
   const VehicleSelectionScreen({
     super.key,
@@ -43,6 +44,7 @@ class VehicleSelectionScreen extends StatefulWidget {
     this.filterVehicleIds,
     this.serviceTypeId,
     required this.priceMultiplier,
+    required this.category
   });
 
   @override
@@ -462,6 +464,7 @@ Future<void> _fetchVehiclesFromCloud() async {
                           dropOffDestination: widget.dropOffDestination,
                           pickup_name: widget.pickup_name,
                           serviceTypeId: widget.serviceTypeId, tripCount: 1,
+                          category: widget.category,
                         ),
                       ),
                     );

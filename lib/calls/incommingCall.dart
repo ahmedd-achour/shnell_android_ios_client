@@ -16,37 +16,26 @@ class IncomingCallOverlay extends StatefulWidget {
 }
 
 class _IncomingCallOverlayState extends State<IncomingCallOverlay> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
 
   @override
 
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(); // Pulsating effect for the ring
+  
   }
 
   final AgoraService _agoraService = AgoraService();
 
   @override
   Widget build(BuildContext context) {
-    final String callerName = "Guest";
+    final String callerName = widget.data['callerName'];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           // 1. Blurred Background
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage("https://your-placeholder.com/bg.jpg"),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+     
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(color: Colors.black.withOpacity(0.6)),
@@ -69,23 +58,7 @@ class _IncomingCallOverlayState extends State<IncomingCallOverlay> with SingleTi
                     ),
 
                     // Pulsating Avatar
-                    AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        return Container(
-                          padding: EdgeInsets.all(20 * _controller.value),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.1 * (1 - _controller.value)),
-                          ),
-                          child: CircleAvatar(
-                            radius: constraints.maxWidth * 0.2,
-                            backgroundImage: const NetworkImage("https://your-placeholder.com/avatar.jpg"),
-                          ),
-                        );
-                      },
-                    ),
-
+                  
                     // Action Buttons (Accept / Decline)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -15,7 +15,31 @@
       },
       "oauth_client": [
         {
-          "client_id": "217120837439-vldv7tn0qbdra9bgd13sbg9dcatbhms1.apps.googleusercontent.com",
+          "client_id": "217120837439-1uqedgtj38efec2650o1g7fejbt46jg5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shnell_driver",
+            "certificate_hash": "efd1fb99816f01239434754432dfa6fd7a212d4a"
+          }
+        },
+        {
+          "client_id": "217120837439-g2sbkhd1rvke1024oo8uknk0hfbi3ok3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shnell_driver",
+            "certificate_hash": "6a8a459cd2dd45f05737470c3e655f2a1e90d1ae"
+          }
+        },
+        {
+          "client_id": "217120837439-qa989e9bsuv6c0qokedbqa2hv29q4ct5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shnell_driver",
+            "certificate_hash": "5828b5255a15f9ec4b902c7027d46d00f11d5662"
+          }
+        },
+        {
+          "client_id": "217120837439-2reugbpp9l30hs3snmcukhvnnsmksg9u.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -28,14 +52,14 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "217120837439-vldv7tn0qbdra9bgd13sbg9dcatbhms1.apps.googleusercontent.com",
+              "client_id": "217120837439-2reugbpp9l30hs3snmcukhvnnsmksg9u.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "217120837439-53l2hm2gjcj09k4qtc7lab71kmfm5sfe.apps.googleusercontent.com",
+              "client_id": "217120837439-3u8qjas77aeq0rffpmljre0f5qnglaqq.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.shnell"
+                "bundle_id": "com.shnell.app"
               }
             }
           ]
@@ -51,7 +75,31 @@
       },
       "oauth_client": [
         {
-          "client_id": "217120837439-vldv7tn0qbdra9bgd13sbg9dcatbhms1.apps.googleusercontent.com",
+          "client_id": "217120837439-40ph1ghl1kckomjaa274771q5ssv551n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shnell.app",
+            "certificate_hash": "6a8a459cd2dd45f05737470c3e655f2a1e90d1ae"
+          }
+        },
+        {
+          "client_id": "217120837439-h9fukpfv2a8kfk0fj9jt9cpg2lq1iq35.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shnell.app",
+            "certificate_hash": "efd1fb99816f01239434754432dfa6fd7a212d4a"
+          }
+        },
+        {
+          "client_id": "217120837439-v9sot7v7tt8f955d9agdpmkslp5ikegv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shnell.app",
+            "certificate_hash": "5828b5255a15f9ec4b902c7027d46d00f11d5662"
+          }
+        },
+        {
+          "client_id": "217120837439-2reugbpp9l30hs3snmcukhvnnsmksg9u.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -64,14 +112,14 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "217120837439-vldv7tn0qbdra9bgd13sbg9dcatbhms1.apps.googleusercontent.com",
+              "client_id": "217120837439-2reugbpp9l30hs3snmcukhvnnsmksg9u.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "217120837439-53l2hm2gjcj09k4qtc7lab71kmfm5sfe.apps.googleusercontent.com",
+              "client_id": "217120837439-3u8qjas77aeq0rffpmljre0f5qnglaqq.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.shnell"
+                "bundle_id": "com.shnell.app"
               }
             }
           ]

@@ -21,11 +21,16 @@
    
    
    
-    <application
-        android:label="Shnell"
-        android:name="${applicationName}"
-        
-        android:icon="@mipmap/launcher_icon">
+   <application
+    android:label="Shnell"
+    android:name="${applicationName}"
+    android:icon="@mipmap/launcher_icon"
+    android:enableOnBackInvokedCallback="true">
+
+    <!-- activities, services, receivers, etc -->
+
+
+
    
 <service 
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingService"

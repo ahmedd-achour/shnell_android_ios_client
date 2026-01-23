@@ -1,12 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shnell/FcmManagement.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shnell/calls/AgoraService.dart';
 import 'package:shnell/calls/agoraActiveCall.dart';
 import 'package:shnell/calls/incommingCall.dart';
 import 'package:shnell/calls/outGoingCall.dart';
-
 
 class CallOverlayWrapper extends StatefulWidget {
   final Widget child;
@@ -17,89 +16,107 @@ class CallOverlayWrapper extends StatefulWidget {
 }
 
 class _CallOverlayWrapperState extends State<CallOverlayWrapper> {
-  
-  @override
-  void initState() {
-    super.initState();
-    // Only init FCM/Notifications, NO Agora code here
-    if (FirebaseAuth.instance.currentUser != null) {
-      FCMTokenManager().initialize();
-    }
+  String? _lastCallId;
+  String? _lastStatus; // to detect status transitions
+  DateTime _lastSnackAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  void _snack(String msg, {bool replace = true}) {
+    if (!mounted) return;
+
+    // throttle: avoid spam during rapid rebuilds
+    final now = DateTime.now();
+    if (now.difference(_lastSnackAt).inMilliseconds < 700) return;
+    _lastSnackAt = now;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+
+      if (replace) messenger.hideCurrentSnackBar();
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return widget.child;
+    final user = FirebaseAuth.instance.currentUser;
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('calls')
+          .where('callStatus', whereIn: ['ringing', 'connected'])
           .where(Filter.or(
-            Filter('callerFirebaseUid', isEqualTo: currentUser.uid),
-            Filter('receiverFirebaseUid', isEqualTo: currentUser.uid),
+            Filter('callerFirebaseUid', isEqualTo: user!.uid),
+            Filter('receiverFirebaseUid', isEqualTo: user.uid),
           ))
+          .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        // 1. If no active call docs, just show the app
-   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    // This is the "Safety Net"
-    // If the FCM already killed the engine, this does nothing.
-    // If the FCM is slow, this kills the Mic/Cam the MOMENT the doc is deleted.
-    await AgoraService().leave(); 
-  });
-  return widget.child;
-}
-
-        // 2. Get the first active call
-        // Note: You might want to filter for status != 'ended' if you don't delete docs immediately
-        final callDoc = snapshot.data!.docs.first; 
-        final callData = callDoc.data() as Map<String, dynamic>;
-        final String status = callData['callStatus'] ?? 'ended';
-        final String callerId = callData['callerFirebaseUid'];
-
-        // 3. If the call is ended, show nothing (return child only)
-        if (status == 'ended') {
-           // Optional: You might trigger a cleanup function here to delete the doc
-           return widget.child;
+        // show stream errors (useful for index errors)
+        if (snapshot.hasError) {
+          _snack("Call stream error: ${snapshot.error}", replace: true);
+          return widget.child;
         }
 
-        // 4. Overlay the Call UI on top of your app
-        return Stack(
-          children: [
-            widget.child, // The App (Map, Dashboard, etc)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black, // Background for the call
-                child: _buildCallUI(status, callerId, currentUser.uid, callData),
-              ),
-            ),
-          ],
+        // Don’t do anything while loading first snapshot
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return widget.child;
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          if (_lastCallId != null) {
+            _snack("Call ended / no active call");
+            _lastCallId = null;
+            _lastStatus = null;
+            unawaited(AgoraService().leave());
+          }
+          return widget.child;
+        }
+
+        final doc = docs.first;
+        final data = doc.data() as Map<String, dynamic>;
+
+        final status = (data['callStatus'] ?? '').toString();
+        final isCaller = data['callerFirebaseUid'] == user.uid;
+
+        // Transition logging
+        if (_lastCallId != doc.id) {
+          _snack("Call doc detected: ${doc.id}");
+          _lastCallId = doc.id;
+          _lastStatus = null; // reset status tracking for new call
+        }
+
+        if (_lastStatus != status) {
+          _lastStatus = status;
+
+          if (status == 'ringing') {
+            _snack(isCaller ? "Calling..." : "Incoming call...");
+          } else if (status == 'connected') {
+            _snack("Call connected");
+          } else {
+            _snack("Call status: $status");
+          }
+        }
+
+        return Material(
+          color: Colors.black,
+          child: status == 'connected'
+              ? AgoraActiveCallScreen(data: data)
+              : isCaller
+                  ? OutgoingCallOverlay(data: data)
+                  : IncomingCallOverlay(data: data),
         );
       },
     );
-  }
-
-  Widget _buildCallUI(String status, String callerId, String myId, Map<String, dynamic> data) {
-    switch (status) {
-      case 'ringing':
-        // If I am the caller -> Show "Calling..."
-        // If I am the receiver -> Show "Incoming Call..."
-        return myId == callerId
-            ? OutgoingCallOverlay(data: data)
-            : IncomingCallOverlay(data: data);
-
-      case 'connected':
-        // Both users see this when status flips to 'connected'
-       return AgoraActiveCallScreen(
-  key: ValueKey(data['dealId']), // Force a fresh initState every call
-  data: data,
-);
-
-      default:
-        // Render nothing if status is unknown/ended
-        return const SizedBox.shrink(); 
-    }
   }
 }

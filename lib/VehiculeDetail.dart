@@ -89,10 +89,12 @@ class VehicleDetailScreen extends StatefulWidget {
   final String pickup_name;
   final String? serviceTypeId;
   final int tripCount;
+  final String category;
 
   const VehicleDetailScreen({
     Key? key,
     required this.type,
+    required this.category,
     required this.image,
     required this.pickupLocation,
     required this.dropOffDestination,
@@ -195,8 +197,6 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               _vehicleSettings!,
               widget.dropOffDestination.length,
             );
-            _calculatedEstimatedPrice *= widget.tripCount;
-
             _offerController.text = _calculatedEstimatedPrice.toStringAsFixed(0);
             _validateOffer(_offerController.text);
           }
@@ -218,8 +218,15 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       pricePerKm = v.longDistRate;
     }
     double baseCalculation = v.basePrice + (distance * pricePerKm) + (stops * _stopFee);
+
+    double pro = 1;
+    if(widget.category == 'pro'){
+      pro = 1.49;
+    }
+    _serviceMultiplier *=pro;
     return baseCalculation * _serviceMultiplier;
   }
+
 
   Future<double?> getGoogleRoadDistance(
       lt.LatLng origin, List<lt.LatLng> destinations, String apiKey) async {
@@ -320,13 +327,7 @@ Future<void> _passAnOrder() async {
     HapticFeedback.vibrate(); // Physically alert the user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.calendar_month, color: Colors.white),
-            const SizedBox(width: 10),
-            Text(loc.scheduleError),
-          ],
-        ),
+        content: Text(loc.scheduleError , maxLines: 2,),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
@@ -371,6 +372,7 @@ Future<void> _passAnOrder() async {
       vehicleType: widget.type,
       id: '', 
       userId: user.uid,
+      category: widget.category,
       isAcepted: false,
       scheduleAt: Timestamp.fromDate(_selectedScheduleDate!),
     );
@@ -422,123 +424,125 @@ Widget build(BuildContext context) {
 
   String currentPriceDisplay = _offerController.text.isEmpty ? "0" : _offerController.text;
 
-  return Scaffold(
-    resizeToAvoidBottomInset: false,
-    body: Stack(
-      children: [
-        // 1. THE SCROLLABLE CONTENT
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              // HEADER BOX (Gradient + Vehicle Card)
-              Stack(
-                alignment: Alignment.topCenter,
-                clipBehavior: Clip.none,
-                children: [
-                  // The Background Gradient (Now part of the scroll view)
-                  Container(
-                    height: headerHeight,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [colorScheme.primary, colorScheme.primaryContainer],
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(40),
-                      ),
-                    ),
-                  ),
-                  
-                  // Floating the Vehicle Card so it overlaps the bottom of the gradient
-                  Padding(
-                    padding: EdgeInsets.only(top: headerHeight * 0.4),
-                    child: _buildFloatingVehicleCard(colorScheme, textTheme, cardHeight, isSmallScreen),
-                  ),
-                ],
-              ),
-
-              // 2. THE REST OF THE DATA
-              SizedBox(height: size.height * 0.03),
-              
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
-                child: Column(
+  return SafeArea(
+    child: Scaffold(
+     
+      body: Stack(
+        children: [
+          // 1. THE SCROLLABLE CONTENT
+           
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                
+                // HEADER BOX (Gradient + Vehicle Card)
+                Stack(
+                  alignment: Alignment.topCenter,
+                  clipBehavior: Clip.none,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: _buildMainScreenPriceCard(colorScheme, textTheme, isSmallScreen, loc),
+                    // The Background Gradient (Now part of the scroll view)
+                    Container(
+                      height: headerHeight,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [colorScheme.primary, colorScheme.primaryContainer],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 4,
-                          child: _buildMainScreenScheduleCard(colorScheme, textTheme, isSmallScreen, loc),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(40),
+                          bottomRight: Radius.circular(40),
                         ),
-                      ],
+                      ),
                     ),
                     
-                    SizedBox(height: size.height * 0.03),
-
-                    // Info Notes
-                    _buildInfoRow(Icons.info_outline, loc.service_note, colorScheme.onSurfaceVariant, isSmallScreen, textTheme),
-                    SizedBox(height: size.height * 0.01),
-                    _buildInfoRow(Icons.info_outline, loc.cancelFeeNotice((_calculatedEstimatedPrice * 0.1).toStringAsFixed(0)), colorScheme.error, isSmallScreen, textTheme),
-
-                    SizedBox(height: size.height * 0.03),
-                    _buildDetailsCard(vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
-                    
-                    // Extra padding at the bottom so the FAB doesn't cover content
-                    SizedBox(height: bottomPadding),
+                    // Floating the Vehicle Card so it overlaps the bottom of the gradient
+                    Padding(
+                      padding: EdgeInsets.only(top: headerHeight * 0.4),
+                      child: _buildFloatingVehicleCard(colorScheme, textTheme, cardHeight, isSmallScreen),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-
-        // 3. FIXED BACK BUTTON (Overlayed on top)
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.white.withOpacity(0.9),
-                  foregroundColor: colorScheme.onSurface,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
+    
+                // 2. THE REST OF THE DATA
+                SizedBox(height: size.height * 0.03),
+                
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: _buildMainScreenPriceCard(colorScheme, textTheme, isSmallScreen, loc),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 4,
+                            child: _buildMainScreenScheduleCard(colorScheme, textTheme, isSmallScreen, loc),
+                          ),
+                        ],
+                      ),
+                      
+                      SizedBox(height: size.height * 0.03),
+                      // Info Notes
+                      if(widget.category=="pro")
+                      _buildInfoRow(Icons.done_all, loc.pro_banner_text, colorScheme.onSurfaceVariant, isSmallScreen, textTheme),
+                      if(widget.category=="eco")
+                      _buildInfoRow(Icons.info_outline, loc.service_note, colorScheme.onSurfaceVariant, isSmallScreen, textTheme),
+                      SizedBox(height: size.height * 0.03),
+                      _buildDetailsCard(vehicleName, vehicleMaxWeight, vehicleVolume, colorScheme, textTheme, isSmallScreen, loc),
+                      // Extra padding at the bottom so the FAB doesn't cover content
+                      SizedBox(height: bottomPadding),
+                    ],
                   ),
                 ),
-                const Spacer(),
               ],
             ),
           ),
-        ),
-      ],
-    ),
     
-    // 4. THE ACTION BUTTON (Fixed at bottom)
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    floatingActionButton: Padding(
-      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
-      child: SizedBox(
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: _passAnOrder, // Using the logic from the previous turn
-          style: FilledButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            backgroundColor: colorScheme.primary,
-            elevation: 8,
+          // 3. FIXED BACK BUTTON (Overlayed on top)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                   CircleAvatar(
+                    radius: 20,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
           ),
-          child: Text(
-            loc.confirmBookingButton(currentPriceDisplay),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
+        ],
+      ),
+      
+      // 4. THE ACTION BUTTON (Fixed at bottom)
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _passAnOrder, // Using the logic from the previous turn
+            style: FilledButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              backgroundColor: colorScheme.primary,
+              elevation: 8,
+            ),
+            child: Text(
+              loc.confirmBookingButton(currentPriceDisplay),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.1),
+            ),
           ),
         ),
       ),
@@ -896,6 +900,8 @@ Widget _buildMainScreenScheduleCard(ColorScheme colorScheme, TextTheme textTheme
             _buildDetailRow(Icons.scale_outlined, loc.maxWeightLabel, "$weight Kg", colorScheme, textTheme),
             const Divider(height: 24),
             _buildDetailRow(Icons.aspect_ratio_outlined, loc.volumeLabel, "$vol m³", colorScheme, textTheme),
+              const Divider(height: 24),
+            _buildDetailRow(Icons.room_service, widget.category=='pro' ?loc.serviceProfessional  :loc.serviceEconomic , "--", colorScheme, textTheme),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shnell/dots.dart';
 import 'package:shnell/model/oredrs.dart';
 import 'package:shnell/model/destinationdata.dart';
 // import 'package:shnell/dots.dart'; // Assuming this is your custom loading indicator used elsewhere
@@ -105,7 +106,7 @@ class _PendingOrderWidgetState extends State<PendingOrderWidget>
         builder: (context, snapshot) {
           if (!snapshot.hasData || !snapshot.data!.exists) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: RotatingDotsIndicator());
             }
             return Center(child: Text(l10n.orderNotFound));
           }

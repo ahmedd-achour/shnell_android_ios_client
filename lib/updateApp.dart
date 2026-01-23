@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shnell/dots.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UpdateAppScreen extends StatelessWidget {
@@ -34,7 +35,7 @@ class UpdateAppScreen extends StatelessWidget {
         builder: (context, snapshot) {
           // Loading State
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: RotatingDotsIndicator());
           }
     
           // Error State

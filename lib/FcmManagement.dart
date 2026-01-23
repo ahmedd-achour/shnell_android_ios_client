@@ -10,13 +10,11 @@ class FCMTokenManager {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
-  void initialize() {
+  void initialize(User user) {
     // 1. Mise à jour au changement de user (Login/Logout)
-    _auth.authStateChanges().listen((User? user) {
-      if (user != null) {
+    
         _updateTokenForUser(user);
-      }
-    });
+     
 
     // 2. Mise à jour si Google rafraîchit le token
     _fcm.onTokenRefresh.listen((newToken) {

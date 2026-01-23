@@ -654,7 +654,12 @@
   "selectDifferentLocation": "Selecionar outro local",
   "zoneValidationFailed": "Não foi possível verificar a área de serviço. Verifique a conexão.",
   "locationSelectedOnMap": "Local selecionado no mapa",
-    "service_note": "Nota: Esta taxa cobre apenas o serviço básico de transporte. Serviços adicionais podem variar de acordo com as necessidades e requisitos de cada caso e podem ser combinados diretamente com o operador, se necessário."
+    "service_note": "Nota: Esta taxa cobre apenas o serviço básico de transporte. Serviços adicionais podem variar de acordo com as necessidades e requisitos de cada caso e podem ser combinados diretamente com o operador, se necessário.",
+    "serviceEconomic": "Econômico",
+  "serviceProfessional": "Profissional",
+  "pro_banner_text": "Serviço Completo • Seguro Incluído • Sem Taxas Ocultas",
+    "pro_banner_sub": "Executado por Agências Certificadas",
+    "eco_banner_text": "Transporte Básico • Calçada a Calçada • Melhor Valor"
 
 
 

@@ -4,6 +4,7 @@ import 'package:shnell/History.dart';
 import 'package:shnell/drawer.dart';
 import 'package:shnell/tabsControlerMultipleAsignements.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'main.dart';
 
 class MainUsersScreen extends StatelessWidget {
   final int? initialIndex;
@@ -30,7 +31,6 @@ class _MainTabsContent extends StatefulWidget {
 }
 
 class _MainTabsContentState extends State<_MainTabsContent> {
-  late int _currentIndex;
 
   final List<Widget> _tabs = const [
     SingleBookingScreen(),
@@ -42,34 +42,40 @@ class _MainTabsContentState extends State<_MainTabsContent> {
 
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
 
   }
-
-
-  @override
+@override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      drawer: const ShnellDrawer(),
-      extendBodyBehindAppBar: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: l10n.home),
-          BottomNavigationBarItem(icon: Icon(Icons.history_edu_outlined, size: 26), label: l10n.history),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outlined), label: l10n.account),
-        ],
-        selectedItemColor: const Color.fromARGB(255, 187, 152, 48),
-        unselectedItemColor: const Color.fromARGB(255, 197, 197, 195),
-        type: BottomNavigationBarType.fixed,
-      ),
+    // 2. Wrap your Scaffold in a ValueListenableBuilder
+    return ValueListenableBuilder<int>(
+      valueListenable: persistentTabController,
+      builder: (context, currentIndex, _) {
+        return Scaffold(
+          drawer: const ShnellDrawer(),
+          extendBodyBehindAppBar: true,
+          body: IndexedStack(
+            index: currentIndex, // Uses the persistent value
+            children: _tabs,
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: (index) {
+              // 3. Update the persistent value instead of local state
+              persistentTabController.value = index;
+            },
+            items: [
+              BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: l10n.home),
+              BottomNavigationBarItem(icon: Icon(Icons.history_edu_outlined, size: 26), label: l10n.history),
+              BottomNavigationBarItem(icon: Icon(Icons.person_outlined), label: l10n.account),
+            ],
+            selectedItemColor: const Color.fromARGB(255, 187, 152, 48),
+            unselectedItemColor: const Color.fromARGB(255, 197, 197, 195),
+            type: BottomNavigationBarType.fixed,
+          ),
+        );
+      },
     );
   }
 }

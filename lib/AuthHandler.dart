@@ -1,259 +1,183 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shnell/FcmManagement.dart';
 import 'package:shnell/model/users.dart';
 
-class AuthMethods {
+class GoogleSignInService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-  // Get Current User
-  User? getCurrentUser() {
-    return _auth.currentUser;
+  static bool _isInitialized = false;
+
+  static const String _serverClientId =
+      '217120837439-2reugbpp9l30hs3snmcukhvnnsmksg9u.apps.googleusercontent.com';
+
+  static Future<void> initSignIn() async {
+    if (_isInitialized) return;
+    await _googleSignIn.initialize(serverClientId: _serverClientId);
+    _isInitialized = true;
   }
 
-  void _requestPermissions() {
-    Permission.location.request();
-    Permission.audio.request();
-  }
+ /* void _snack(BuildContext context, String msg,
+      {Color color = Colors.black, bool clear = true}) {
+    if (!context.mounted) return;
+    final m = ScaffoldMessenger.of(context);
+    if (clear) m.clearSnackBars();
+    m.showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: color,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }*/
 
-  // --- SIGN UP (STRICT FLOW) ---
-  // 1. Create User
-  // 2. Write to Firestore immediately
-  // 3. Send Verification Email
-  Future<String?> signUp({
-    required String email,
-    required String password,
-    required String name,
-    required String phone,
-  }) async {
+  Future<UserCredential?> signInWithGoogle(String phone, BuildContext context) async {
+   // void s(String msg, {Color color = Colors.blueGrey}) =>
+      //  _snack(context, '[$step] $msg', color: color);
+
     try {
-      // Validate inputs
-      if (phone.isNotEmpty && !RegExp(r'^\+?[0-9]{7,15}$').hasMatch(phone) && phone.length != 8) {
-        return 'Format de téléphone invalide';
-      }
+     // s("init google_sign_in…", color: Colors.deepPurple);
+      await initSignIn();
 
-      // Create user with email and password
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+     // s("disconnect (reset session)…", color: Colors.deepPurple);
+      await _googleSignIn.disconnect().catchError((_) {});
 
-      User? user = userCredential.user;
+    //  s("authenticate()… (account picker)", color: Colors.orange);
 
-      if (user != null) {
-        // Update Display Name
-        await user.updateDisplayName(name);
-
-        // Save user data to Firestore IMMEDIATELY
-        final shnellUser = shnellUsers(
-          email: email,
-          name: name,
-          phone: phone.isEmpty ? '' : phone,
-          role: 'user',
-          isActive: true, // Active, but needs verification to login
-          darkMode: false,
-        );
-
-        // Using set(..., SetOptions(merge: true)) is safer
-        await _firestore.collection('users').doc(user.uid).set(
-              shnellUser.toJson(),
-              SetOptions(merge: true),
-            );
+      GoogleSignInAccount? account;
+      try {
+        account = await _googleSignIn.authenticate();
         
-        // CRITICAL: Send Verification Email
-        await user.sendEmailVerification();
-
-        debugPrint('User signed up, saved, and verification sent: ${user.uid}');
-        return 'success'; 
-      } else {
-        return 'Échec de la création de l\'utilisateur';
+      } on PlatformException catch (e) {
+       /* s("PlatformException: ${e.code} | ${e.message ?? ''}",
+            color: Colors.redAccent);*/
+      //  debugPrint("[GSI] PlatformException code=${e.code} message=${e.message} details=${e.details}");
+        return null;
+      } catch (e) {
+        //s("authenticate threw: $e", color: Colors.redAccent);
+        //debugPrint("[GSI] authenticate error: $e\n$st");
+        return null;
       }
-    } on FirebaseAuthException catch (e) {
-      debugPrint('Sign Up Error: ${e.message}');
-      return _mapAuthError(e.code);
-    } catch (e) {
-      debugPrint('Sign Up General Error: $e');
-      return 'Une erreur inattendue est survenue: $e';
-    }
-  }
 
-  // --- SIGN IN (STRICT FLOW) ---
-  // 1. Check Credentials
-  // 2. Check Email Verification
-  Future<String?> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      // Attempt Sign In
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      if (account == null) {
+       // s("cancelled by user (account == null)", color: Colors.orange);
+        return null;
+      }
+
+      //s("picked: ${account.email}", color: const Color.fromARGB(255, 71, 114, 2));
+
+      //s("get authentication tokens…", color: Colors.blue);
+
+      final auth = await account.authentication;
+
+      final String? idToken = auth.idToken;
+
+      // We intentionally ignore accessToken completely.
+     // debugPrint("[GSI] idTokenNull=${idToken == null} accessTokenPresent=${auth != null}");
+
+      if (idToken == null) {
+        //s("idToken is NULL → config/signing issue", color: Colors.redAccent);
+        return null;
+      }
+
+     // s("build Firebase credential (ID TOKEN ONLY)…", color: Colors.blue);
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+        // accessToken omitted on purpose
       );
 
-      User? user = userCredential.user;
+     // s("FirebaseAuth.signInWithCredential…", color: Colors.blue);
 
-      if (user != null) {
-        // CRITICAL: Check Verification Status
-        if (!user.emailVerified) {
-          // If not verified, we DO NOT request permissions or proceed.
-          // We sign them out immediately to prevent access.
-          await _auth.signOut();
-          return 'email-not-verified'; // Special code for UI to handle
-        }
+      final userCredential = await _auth.signInWithCredential(credential);
 
-        // Success Path
-        debugPrint('Sign-in successful for verified user: ${user.uid}');
-        _requestPermissions();
-        return 'success';
-      } else {
-        return 'Échec de la connexion';
+      final user = userCredential.user;
+      if (user == null) {
+       // s("Firebase user == null (unexpected)", color: Colors.redAccent);
+        return userCredential;
       }
-    } on FirebaseAuthException catch (e) {
-      debugPrint('Sign In Error: ${e.message}');
-      return _mapAuthError(e.code);
-    } catch (e) {
-      debugPrint('Sign In General Error: $e');
-      return 'Une erreur inattendue est survenue: $e';
-    }
-  }
 
-  // Logout
-  Future<void> logout() async {
-    try {
-      await _auth.signOut();
-      debugPrint('User logged out successfully');
+    //  s("signed in uid=${user.uid}", color: const Color.fromARGB(255, 71, 114, 2));
+
+    //  s("check/create Firestore user doc…", color: Colors.teal);
+
+      final ref = FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+
+      final snap = await ref.get();
+
+      if (!snap.exists) {
+       // s("creating user doc…", color: Colors.teal);
+             String? token = await FirebaseMessaging.instance.getToken();
+
+        await ref.set(
+          shnellUsers(
+            email: user.email ?? "",
+            name: user.displayName ?? "",
+            phone: phone,
+            role: 'user',
+            fcmToken: token
+          ).toJson(),
+        );
+      } else {
+              final token = await FirebaseMessaging.instance.getToken();
+
+await ref.set({
+  "phone": phone,
+  "fcmToken": token,
+}, SetOptions(merge: true));
+       // s("user doc exists", color: Colors.teal);
+      }
+
+    //  s("init FCM token…", color: Colors.teal);
+      // FCMTokenManager().initialize(user);
+
+     // s("DONE ✅", color: const Color.fromARGB(255, 71, 114, 2));
+      return userCredential;
+
+    } on FirebaseAuthException catch (e) {
+     // _snack(context, "FirebaseAuthException: ${e.code} ${e.message ?? ''}",
+        //  color: Colors.redAccent);
+     // debugPrint("[AUTH] FirebaseAuthException ${e.code}: ${e.message}\n$st");
+      rethrow;
     } catch (e) {
-      debugPrint('Error logging out: $e');
+    //  _snack(context, "Unexpected error: $e", color: Colors.redAccent);
+    //  debugPrint("[AUTH] Unexpected error: $e\n$st");
       rethrow;
     }
   }
 
-  // Resend Verification Email (Helper)
-  Future<String?> resendVerificationEmail() async {
+  Future<void> signOut() async {
+  /*  void s(String msg, {Color color = Colors.blueGrey}) =>
+        _snack(context, msg, color: color);*/
+
     try {
-      final user = _auth.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-        return 'success';
-      }
-      return 'User not found or already verified';
+     // s("Signing out…", color: Colors.orange);
+
+      await Future.wait([
+        FCMTokenManager().deleteTokenOnLogout().catchError((e) {
+         // debugPrint("[FCM] deleteTokenOnLogout error: $e");
+        }),
+        _auth.signOut().catchError((e) {
+         // debugPrint("[AUTH] signOut error: $e");
+        }),
+        _googleSignIn.signOut().catchError((e) {
+        //  debugPrint("[GSI] signOut error: $e");
+        }),
+      ]);
+
+     // s("Signed out ✅", color: const Color.fromARGB(255, 71, 114, 2));
     } catch (e) {
-      return e.toString();
+     // s("Sign out error: $e", color: Colors.redAccent);
+     // debugPrint("[SIGNOUT] error: $e\n$st");
+      await _auth.signOut().catchError((_) {});
     }
   }
 
-  // Get User Data
-  Future<shnellUsers?> getUserData(String userId) async {
-    try {
-      final doc = await _firestore.collection('users').doc(userId).get();
-      if (doc.exists) {
-        // Ensure your ShnellUser.fromJson handles the parsing correctly
-        return shnellUsers.fromJson(doc.data() as Map<String, dynamic> );
-      } else {
-        debugPrint('User not found in Firestore: $userId');
-        return null;
-      }
-    } catch (e) {
-      debugPrint('Error fetching user data: $e');
-      return null;
-    }
-  }
-
-  // Map Firebase Auth Errors to French Messages
-  String _mapAuthError(String code) {
-    switch (code) {
-      case 'email-already-in-use':
-        return 'Cet email est déjà enregistré';
-      case 'invalid-email':
-        return 'Format d\'email invalide';
-      case 'weak-password':
-        return 'Le mot de passe est trop faible (min 6 caractères)';
-      case 'user-not-found':
-        return 'Aucun utilisateur trouvé avec cet email';
-      case 'wrong-password':
-        return 'Mot de passe incorrect';
-      case 'too-many-requests':
-        return 'Trop de tentatives. Veuillez réessayer plus tard';
-      case 'network-request-failed':
-        return 'Erreur réseau. Vérifiez votre connexion';
-      case 'user-disabled':
-        return 'Ce compte utilisateur a été désactivé';
-      case 'credential-already-in-use':
-        return 'Ces identifiants sont déjà associés à un autre compte';
-      default:
-        return 'Erreur d\'authentification: $code';
-    }
-  }
-
-  // -------------------------------
-  // 🔐 OTP HANDLING (Unchanged)
-  // -------------------------------
-  static final Map<String, _OtpData> _pendingOtps = {};
-
-  static Future<void> updateEmailWithOtp(String newEmail) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception("User not logged in");
-    final otp = _generateOtp();
-    _pendingOtps[uid] = _OtpData(
-      otp: otp,
-      expiry: DateTime.now().add(const Duration(seconds: 90)),
-      field: "email",
-      newValue: newEmail,
-    );
-    print("DEBUG OTP for email update: $otp");
-  }
-
-  static Future<void> verifyOtpAndApply(String otp) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception("User not logged in");
-    final data = _pendingOtps[uid];
-    if (data == null) throw Exception("No pending OTP request");
-    if (DateTime.now().isAfter(data.expiry)) {
-      _pendingOtps.remove(uid);
-      throw Exception("OTP expired");
-    }
-    if (otp != data.otp) throw Exception("Invalid OTP");
-    if (data.field == "email") {
-      await _auth.currentUser?.verifyBeforeUpdateEmail(data.newValue);
-      await _firestore.collection("users").doc(uid).update({"email": data.newValue});
-    }
-    _pendingOtps.remove(uid);
-  }
-
-  static Future<void> updatePhoneWithOtp(String newPhone) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) throw Exception("User not logged in");
-    final otp = _generateOtp();
-    _pendingOtps[uid] = _OtpData(
-      otp: otp,
-      expiry: DateTime.now().add(const Duration(seconds: 90)),
-      field: "phone",
-      newValue: newPhone,
-    );
-    print("DEBUG OTP for phone update: $otp");
-  }
-
-  static String _generateOtp() {
-    final random = Random();
-    return (100000 + random.nextInt(900000)).toString();
-  }
-}
-
-class _OtpData {
-  final String otp;
-  final DateTime expiry;
-  final String field; 
-  final String newValue;
-
-  _OtpData({
-    required this.otp,
-    required this.expiry,
-    required this.field,
-    required this.newValue,
-  });
+  static User? getCurrentUser() => _auth.currentUser;
 }

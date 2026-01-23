@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shnell/SignInScreen.dart';
+import 'package:shnell/dots.dart';
 import 'package:shnell/mainUsers.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
@@ -129,7 +130,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               ),
               const SizedBox(height: 48),
               if(FirebaseAuth.instance.currentUser?.emailVerified == false)
-              const CircularProgressIndicator(),
+              const RotatingDotsIndicator(),
               if(FirebaseAuth.instance.currentUser?.emailVerified == false)
 
               const SizedBox(height: 16),

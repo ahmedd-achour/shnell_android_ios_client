@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shnell/AuthHandler.dart';
-import 'package:shnell/dots.dart';
 // Assuming you have this set up based on previous context
 
 class LanguageSelectionWidget extends StatefulWidget {
@@ -13,9 +11,8 @@ class LanguageSelectionWidget extends StatefulWidget {
 }
 
 class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
-  final AuthMethods _authMethods = AuthMethods();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  fb_auth.User? currentUser;
+  final currentUser = fb_auth.FirebaseAuth.instance.currentUser;
 
   String? _selectedLanguage;
 
@@ -35,7 +32,6 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
   @override
   void initState() {
     super.initState();
-    currentUser = _authMethods.getCurrentUser();
     _fetchCurrentUserLanguage();
   }
 
@@ -77,10 +73,11 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
 
 
     try {
+      Navigator.of(context).pop(); // Close the language selection screen
+
       await _firestore.collection('users').doc(currentUser!.uid).update({
         'language': newLanguage,
       });
-      Navigator.of(context).pop(); // Close the language selection screen
 
       
       if (mounted) {
@@ -120,9 +117,7 @@ class _LanguageSelectionWidgetState extends State<LanguageSelectionWidget> {
         elevation: 0,
       ),
       backgroundColor: colorScheme.surface,
-     body: currentUser == null
-          ? const Center(child: RotatingDotsIndicator())
-          : Padding(
+     body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
               child: ListView.builder(
                 physics: const BouncingScrollPhysics(),

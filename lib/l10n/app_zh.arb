@@ -624,6 +624,8 @@
   "minutesShort": "{count} 分钟",
   "pickupIn": "{time}后到达",
   "inTransit": "运输中",
+  "serviceEconomic": "经济型",
+  "serviceProfessional": "专业型",
 
 
 
@@ -661,7 +663,10 @@
   "selectDifferentLocation": "选择其他位置",
   "zoneValidationFailed": "无法验证服务区域。请检查连接。",
   "locationSelectedOnMap": "已在地图上选择位置",
-    "service_note": "注意：此费用仅涵盖基本运输服务。额外服务可能根据每个情况的需求和要求而有所不同，如有需要可直接与运营商协调。"
+    "service_note": "注意：此费用仅涵盖基本运输服务。额外服务可能根据每个情况的需求和要求而有所不同，如有需要可直接与运营商协调。",
+    "pro_banner_text": "全套服务 • 包含保险 • 无隐藏费用",
+    "pro_banner_sub": "由认证机构执行",
+    "eco_banner_text": "基本运输 • 路边到路边 • 超值优惠"
 
 
 

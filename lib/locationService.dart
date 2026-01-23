@@ -254,7 +254,7 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   Widget _buildSearchView(ColorScheme colorScheme, AppLocalizations l10n) {
     return Column(
       children: [
-        ListTile(leading: Icon(Icons.my_location, color: colorScheme.primary), title: Text(l10n.currentLocation), onTap: () => _useCurrentLocation(l10n)),
+        ListTile(leading: Icon(Icons.my_location, color: colorScheme.primary), title: Text(l10n.currentLocation), onTap: () => _useCurrentLocation()),
         ListTile(leading: Icon(Icons.map_outlined, color: colorScheme.primary), title: Text(l10n.search), onTap: _toggleMapView),
         const Divider(),
         Expanded(
@@ -272,43 +272,54 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
   }
 
   Widget _buildMapView(ColorScheme colorScheme, AppLocalizations l10n) {
-    return Stack(
-      children: [
-        GoogleMap(
-          initialCameraPosition: CameraPosition(target: LatLng(_currentPinLocation.latitude, _currentPinLocation.longitude), zoom: 15.0),
-          onMapCreated: (controller) {
-            controller.setMapStyle(mapStyleNotifier.value);
-            if (!_mapController.isCompleted) _mapController.complete(controller);
-          },
-          onCameraMove: (pos) => _currentPinLocation = lt.LatLng(pos.target.latitude, pos.target.longitude),
-          myLocationEnabled: true,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: false,
-        ),
-        
-        // Accurate Pin Alignment (Anchor is the tip)
-        IgnorePointer(
-          child: Center(
-            child: AnimatedBuilder(
-              animation: Listenable.merge([_pinDropController, _selectController, _pulseController]),
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _pulseScaleAnimation.value,
-                  child: Transform.translate(
-                    offset: Offset(0, -24 + _pinDropAnimation.value + _selectAnimation.value),
-                    child: Image.asset('assets/pin.png', width: 48, height: 48),
-                  ),
-                );
-              },
+    return Scaffold(
+    extendBodyBehindAppBar: true, 
+    appBar: AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.transparent, // Fully transparent
+      elevation: 0,                       // Remove shadow
+      scrolledUnderElevation: 0,          // Stop color change when map moves
+      systemOverlayStyle: SystemUiOverlayStyle.dark, // Dark icons for light map
+    ),
+    
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(target: LatLng(_currentPinLocation.latitude, _currentPinLocation.longitude), zoom: 15.0),
+            onMapCreated: (controller) {
+              controller.setMapStyle(mapStyleNotifier.value);
+              if (!_mapController.isCompleted) _mapController.complete(controller);
+            },
+            onCameraMove: (pos) => _currentPinLocation = lt.LatLng(pos.target.latitude, pos.target.longitude),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+          ),
+          
+          // Accurate Pin Alignment (Anchor is the tip)
+          IgnorePointer(
+            child: Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([_pinDropController, _selectController, _pulseController]),
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _pulseScaleAnimation.value,
+                    child: Transform.translate(
+                      offset: Offset(0, -24 + _pinDropAnimation.value + _selectAnimation.value),
+                      child: Image.asset('assets/pin.png', width: 48, height: 48),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-
-        Positioned(
-          bottom: 0, left: 0, right: 0,
-          child: _buildBottomPanel(colorScheme, l10n),
-        ),
-      ],
+      
+          Positioned(
+            bottom: 0, left: 0, right: 0,
+            child: _buildBottomPanel(colorScheme, l10n),
+          ),
+        ],
+      ),
     );
   }
 
@@ -347,13 +358,38 @@ class _SearchLocationScreenState extends State<SearchLocationScreen> with Ticker
     );
   }
 
-  Future<void> _useCurrentLocation(AppLocalizations l10n) async {
-    setState(() => _isLoading = true);
+  Future<void> _useCurrentLocation() async {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      final pos = await LocationUtils.getCurrentLocation();
-      _onPlaceSelected(GooglePlacePrediction(lat: pos.latitude, lng: pos.longitude, description: l10n.currentLocation));
+      final position = await LocationUtils.getCurrentLocation();
+      final latLng = lt.LatLng(position.latitude, position.longitude);
+      final address = await LocationUtils.reverseGeocode(latLng, context, {});
+      
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        Navigator.pop(
+          context,
+          GooglePlacePrediction(
+            placeId: null,
+            description: address ?? l10n.currentLocation,
+            lat: latLng.latitude,
+            lng: latLng.longitude,
+          ),
+        );
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
+
 }

@@ -666,7 +666,12 @@
   "selectDifferentLocation": "Seleccionar otra ubicación",
   "zoneValidationFailed": "No se pudo verificar el área de servicio. Verifique la conexión.",
   "locationSelectedOnMap": "Ubicación seleccionada en el mapa",
-    "service_note": "Nota: Esta tarifa cubre solo el servicio de transporte básico. Los servicios adicionales pueden variar según las necesidades y los requisitos de cada caso, y se pueden coordinar directamente con el operador si es necesario."
+    "service_note": "Nota: Esta tarifa cubre solo el servicio de transporte básico. Los servicios adicionales pueden variar según las necesidades y los requisitos de cada caso, y se pueden coordinar directamente con el operador si es necesario.",
+    "serviceEconomic": "Económico",
+  "serviceProfessional": "Profesional",
+  "pro_banner_text": "Servicio Completo • Seguro Incluido • Sin Cargos Ocultos",
+    "pro_banner_sub": "Ejecutado por Agencias Certificadas",
+    "eco_banner_text": "Transporte Básico • De Acera a Acera • Mejor Precio"
 
 
 

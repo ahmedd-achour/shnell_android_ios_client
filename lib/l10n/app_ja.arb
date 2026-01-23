@@ -46,6 +46,8 @@
   "notSuitable": "不適切",
   "cancelFeeNotice": "ドライバーの承諾後のキャンセルには、トラック移動費用として {amount} DT (10%) の支払いが必要です。",
   "retry": "再試行",
+  "serviceEconomic": "エコノミー",
+  "serviceProfessional": "プロフェッショナル",
 
 "selectLocationTitle": "{type}場所を選択",
 "searchForALocation": "場所を検索",
@@ -663,7 +665,11 @@
   "selectDifferentLocation": "別の場所を選択",
   "zoneValidationFailed": "サービスエリアを確認できませんでした。接続を確認してください。",
   "locationSelectedOnMap": "地図上で選択された場所",
-    "service_note": "注意：この料金は基本的な輸送サービスのみをカバーします。追加サービスは各ケースの必要性や条件によって異なる場合があり、必要に応じて運営者と直接調整できます。"
+    "service_note": "注意：この料金は基本的な輸送サービスのみをカバーします。追加サービスは各ケースの必要性や条件によって異なる場合があり、必要に応じて運営者と直接調整できます。",
+
+    "pro_banner_text": "フルサービス • 保険込み • 追加料金なし",
+    "pro_banner_sub": "認定された専門業者が実施",
+    "eco_banner_text": "基本輸送 • 路上受け渡し • 最安値"
 
 
 

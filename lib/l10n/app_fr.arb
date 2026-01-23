@@ -658,7 +658,12 @@
   "zoneValidationFailed": "Impossible de vérifier la zone. Vérifiez la connexion.",
   "locationSelectedOnMap": "Position sélectionnée sur la carte",
     "service_note": "Remarque : Ce tarif couvre uniquement le service de transport de base. Les services supplémentaires peuvent varier selon les besoins et les exigences de chaque cas et peuvent être arrangés directement avec l’opérateur si nécessaire.",
-    "cancelFeeNotice": "L'annulation après acceptation nécessite des frais de déplacement camion de {amount} DT (10%)."
+    "cancelFeeNotice": "L'annulation après acceptation nécessite des frais de déplacement camion de {amount} DT (10%).",
+    "serviceEconomic": "Économique",
+  "serviceProfessional": "Professionnel",
+  "pro_banner_text": "Service Complet • Assurance Incluse • Prix Fixe",
+    "pro_banner_sub": "Exécuté par des Agences Certifiées",
+    "eco_banner_text": "Transport Simple • Trottoir à Trottoir • Meilleur Prix"
 
 
 

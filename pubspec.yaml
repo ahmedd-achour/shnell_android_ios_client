@@ -68,7 +68,8 @@ dependencies:
   intl_phone_number_input: ^0.7.4
   pin_code_fields: ^8.0.1
   mailer: ^6.1.0
-  
+  font_awesome_flutter: ^10.6.0 # For the Google Brand Icon
+  google_sign_in: ^7.2.0
 
   
 

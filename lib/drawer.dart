@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:shnell/Account/privacyPolicy.dart';
 import 'package:shnell/AuthHandler.dart';
-import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/mainUsers.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shnell/us.dart'; // ContactUsWidget
@@ -41,15 +40,10 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
       onTap: onTap,
     );
   }
-
   Future<void> _logoutAction() async {
-    await AuthMethods().logout();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()),
-      (_) => false,
-    );
+    await GoogleSignInService().signOut();
   }
+
 
 @override
 Widget build(BuildContext context) {
@@ -131,7 +125,7 @@ Widget build(BuildContext context) {
               title: l10n.logout,
               iconColor: Colors.red,
               textColor: Colors.red,
-              onTap: () async => _showLogoutDialog(context, l10n, colorScheme),
+              onTap: () async => _logoutAction()
             ),
             const SizedBox(height: 12), // Padding from the bottom of the screen
           ],
@@ -143,6 +137,11 @@ Widget build(BuildContext context) {
 
 // Helper for the Header to keep the build method clean
 Widget _buildHeader(ColorScheme colorScheme, String userName) {
+   final theme = Theme.of(context);
+    final authUser = fb_auth.FirebaseAuth.instance.currentUser;
+
+    final photoUrl = authUser?.photoURL;
+   
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.only(top: 60, left: 16, bottom: 20),
@@ -150,11 +149,15 @@ Widget _buildHeader(ColorScheme colorScheme, String userName) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          radius: 32,
-          backgroundImage: const AssetImage("assets/shnell.jpeg"),
-          backgroundColor: Colors.grey[200],
-        ),
+         CircleAvatar(
+            radius: 36,
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+            child: photoUrl == null
+                ? Icon(Icons.person,
+                    size: 36, color: theme.colorScheme.primary)
+                : null,
+          ),
         const SizedBox(height: 12),
         Text(
           userName,
@@ -171,22 +174,4 @@ Widget _buildHeader(ColorScheme colorScheme, String userName) {
 }
 
 // Helper for the Logout Dialog
-Future<void> _showLogoutDialog(BuildContext context, AppLocalizations l10n, ColorScheme colorScheme) async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.logout),
-      content: Text(l10n.logout), // You might want a "Are you sure?" string here
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: Text(l10n.logout, style: TextStyle(color: colorScheme.error)),
-        ),
-      ],
-    ),
-  );
-  if (confirm == true) {
-    await _logoutAction();
-  }
-}}
+}

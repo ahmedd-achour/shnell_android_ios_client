@@ -42,7 +42,7 @@ class Deoaklna extends StatefulWidget {
 class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveClientMixin {
   // Configuration Constants
   static const Duration _fetchTimeout = Duration(seconds: 15);
-  static const String googleDirectionsApiKey = 'AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w'; 
+  static const String googleDirectionsApiKey = 'AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w';
 
   // State Variables
   final Completer<GoogleMapController> _mapController = Completer();
@@ -59,7 +59,6 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   List<DropOffData> _allDropoffs = [];
   List<DropOffData> _remainingDropoffs = [];
   List<String> _stopIds = [];
-  
   // Driver Details
   String? _driverID;
   String? _orderId;
@@ -75,10 +74,10 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   bool _isCallLoading = false; 
 
   // --- ETA Variables (Raw Data for Localization) ---
-  int? _etaSecondsRemaining; // Changed from String to Int for cleaner L10n
-  double? _baselineTotalDist; 
-  int? _baselineTotalSeconds; 
-  latlong.LatLng? _currentTarget; 
+  int? _etaSecondsRemaining;// Changed from String to Int for cleaner L10n
+  double? _baselineTotalDist;
+  int? _baselineTotalSeconds;
+  latlong.LatLng? _currentTarget;
 
   // Subscriptions
   StreamSubscription? _dealStatusSubscription;
@@ -95,10 +94,9 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   @override
   void initState() {
     super.initState();
-    _loadCustomMarkerIcons(); 
+    _loadCustomMarkerIcons();
     _initializeScreen();
-          mapStyleNotifier.addListener(_updateMapStyle); 
-
+    mapStyleNotifier.addListener(_updateMapStyle);
   }
 
   @override
@@ -111,7 +109,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
     _circlesNotifier.dispose();
     _polylinesNotifier.dispose();
     _mapController.future.then((controller) => controller.dispose());
-            mapStyleNotifier.removeListener(_updateMapStyle); // ← Clean up listener
+    mapStyleNotifier.removeListener(_updateMapStyle); // ← Clean up listener
 
     super.dispose();
   }
@@ -531,21 +529,47 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
       debugPrint("Zoom error: $e");
     }
   }
+  Future<void> _makeCall() async {
+    setState(() => _isCallLoading = true);
+    try {
+        DocumentSnapshot  ourdoc= await FirebaseFirestore.instance.collection("users").doc(_order!.userId).get();
+                DocumentSnapshot  userData= await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
+
+              final userFCMT  = userData["fcmToken"];
+                  await _agoraService.initiateCall(receiverId: _order!.userId, receiverFCMToken: userFCMT, sessionId: widget.dealId, callerName: ourdoc['name']);
+
+         // await AgoraService().initiateCall(receiverId:  _order!.userId, receiverFCMToken: userFCMT, sessionId: widget.dealId);
+      
+   } catch (e) {
+    } finally {
+      if (mounted) setState(() => _isCallLoading = false);
+    }
+  }
 
   // --- ACTIONS ---
   Future<void> _initiateInAppCall() async {
-    setState(() => _isCallLoading = true);
     //bool proceed=await _checkCallPermissions(context);
     //if (proceed){
    try {
-      DocumentSnapshot driverData = await FirebaseFirestore.instance.collection("users").doc(_driverID).get();
-      DocumentSnapshot ourDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
-      final driverFCM  = driverData["fcmToken"];
+    final results = await Future.wait([
+  FirebaseFirestore.instance
+      .collection("users")
+      .doc(_driverID)
+      .get(),
+
+  FirebaseFirestore.instance
+      .collection("users")
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .get(),
+]);
+
+final DocumentSnapshot driverData = results[0];
+final DocumentSnapshot ourDoc = results[1];
+final driverFCM  = driverData["fcmToken"];
     await _agoraService.initiateCall(receiverId: _driverID!, receiverFCMToken: driverFCM, sessionId: widget.dealId, callerName: ourDoc['name']);
     } catch (e) {
        // Handle error
     } finally {
-      if (mounted) setState(() => _isCallLoading = false);
     }
 
    // }
@@ -554,7 +578,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
 
   Future<void> _loadCustomMarkerIcons() async {
     try {
-      _driverIcon = await _loadCustomMarker('delivery_boy' , 96);
+      _driverIcon = await _loadCustomMarker('active' , 96);
       _pickupIcon = await _loadCustomMarker('pin' , 64);
       _undeliveredStopIcon = await _loadCustomMarker('pin' , 64);
       _deliveredStopIcon = await _loadCustomMarker('check' , 64);
@@ -769,18 +793,7 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
               amount: _order?.price ?? 0,
               colorScheme: colorScheme,
             ),
-
-            if (_dealStatus == DealStatus.accepted)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: _fareRowCompact(
-                  icon: Icons.info_outline,
-                  label: loc.cancel,
-                  amount: (_order?.price ?? 0) * 0.1,
-                  colorScheme: colorScheme,
-                  isError: true,
-                ),
-              ),
+       
             // --- ACTION BUTTONS (Optional: Keep for consistent height or status) ---
             if (_dealStatus != DealStatus.accepted)
                Container(

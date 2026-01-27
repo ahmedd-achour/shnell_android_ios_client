@@ -529,22 +529,6 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
       debugPrint("Zoom error: $e");
     }
   }
-  Future<void> _makeCall() async {
-    setState(() => _isCallLoading = true);
-    try {
-        DocumentSnapshot  ourdoc= await FirebaseFirestore.instance.collection("users").doc(_order!.userId).get();
-                DocumentSnapshot  userData= await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
-
-              final userFCMT  = userData["fcmToken"];
-                  await _agoraService.initiateCall(receiverId: _order!.userId, receiverFCMToken: userFCMT, sessionId: widget.dealId, callerName: ourdoc['name']);
-
-         // await AgoraService().initiateCall(receiverId:  _order!.userId, receiverFCMToken: userFCMT, sessionId: widget.dealId);
-      
-   } catch (e) {
-    } finally {
-      if (mounted) setState(() => _isCallLoading = false);
-    }
-  }
 
   // --- ACTIONS ---
   Future<void> _initiateInAppCall() async {

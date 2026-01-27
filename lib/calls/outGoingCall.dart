@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,15 +79,12 @@ class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
                             color: Colors.redAccent,
                             onPressed: ()async{
                               await _agoraService.leave();
-            await FirebaseFirestore.instance.collection('calls').doc(widget.data['dealId']).delete();
-
-                          
                              // final callerDoc = await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
                                // final callerFcm = callerDoc['fcmToken'];
                                   final recieverDoc = await FirebaseFirestore.instance.collection('users').doc(widget.data['receiverFirebaseUid']).get();
                                 final reciverFcm = recieverDoc['fcmToken'];
-                                    unawaited(
-                        http.post(
+                                    
+                        await http.post(
               Uri.parse("$cloudFunctionUrl/terminateCall"),
               headers: {"Content-Type": "application/json"},
               body: jsonEncode({
@@ -96,7 +92,10 @@ class _OutgoingCallOverlayState extends State<OutgoingCallOverlay> {
                 "receiverFCMToken": reciverFcm,
                // "callerFCMToken" : callerFCMToken
               }),
-            ));
+            );
+
+            await FirebaseFirestore.instance.collection('calls').doc(widget.data['dealId']).delete();
+
             
                             })
                            

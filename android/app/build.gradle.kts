@@ -42,12 +42,12 @@ android {
         applicationId = "com.shnell.app"
         minSdk = 23
         targetSdk = 35
-        versionCode = 27
-        versionName = "20.16.16"
+        versionCode = 31
+        versionName = "20.18.19"
     }
 buildTypes {
     getByName("release") {
-        // You must enable code shrinking (minify) to use resource shrinking
+        // You must enable code shrinkin²g (minify) to use resource shrinking
         isMinifyEnabled = true
         isShrinkResources = true
         

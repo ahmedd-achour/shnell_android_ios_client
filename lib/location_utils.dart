@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as lt;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:geolocator/geolocator.dart'; // Import the geolocator package
+import 'package:geolocator/geolocator.dart';
+import 'package:shnell/main.dart'; // Import the geolocator package
 
 class LocationUtils {
   static const String _googleApiKey = "AIzaSyCPNt6re39yO5lhlD-H1eXWmRs4BAp_y6w";
@@ -17,6 +18,13 @@ class LocationUtils {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       // Location services are not enabled, don't continue accessing the position.
+      await Geolocator.openLocationSettings();
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        const SnackBar(
+          content: Text('Location services are disabled.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       throw Exception('Location services are disabled.');
     }
 

@@ -108,10 +108,12 @@ Future<void> _toggleCamera() async {
   }
 _endCall()async{
      await _agoraService.leave();
-  if(_isCaller){
-         await FlutterCallkitIncoming.endAllCalls();
+     await FlutterCallkitIncoming.endAllCalls();
 
-    unawaited(
+  if(_isCaller){
+    // en est en une active call , we inform the receiver to terminate, shall the caller ends or the reciver ends (inform the caller also if he ends)
+
+    
         http.post(
               Uri.parse("$cloudFunctionUrl/terminateCall"),
               headers: {"Content-Type": "application/json"},
@@ -120,16 +122,10 @@ _endCall()async{
                 "receiverFCMToken":  _receiverFCMToken ,
                 //"callerFCMToken" : callerFCMToken
               }),
-            ));
-  await FirebaseFirestore.instance.collection('calls').doc(widget.data["dealId"]).delete();
+            );
 
   }else{
-
-
-         await FlutterCallkitIncoming.endAllCalls();
-
-   unawaited(
-        http.post(
+        await http.post(
               Uri.parse("$cloudFunctionUrl/terminateCall"),
               headers: {"Content-Type": "application/json"},
               body: jsonEncode({
@@ -137,10 +133,12 @@ _endCall()async{
                 //"receiverFCMToken":  widget.data['receiverFCMToken'] ,
                 "callerFCMToken" :_callerFCMToken
               }),
-            ));
-  await FirebaseFirestore.instance.collection('calls').doc(widget.data["dealId"]).delete();
+            );
 
   }
+
+  await FirebaseFirestore.instance.collection('calls').doc(widget.data["dealId"]).delete();
+
 
 }
   @override

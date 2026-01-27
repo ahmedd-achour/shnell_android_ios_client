@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,8 +77,7 @@ class _IncomingCallOverlayState extends State<IncomingCallOverlay> with SingleTi
                              await _agoraService.leave();
                              // final callerDoc = await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
                                // final callerFcm = callerDoc['fcmToken'];
-                                    unawaited(
-                        http.post(
+                                    await http.post(
               Uri.parse("$cloudFunctionUrl/terminateCall"),
               headers: {"Content-Type": "application/json"},
               body: jsonEncode({
@@ -87,7 +85,7 @@ class _IncomingCallOverlayState extends State<IncomingCallOverlay> with SingleTi
                // "receiverFCMToken": reciverFcm,
                "callerFCMToken" : widget.data['callerFirebaseUid']
               }),
-            ));
+            );
             await FirebaseFirestore.instance.collection('calls').doc(widget.data['dealId']).delete();
                             }
                         ),

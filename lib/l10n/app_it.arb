@@ -37,8 +37,7 @@
   "cancelFeeNotice": "L'annullamento dopo l'accettazione comporta una penale di {amount} DT (10%) per lo spostamento del camion.",
 
   "cancellationHeading": "11. Politica e Sistema Disciplinare 2ⁿ",
-  "cancellationBody": "Per garantire equità nella logistica ad alto rischio, Shnell Logistics applica una politica rigorosa basata sul momento della cancellazione e sulla parte responsabile.\n\n**11.1 Scenari Cliente**\n- **Cancellazione gratuita**: Prima dell’accettazione del conducente.\n- **10% di commissione**: Dopo l’accettazione ma prima del carico (compensazione carburante/tempo).\n- **Commissione completa (100%) / Decisione Admin**: Dopo il carico o movimento del conducente, la cancellazione è bloccata. Intervento admin richiesto. Senza colpa del conducente si applica il prezzo pieno.\n\n**11.2 Disciplina del Conducente (Sistema Esponenziale 2ⁿ)**\nNessuna multa monetaria. Si utilizzano sospensioni temporali che crescono esponenzialmente:\n- **Eccezione cancellazione gratuita**: Solo se il cliente non si presenta dopo 12 minuti.\n- **Scala delle sanzioni**:\n  1. **1ª violazione**: Avviso (0 giorni)\n  2. **2ª violazione**: **1 giorno** sospensione\n  3. **3ª violazione**: **2 giorni** sospensione\n  4. **4ª violazione**: **4 giorni** sospensione\n  5. **5ª violazione**: **8 giorni** sospensione\n  6. **Successive**: 16, 32, fino a **64 giorni**\n- **Recupero**: Ogni **5 lavori completati con successo** rimuove **1 cancellazione**, permettendo di riconquistare affidabilità gradualmente.\n- **Reset annuale**: Lo storico delle cancellazioni si azzera ogni anno.\n\n**11.3 Accordo reciproco**: L’admin può annullare le tariffe se entrambe le parti concordano."
-,"suspensionHeading": "12. Sospensione Account",
+"cancellationBody": "**Scala delle sanzioni**:\n1. **Prima infrazione**: Avviso e chiamata amministrativa (0 giorni).\n2. **Seconda infrazione**: Sospensione di **1 giorno**.\n3. **Terza infrazione**: Sospensione di **2 giorni**.\n4. **Quarta infrazione**: Sospensione di **4 giorni**.\n5. **Quinta infrazione**: Sospensione di **8 giorni**.\n6. **Successive**: 16, 32, fino a **64 giorni**.\n- **Recupero cancellazioni**: Per ogni **5 servizi completati con successo**, viene rimossa **1 cancellazione** dallo storico del conducente, offrendo la possibilità di ripristinare gradualmente la propria affidabilità.\n- **Reset annuale**: Lo storico viene azzerato annualmente.\n\n**11.3 Accordo reciproco**: Se entrambe le parti concordano sulla cancellazione (es: la merce non entra nel camion), l'amministrazione può annullare le commissioni.","suspensionHeading": "12. Sospensione Account",
   "suspensionBody": "**12.1 Sospensione Automatica**: Basata sul sistema 2ⁿ.\n**12.2 Terminazione**: Per frode, evasione commissioni o abusi.",
   "driverPerformanceHeading": "13. Autonomia del Conducente",
   "driverPerformanceBody": "I conducenti decidono liberamente. Una volta accettato, l'affidabilità è obbligatoria.",
@@ -653,15 +652,20 @@
   "serviceProfessional": "Professionale",
   "pro_banner_text": "Servizio Completo • Assicurazione Inclusa • Nessun Costo Nascosto",
     "pro_banner_sub": "Eseguito da Agenzie Certificate",
-    "eco_banner_text": "Trasporto Base • Marciapiede su Marciapiede • Miglior Valore"
+    "eco_banner_text": "Trasporto Base • Marciapiede su Marciapiede • Miglior Valore",
 
 
 
 
 
-
-
-
-
-
+  "eco_title": "Eco Move",
+  "eco_feature_trips": "Trasloco standard; copre fino a 2 viaggi",
+  "eco_feature_partner": "Gestito da un partner di trasporto verificato",
+  "eco_feature_price": "La nostra tariffa più competitiva e vantaggiosa",
+  
+  "pro_title": "Pro Move",
+  "pro_feature_premium": "Servizio premium con imballaggio completo (Taghlif)",
+  "pro_feature_guarantee": "Garanzia totale sul trasloco e gestione prioritaria",
+  "pro_feature_safety": "Protezione avanzata per la sicurezza dei tuoi beni",
+  "pro_feature_agency": "Eseguito da un'agenzia logistica certificata"
 }

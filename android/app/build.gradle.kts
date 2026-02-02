@@ -42,7 +42,7 @@ android {
         applicationId = "com.shnell.app"
         minSdk = 23
         targetSdk = 35
-        versionCode = 31
+        versionCode = 34
         versionName = "20.18.19"
     }
 buildTypes {

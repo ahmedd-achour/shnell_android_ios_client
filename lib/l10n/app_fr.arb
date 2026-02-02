@@ -36,8 +36,7 @@
   
 
   "cancellationHeading": "11. Politique d'annulation et Système 2ⁿ",
-  "cancellationBody": "Pour garantir l'équité dans la logistique à enjeux élevés, Shnell Logistics applique une politique stricte basée sur le moment de l'annulation et la partie responsable.\n\n**11.1 Scénarios Clients**\n- **Annulation gratuite**: Autorisée avant que le chauffeur n’accepte la course.\n- **Frais 10%**: Après acceptation mais avant le chargement (compensation carburant/temps).\n- **Frais complets (100%) / Décision Admin**: Une fois la marchandise chargée ou le chauffeur en route, l’annulation est bloquée. Intervention admin requise. Sans faute du chauffeur, le prix complet s’applique.\n\n**11.2 Discipline du Chauffeur (Système exponentiel 2ⁿ)**\nPas de pénalités financières. Utilisation de suspensions exponentielles:\n- **Exception annulation gratuite**: Seulement si client absent après 12 min d’attente au point de prise.\n- **Échelle des sanctions**:\n  1. **1ère infraction**: Avertissement (0 jour)\n  2. **2ème infraction**: **1 jour** suspension\n  3. **3ème infraction**: **2 jours** suspension\n  4. **4ème infraction**: **4 jours** suspension\n  5. **5ème infraction**: **8 jours** suspension\n  6. **Suivantes**: 16, 32, jusqu’à **64 jours**\n- **Récupération**: Chaque **5 services réussis** supprime **1 annulation** du registre, permettant de regagner progressivement la fiabilité.\n- **Réinitialisation annuelle**: Le registre des annulations est remis à zéro chaque année.\n\n**11.3 Accord mutuel**: L’admin peut annuler les frais si les deux parties sont d’accord.",
-
+"cancellationBody": "**Échelle des sanctions** :\n1. **Première infraction** : Avertissement et appel administratif (0 jour).\n2. **Deuxième infraction** : Suspension d'un jour.\n3. **Troisième infraction** : Suspension de 2 jours.\n4. **Quatrième infraction** : Suspension de 4 jours.\n5. **Cinquième infraction** : Suspension de 8 jours.\n6. **Suivantes** : 16, 32, jusqu'à 64 jours.\n- **Récupération d'annulation** : Pour chaque 5 services réussis, une annulation est retirée du dossier du chauffeur, lui redonnant une chance de restaurer sa fiabilité.\n- **Remise à zéro annuelle** : Le dossier est réinitialisé chaque année.\n\n**11.3 Accord mutuel** : Si les deux parties s'entendent sur l'annulation (ex : la marchandise n'entre pas dans le camion), l'administration peut annuler les frais.",
 "suspensionHeading": "12. Suspension de compte",
   "suspensionBody": "**12.1 Suspension Automatique**\n- Les comptes chauffeurs sont suspendus automatiquement selon le système 2ⁿ (Section 11.2). Ce blocage est technique et ne peut être levé manuellement.\n\n**12.2 Résiliation**\n- **Fraude** : Fausses commandes ou contournement de la commission.\n- **Comportement** : Harcèlement ou insécurité.\n- **Abus Client** : Les clients annulant de manière abusive seront bannis définitivement.",
   "driverPerformanceHeading": "13. Autonomie du Chauffeur",
@@ -663,12 +662,18 @@
   "serviceProfessional": "Professionnel",
   "pro_banner_text": "Service Complet • Assurance Incluse • Prix Fixe",
     "pro_banner_sub": "Exécuté par des Agences Certifiées",
-    "eco_banner_text": "Transport Simple • Trottoir à Trottoir • Meilleur Prix"
+    "eco_banner_text": "Transport Simple • Trottoir à Trottoir • Meilleur Prix",
 
 
 
-
-
-
-
+  "eco_title": "Éco Move",
+  "eco_feature_trips": "Déménagement standard ; jusqu'à 2 trajets inclus",
+  "eco_feature_partner": "Réalisé par un partenaire transporteur certifié",
+  "eco_feature_price": "Notre tarif le plus compétitif et économique",
+  
+  "pro_title": "Pro Move",
+  "pro_feature_premium": "Service premium avec emballage complet (Taghlif)",
+  "pro_feature_guarantee": "Garantie de déménagement complet et traitement prioritaire",
+  "pro_feature_safety": "Protection maximale pour la sécurité de vos biens",
+  "pro_feature_agency": "Exécuté par une agence logistique professionnelle"
 }

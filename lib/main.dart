@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +16,8 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shnell/FcmManagement.dart';
 
 import 'package:shnell/calls/AgoraService.dart';
 import 'package:shnell/calls/agoraActiveCall.dart';
@@ -34,7 +36,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final ValueNotifier<String> mapStyleNotifier = ValueNotifier<String>('');
 final ValueNotifier<int> persistentTabController = ValueNotifier<int>(0);
 // You can adjust this value according to your current version
-const String _currentAppVersion = "21.21.22";
+const String _currentAppVersion = "21.21.34";
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -152,6 +154,18 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   _setupGlobalCallKitListener();
   unawaited(_warmUpCallQueries());
+      if (Platform.isAndroid && FirebaseAuth.instance.currentUser != null) {
+      // Android 13+
+      final status = await Permission.notification.status;
+      if (!status.isGranted) {
+        await Permission.notification.request();
+      }
+    }
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+    if (user != null) {
+      FCMTokenManager().initialize(user);
+    }
+  });
   runApp(const CallPriorityApp());
 }
 
@@ -290,6 +304,9 @@ class CallRootRouter extends StatelessWidget {
             home: const ShnellWelcomeScreen(),
           );
         }
+
+
+       
 
         // Try cache first for speed
         return FutureBuilder<DocumentSnapshot>(

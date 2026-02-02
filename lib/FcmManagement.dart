@@ -1,8 +1,11 @@
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FCMTokenManager {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -14,6 +17,7 @@ class FCMTokenManager {
     // 1. Mise à jour au changement de user (Login/Logout)
     
         _updateTokenForUser(user);
+     
      
 
     // 2. Mise à jour si Google rafraîchit le token
@@ -31,6 +35,7 @@ class FCMTokenManager {
       if (token != null) {
         await _saveTokenToFirestore(user.uid, token);
       }
+      
     } catch (e) {
       debugPrint("❌ Erreur récupération FCM Token: $e");
     }
@@ -52,6 +57,13 @@ class FCMTokenManager {
         updateData, 
         SetOptions(merge: true) // <-- La protection des données existantes est ici
       );
+          if (Platform.isAndroid && FirebaseAuth.instance.currentUser != null) {
+      // Android 13+
+      final status = await Permission.notification.status;
+      if (!status.isGranted) {
+        await Permission.notification.request();
+      }
+    }
       
       debugPrint("✅ FCM Token synchronisé pour $userId");
     } catch (e) {

@@ -238,20 +238,6 @@ final String? myFCMToken = results[1];
     }
   }
 
-  Future<void> acceptCall({
-    required String sessionId,
-    required String token,
-    required int uid,
-  }) async {
-    
-    try {
-      // no server work needed , just we make sure that our agora is well on the channel
-      await init(token: token, channel: sessionId, uid: uid);
-  
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   Future<void> endCall({required String callId, required String callerFCMToken , required String receiverFCMToken}) async {
     try{

@@ -6,6 +6,7 @@ import 'package:shnell/Account/changeLanguage.dart';
 import 'package:shnell/Account/personalDetails.dart';
 import 'package:shnell/Account/privacyPolicy.dart';
 import 'package:shnell/AuthHandler.dart';
+import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/dots.dart';
 import 'package:shnell/drawer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -22,10 +23,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isProcessing = false;
 
   Future<void> _logoutAction() async {
+   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const UnifiedAuthScreen()));
+
    await GoogleSignInService().signOut();
+
   }
-
-
   Future<void> _toggleDarkMode(bool newValue) async {
     final l10n = AppLocalizations.of(context)!;
     if (_currentUser == null) return;

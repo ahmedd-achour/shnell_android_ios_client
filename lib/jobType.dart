@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shnell/categoryscreen.dart';
 import 'package:shnell/dots.dart'; 
 import 'package:shnell/model/destinationdata.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:shnell/selectionType.dart';
 // import 'package:shnell/screens/vehicle_selection_screen.dart';
 
 // --- MODEL ---
@@ -59,7 +59,7 @@ class _ServiceTypeSelectionScreenState extends State<ServiceTypeSelectionScreen>
   bool _isLoading = true;
   List<ServiceTypeUiModel> _serviceTypes = [];
   String? _selectedTypeId;
-  String _jobCategory = 'eco'; 
+  //String _jobCategory = 'eco'; 
 
   @override
   void initState() {
@@ -105,15 +105,12 @@ void _onContinue() {
     // 2. Pass 'filterVehicleIds' to the next screen
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => VehicleSelectionScreen(
+        builder: (context) => ServiceTierSelectionScreen(
           pickup: widget.pickup,
           dropOffDestination: widget.dropOffDestination,
-          pickup_name: widget.pickupName,
+          pickupName: widget.pickupName,
           // CRITICAL: This restricts the next screen to ONLY the vehicles allowed for this job
-          filterVehicleIds: selectedService.allowedVehicles, 
-          serviceTypeId: selectedService.id, // Optional: if your next screen needs the ID
-          priceMultiplier: selectedService.priceMultiplier,
-          category: _jobCategory, // 'eco' or 'pro'
+          selectedService: selectedService, // Optional: if your next screen needs the ID
         ),
       ),
     );
@@ -185,13 +182,7 @@ void _onContinue() {
                             letterSpacing: -0.5,
                           ),
                         ),
-                        Text(
-                          l10n.serviceTypeSubtitle,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                        
                       ],
                     ),
                   ),
@@ -200,10 +191,9 @@ void _onContinue() {
             ),
 
             // === JOB CATEGORY SELECTOR ===
-            _buildJobCategoryToggle(colorScheme),
+           // _buildJobCategoryToggle(colorScheme),
 
             // === NEW: CONTEXTUAL INFO WIDGET (Added Here) ===
-            _buildCategoryInfo(colorScheme),
             
             // === LIST ===
             Expanded(
@@ -228,67 +218,9 @@ void _onContinue() {
   }
 
   // === NEW: INFO WIDGET IMPLEMENTATION ===
-  Widget _buildCategoryInfo(ColorScheme colorScheme) {
-    // You should move these strings to your AppLocalizations later
-    final isPro = _jobCategory == 'pro';
-    
-    // Pro uses a premium Gold/Amber tint, Eco uses a clean Blue/Grey tint
-    final bgColor =  
-         colorScheme.surfaceContainerLow;
-        
-   
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.transparent, width: 1),
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: Row(
-          key: ValueKey<String>(_jobCategory), // Triggers animation
-          children: [
-            Icon(
-              isPro ? Icons.verified_user_rounded : Icons.info_outline_rounded,
-              size: 18,
-            ),
-            const SizedBox(width: 6),
-          // ... inside _buildCategoryInfo method
-
-Expanded(
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        isPro 
-          ? AppLocalizations.of(context)!.pro_banner_text
-          : AppLocalizations.of(context)!.eco_banner_text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
-        ),
-      ),
-      if (isPro) ...[
-         Text(
-          AppLocalizations.of(context)!.pro_banner_sub,
-          style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
-         )
-      ]
-    ],
-  ),
-),],
-        ),
-      ),
-    );
-  }
 
   // === TOGGLE WIDGET ===
-  Widget _buildJobCategoryToggle(ColorScheme colorScheme) {
+ /* Widget _buildJobCategoryToggle(ColorScheme colorScheme) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 8, 20, 4), // Adjusted bottom margin
@@ -321,8 +253,8 @@ Expanded(
       ),
     );
   }
-
-  Widget _buildToggleOption({
+*/
+/*  Widget _buildToggleOption({
     required String id,
     required IconData icon,
     required String label,
@@ -368,7 +300,7 @@ Expanded(
       ),
     );
   }
-
+*/
   // ... (Rest of your existing code: _buildServiceCard, _getDetailIcons, _buildBottomBar) ...
   
   Widget _buildServiceCard(

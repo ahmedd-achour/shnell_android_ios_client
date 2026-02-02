@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart' as lt;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/dots.dart';
 // Adjust these imports based on your actual project structure
 import 'package:shnell/mainUsers.dart';
@@ -318,10 +319,41 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       }
     }
   }
+  Future<bool> requestCallPermissions() async {
+  // 1. Request multiple permissions correctly (OS handles the sequence)
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.notification,
+  ].request();
+
+  // 2. Map results (request() returns a Map, not a List)
+  final notifs = statuses[Permission.notification];
+
+  // 3. Robust check: Ensure BOTH are granted
+  if (notifs?.isGranted == true) {
+    return true; 
+  }
+
+  // 4. Handle Permanent Denial (The User clicked "Never ask again")
+  if (notifs?.isPermanentlyDenied == true) {
+    // If you return null here, the user is stuck forever. 
+    // Usually, you'd show a dialog or open settings.
+   
+  }
+
+  return false;
+}
 
 Future<void> _passAnOrder() async {
   final loc = AppLocalizations.of(context)!;
-  
+     
+      // Android 13+
+      final status = await Permission.notification.status;
+      if (!status.isGranted) {
+        await Permission.notification.request();
+      }
+
+
+     
   // 1. UX FIX: Check Schedule FIRST before anything else
   if (!_hasChosenSchedule || _selectedScheduleDate == null) {
     HapticFeedback.vibrate(); // Physically alert the user

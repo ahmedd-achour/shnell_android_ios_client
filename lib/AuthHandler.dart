@@ -130,6 +130,9 @@ class GoogleSignInService {
 await ref.set({
   "phone": phone,
   "fcmToken": token,
+  'role':"user",
+  "email": user.email ?? "",
+  "name": user.displayName ?? "",
 }, SetOptions(merge: true));
        // s("user doc exists", color: Colors.teal);
       }

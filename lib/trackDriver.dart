@@ -531,35 +531,58 @@ class _DeliveryTrackingTabState extends State<Deoaklna> with AutomaticKeepAliveC
   }
 
   // --- ACTIONS ---
-  Future<void> _initiateInAppCall() async {
-    //bool proceed=await _checkCallPermissions(context);
-    //if (proceed){
-   try {
-    final results = await Future.wait([
-  FirebaseFirestore.instance
-      .collection("users")
-      .doc(_driverID)
-      .get(),
+Future<void> _initiateInAppCall() async {
+  final String myUid = FirebaseAuth.instance.currentUser!.uid;
+  final DocumentReference callRef = FirebaseFirestore.instance
+      .collection("calls")
+      .doc(widget.dealId);
 
-  FirebaseFirestore.instance
-      .collection("users")
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .get(),
-]);
+  try {
+    // 1. THE ATOMIC LOCK: Determine who wins the race
+    bool iAmTheCaller = await FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(callRef);
 
-final DocumentSnapshot driverData = results[0];
-final DocumentSnapshot ourDoc = results[1];
-final driverFCM  = driverData["fcmToken"];
-    await _agoraService.initiateCall(receiverId: _driverID!, receiverFCMToken: driverFCM, sessionId: widget.dealId, callerName: ourDoc['name']);
-    } catch (e) {
-       // Handle error
-    } finally {
+      if (!snapshot.exists || snapshot.get('status') == 'ended') {
+        // SLOT IS EMPTY: I am the winner. Lock it now.
+        transaction.set(callRef, {
+          'callerId': myUid,
+          'receiverId': _driverID,
+          'status': 'ringing',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        return true; 
+      } else {
+        // SLOT IS FULL: Someone else (the driver) beat me by 0.02s!
+        return false; 
+      }
+    });
+
+    if (!iAmTheCaller) {
+      print("Race lost: Driver is already calling me. Let StreamBuilder handle it.");
+      return; // Stop here. Your UI StreamBuilder will show the Incoming Call screen.
     }
 
-   // }
- 
-  }
+    // 2. THE WINNER PROCEEDS: If we reached here, we are the official caller.
+    final results = await Future.wait([
+      FirebaseFirestore.instance.collection("users").doc(_driverID).get(),
+      FirebaseFirestore.instance.collection("users").doc(myUid).get(),
+    ]);
 
+    final driverData = results[0];
+    final ourDoc = results[1];
+    final driverFCM = driverData["fcmToken"];
+
+    await _agoraService.initiateCall(
+      receiverId: _driverID!,
+      receiverFCMToken: driverFCM,
+      sessionId: widget.dealId,
+      callerName: ourDoc['name'],
+    );
+
+  } catch (e) {
+    print("Call Initiation Error: $e");
+  }
+}
   Future<void> _loadCustomMarkerIcons() async {
     try {
       _driverIcon = await _loadCustomMarker('active' , 96);

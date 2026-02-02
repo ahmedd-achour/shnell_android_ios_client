@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:shnell/Account/privacyPolicy.dart';
 import 'package:shnell/AuthHandler.dart';
+import 'package:shnell/SignInScreen.dart';
 import 'package:shnell/mainUsers.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shnell/us.dart'; // ContactUsWidget
@@ -41,7 +42,8 @@ class _ShnellDrawerState extends State<ShnellDrawer> {
     );
   }
   Future<void> _logoutAction() async {
-    await GoogleSignInService().signOut();
+       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const UnifiedAuthScreen()));
+        await GoogleSignInService().signOut();
   }
 
 

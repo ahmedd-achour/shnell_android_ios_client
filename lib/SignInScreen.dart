@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shnell/AuthHandler.dart';
 
 // Import your service and home screen
@@ -55,6 +56,14 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen> {
                 'phone' : _completePhoneNumber,
                 'fcmToken' : token
                });
+
+
+
+               final status = await Permission.notification.status;
+      if (!status.isGranted) {
+        await Permission.notification.request();
+      }
+
       }}else{
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Entrer votre numéro de Tel"),
@@ -146,40 +155,50 @@ class _UnifiedAuthScreenState extends State<UnifiedAuthScreen> {
               
               // Google Sign-In Button
               SizedBox(
-                height: 60,
-                child: ElevatedButton(
-                  // Calls the _handleSignIn function
-                  onPressed: _isLoading ? null : _handleSignIn,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: colors.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: SizedBox.shrink()
-                        )   : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const FaIcon(FontAwesomeIcons.google, size: 20),
-                            const SizedBox(width: 15),
-                            Text(
-                              "S'identifier avec Google",
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+  width: double.infinity,           // full width for better touch target
+  height: 56,                       // official-ish height (Material 3 recommendation ~56dp)
+  child: ElevatedButton(
+    onPressed: _isLoading ? null : _handleSignIn,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: colors.primary,
+      foregroundColor: colors.onPrimary,
+      elevation: 1,                     // very subtle elevation instead of 0
+      shadowColor: colors.primary.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24), // better internal breathing room
+    ),
+    child: _isLoading
+        ? const SizedBox(
+            height: 26,
+            width: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const FaIcon(
+                FontAwesomeIcons.google,
+                size: 22,
+              ),
+              const SizedBox(width: 16), // slightly more natural spacing
+              Text(
+                "S'identifier avec Google",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
                 ),
               ),
-         
+            ],
+          ),
+  ),
+),
          
          
               const Spacer(),

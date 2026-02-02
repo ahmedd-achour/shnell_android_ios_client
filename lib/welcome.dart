@@ -1,107 +1,174 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shnell/SignInScreen.dart';
+import 'package:shnell/SignInScreen.dart'; // ← adjust path if needed
 
 class ShnellWelcomeScreen extends StatelessWidget {
   const ShnellWelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        // Uses the native theme background
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Stack(
-          children: [
-            // 1. Background Image Asset
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height * 0.8,
-              child: Image.asset(
-                'assets/shnellWelcome.png', // Your generated asset
-                fit: BoxFit.cover,
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image with subtle overlay
+          Positioned.fill(
+            child: Image.asset(
+              'assets/shnellWelcome.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+
+          // Dark gradient overlay → improves text readability
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.15),
+                    Colors.black.withOpacity(0.45),
+                    Colors.black.withOpacity(0.75),
+                  ],
+                  stops: const [0.0, 0.55, 1.0],
+                ),
               ),
             ),
-      
-            // 2. Rounded Interaction Panel
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.35,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  // Native surface color from your main theme
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28.0), // The "Slightly Rounded" edge
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 10,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-                child: Column(
+          ),
+
+          // Main content
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isTall = constraints.maxHeight > 750;
+
+                return Column(
                   children: [
-                    // Branding Section
-                    Text(
-                      'SHNELL',
-                      
-                      style: GoogleFonts.montserrat(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 4,
-                                  color: Theme.of(context).colorScheme.primary
-                                ),
+                    // Top spacing / optional logo or empty space
+                    const Spacer(flex: 1),
+
+                    // Branding – big & bold
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'SHNELL',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.montserrat(
+                          fontSize: isTall ? 64 : 52,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 5,
+                          height: 1.05,
+                          color: Theme.of(context).colorScheme.primary,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 12,
+                              color: Colors.black.withOpacity(0.5),
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'L\'excellence en mouvement',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const Spacer(),
+
                     const SizedBox(height: 12),
-                    _buildActionBtn(
-                      context,
-                      label: ' Commencer ',
-                      isPrimary: false,
-      
+
+                    // Tagline
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        'L\'excellence en mouvement',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: isTall ? 22 : 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.95),
+                          height: 1.3,
+                        ),
+                      ),
                     ),
+
+                    const Spacer(flex: 5),
+
+                    // Buttons area
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                      child: Column(
+                        children: [
+                          _buildActionButton(
+                            context,
+                            label: 'Commencer maintenant',
+                            isPrimary: true,
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildActionButton(
+                            context,
+                            label: 'J\'ai déjà un compte',
+                            isPrimary: false,
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const UnifiedAuthScreen()), // e.g. login tab
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
                   ],
-                ),
-              ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildActionBtn(BuildContext context, {required String label, required bool isPrimary }) {
-    final colors = Theme.of(context).colorScheme;
+  Widget _buildActionButton(
+    BuildContext context, {
+    required String label,
+    required bool isPrimary,
+    required VoidCallback onPressed,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? colors.primary : colors.secondaryContainer,
-          foregroundColor: isPrimary ? colors.onPrimary : colors.onSecondaryContainer,
-          elevation: 0,
+      height: 56,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: isPrimary ? colors.primary : colors.surface,
+          foregroundColor: isPrimary ? colors.onPrimary : colors.onSurface,
+          elevation: isPrimary ? 2 : 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.0), // Consistent rounding
+            borderRadius: BorderRadius.circular(16),
           ),
+          side: isPrimary
+              ? null
+              : BorderSide(
+                  color: colors.outline.withOpacity(0.6),
+                  width: 1.5,
+                ),
         ),
-        onPressed: () {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>UnifiedAuthScreen()));
-        },
         child: Text(
           label,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
+          ),
         ),
       ),
     );

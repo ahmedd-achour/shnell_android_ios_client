@@ -36,8 +36,7 @@
   
 
   "cancellationHeading": "11. Política de Cancelación y Sistema 2ⁿ",
-  "cancellationBody": "Para garantizar la equidad en la logística de alto riesgo, Shnell Logistics aplica una política estricta basada en el momento de la cancelación y la parte responsable.\n\n**11.1 Escenarios de Cliente**\n- **Cancelación gratuita**: Permitida antes de que el conductor acepte el pedido.\n- **10% de cargo**: Si se cancela después de la aceptación pero antes de la carga (compensación de combustible/tiempo).\n- **Cargo completo (100%) / Decisión del Admin**: Una vez cargada la mercancía o el conductor en camino, la cancelación se bloquea. Intervención de admin requerida. Sin culpa del conductor, se aplica tarifa completa.\n\n**11.2 Disciplina del Conductor (Sistema Exponencial 2ⁿ)**\nNo hay multas monetarias. Usamos suspensiones temporales que crecen exponencialmente:\n- **Excepción de cancelación gratuita**: Solo si el cliente no aparece después de 12 min de espera en pickup.\n- **Escalera de sanciones**:\n  1. **1ª infracción**: Advertencia (0 días)\n  2. **2ª infracción**: **1 día** suspensión\n  3. **3ª infracción**: **2 días** suspensión\n  4. **4ª infracción**: **4 días** suspensión\n  5. **5ª infracción**: **8 días** suspensión\n  6. **Siguientes**: 16, 32, hasta **64 días**\n- **Recuperación**: Cada **5 trabajos exitosos** elimina **1 cancelación** del registro, permitiendo recuperar confiabilidad gradualmente.\n- **Reinicio anual**: El historial de cancelaciones se reinicia cada año.\n\n**11.3 Acuerdo mutuo**: El admin puede eximir cargos si ambas partes están de acuerdo.",
-  "suspensionHeading": "12. Suspensión de Cuenta",
+"cancellationBody": "**Escala de sanciones**:\n1. **Primera infracción**: Advertencia y llamada administrativa (0 días).\n2. **Segunda infracción**: Suspensión de **1 día**.\n3. **Tercera infracción**: Suspensión de **2 días**.\n4. **Cuarta infracción**: Suspensión de **4 días**.\n5. **Quinta infracción**: Suspensión de **8 días**.\n6. **Siguientes**: 16, 32, hasta **64 días**.\n- **Recuperación de cancelaciones**: Por cada **5 servicios exitosos**, se elimina **1 cancelación** del registro del conductor, dándole la oportunidad de restaurar su confiabilidad gradualmente.\n- **Reinicio anual**: El registro se reinicia anualmente.\n\n**11.3 Acuerdo mutuo**: Si ambas partes acuerdan la cancelación (ej: la mercancía no cabe en el camión), la administración puede anular los cargos.",  "suspensionHeading": "12. Suspensión de Cuenta",
   "suspensionBody": "**12.1 Suspensión Automática**: Basada en el sistema 2ⁿ. No se puede levantar manualmente.\n**12.2 Terminación**: Por fraude, evasión de comisión o comportamiento abusivo.",
   "driverPerformanceHeading": "13. Autonomía del Conductor",
   "driverPerformanceBody": "Los conductores deciden libremente aceptar pedidos. Una vez aceptados, la fiabilidad es obligatoria.",
@@ -671,13 +670,18 @@
   "serviceProfessional": "Profesional",
   "pro_banner_text": "Servicio Completo • Seguro Incluido • Sin Cargos Ocultos",
     "pro_banner_sub": "Ejecutado por Agencias Certificadas",
-    "eco_banner_text": "Transporte Básico • De Acera a Acera • Mejor Precio"
+    "eco_banner_text": "Transporte Básico • De Acera a Acera • Mejor Precio",
 
 
 
-
-
-
-
-
+  "eco_title": "Eco Move",
+  "eco_feature_trips": "Mudanza estándar; cubre hasta 2 viajes",
+  "eco_feature_partner": "Gestionado por un socio de transporte verificado",
+  "eco_feature_price": "Nuestra tarifa más competitiva y económica",
+  
+  "pro_title": "Pro Move",
+  "pro_feature_premium": "Servicio premium con embalaje profesional (Taghlif)",
+  "pro_feature_guarantee": "Mudanza garantizada y atención prioritaria",
+  "pro_feature_safety": "Seguridad total garantizada para sus pertenencias",
+  "pro_feature_agency": "Ejecutado por una agencia logística certificada"
 }
